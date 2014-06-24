@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="com.prudential"
+name="CustomWorkflowActionFactory"
+version="1.0.0"
+provider-name="IBM">
+<extension
+point="com.ibm.workplace.wcm.api.CustomWorkflowActionFactory"
+id="CustomWorkflowActionFactory">
+<provider class="com.prudential.workflow.CustomWorkflowActionFactory"/>
+</extension>
+<extension point="com.ibm.workplace.wcm.api.AuthoringAction" id="PopulateJSPAuthoringAction" >
+    <provider class="com.prudential.commons.wcm.authoring.PopulateJSPAuthoringAction"/>
+</extension>
+<extension point="com.ibm.workplace.wcm.api.AuthoringAction" id="PopulateSuggestedCategoriesAction" >
+    <provider class="com.prudential.commons.wcm.authoring.PopulateSuggestedCategoriesAction"/>
+</extension>
+<extension point="com.ibm.workplace.wcm.api.AuthoringAction" id="ActivateNewsletterProfile" >
+    <provider class="com.prudential.authoring.buttons.ActivateNewsletterProfile"/>
+</extension>
+<extension point="com.ibm.workplace.wcm.api.AuthoringAction" id="DeactivateNewsletterProfile" >
+    <provider class="com.prudential.authoring.buttons.DeactivateNewsletterProfile"/>
+</extension>
+
+</plugin>

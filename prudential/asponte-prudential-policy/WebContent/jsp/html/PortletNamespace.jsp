@@ -1,0 +1,1 @@
+<%@ taglib uri="/WEB-INF/tld/std-portlet.tld" prefix="portlet" %><portlet:defineObjects/><%=renderResponse.getNamespace()%>

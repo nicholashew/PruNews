@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="com.prudential.policy" name="PruPolicyPlugin" version="1.0.1" provider-name="IBM">
+	<extension point="com.ibm.workplace.wcm.api.CustomWorkflowActionFactory" id="PruPolicyActionFactory">
+		<provider class="com.prudential.wf.factory.PruCustomWorkflowActionFactory"/>
+	</extension>	
+	<extension point="com.ibm.workplace.wcm.api.RenderingPlugin" id="RenderReferenceCount">
+    	<provider class="com.prudential.referencecount.RenderReferenceCount"/>
+	</extension>      
+	<extension point="com.ibm.workplace.wcm.api.RenderingPlugin" id="ApproversReviewersPlugin">
+    	<provider class="com.prudential.renderer.ApproversReviewersPlugin"/>
+	</extension>      
+	<extension point="com.ibm.workplace.wcm.api.AuthoringAction" id="PrudentialPopulateJSPAuthoringAction" >
+    <provider class="com.prudential.authoring.launchpage.PrudentialPopulateJSPAuthoringAction"/>
+</extension>
+</plugin>

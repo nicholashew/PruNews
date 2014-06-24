@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="com.prudential.wcm.plugin"
+		name="Prudential WCM Plugin"
+		version="1.0.0"
+		provider-name="IBM">
+	<extension
+		point="com.ibm.workplace.wcm.api.CustomWorkflowActionFactory"
+		id="PrudentialCustomWorkflowActionFactory">
+		<provider class="com.prudential.wcm.workflow.actions.CustomWorkflowActionFactoryImpl"/>
+	</extension>
+</plugin>

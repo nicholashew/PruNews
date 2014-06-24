@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib PUBLIC
+  "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+  "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+<taglib>
+    <tlibversion>1.0</tlibversion>
+    <jspversion>1.1</jspversion>
+    <shortname>portlet</shortname>
+    <uri>http://java.sun.com/portlet</uri>
+    <info>@ibm-taglibrary @since 5.1</info>
+    <!--  NOTE: since 6.1, JSR168/286 tags are provided by WAS. 
+
+          this TLD file should not be used any more but is retained to
+          provide compatibility with portlets that explicitly import
+          WEB-INF/tld/std-portlet.tld in their web.xml files, as documented
+          for predeployed portlet EAR files in 6.0.x.
+          
+          explicitly importing the JSR 168 tag library is not necessary anymore 
+          in 6.1, even for predeployed portlets, therefore any explicit use of 
+          this TLD is deprecated.
+     -->
+    <tag>
+        <name>defineObjects</name>
+        <tagclass>com.ibm.ws.portletcontainer.tags.DefineObjectsTag</tagclass>
+        <teiclass>com.ibm.ws.portletcontainer.tags.DefineObjectsTag$TEI</teiclass>
+        <bodycontent>empty</bodycontent>
+        <info>@ibm-api @since 5.1</info>
+    </tag>
+    <tag>
+        <name>param</name>
+        <tagclass>com.ibm.ws.portletcontainer.tags.ParamTag</tagclass>
+        <bodycontent>empty</bodycontent>
+        <info>@ibm-api @since 5.1</info>
+        <attribute>
+            <name>name</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
+        <name>actionURL</name>
+        <tagclass>com.ibm.ws.portletcontainer.tags.ActionURLTag</tagclass>
+        <teiclass>com.ibm.ws.portletcontainer.tags.BasicURLTag$TEI</teiclass>
+        <bodycontent>JSP</bodycontent>
+        <info>@ibm-api @since 5.1</info>
+        <attribute>
+            <name>windowState</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>portletMode</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>secure</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
+        <name>renderURL</name>
+        <tagclass>com.ibm.ws.portletcontainer.tags.RenderURLTag</tagclass>
+        <teiclass>com.ibm.ws.portletcontainer.tags.BasicURLTag$TEI</teiclass>
+        <bodycontent>JSP</bodycontent>
+        <info>@ibm-api @since 5.1</info>
+        <attribute>
+            <name>windowState</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>portletMode</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>secure</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
+        <name>namespace</name>
+        <tagclass>com.ibm.ws.portletcontainer.tags.NamespaceTag</tagclass>
+        <bodycontent>empty</bodycontent>
+        <info>@ibm-api @since 5.1</info>
+    </tag>
+</taglib>
