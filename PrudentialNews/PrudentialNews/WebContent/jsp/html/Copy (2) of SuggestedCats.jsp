@@ -10,6 +10,9 @@
 .cmk {
 	display:block;
 }
+.prr {
+	font-weight: bold;
+}
 .klinikos-ehr .ui-autobox {
 	display:block;
 	position:relative;
