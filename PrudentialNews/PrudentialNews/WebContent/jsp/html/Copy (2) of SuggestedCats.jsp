@@ -8,6 +8,7 @@
 <wcm:libraryComponent name="Custom Authoring Assets/HTML - InitjQuery" library="PrudentialNewsDesign" />
 <style>
 .cmk {
+	display:block;
 }
 .klinikos-ehr .ui-autobox {
 	display:block;
