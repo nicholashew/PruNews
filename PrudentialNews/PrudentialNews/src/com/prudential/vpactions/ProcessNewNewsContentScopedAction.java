@@ -113,8 +113,24 @@ public class ProcessNewNewsContentScopedAction implements VirtualPortalScopedAct
                         contentToUpdateId = Utils.createContent(ws, authTemplateId, draftsSiteAreaId,currentDraftNewsletterProfile.getName() + " - newsletter", "PrudentialNewsletterDrafts",newsletterProfileCategories);
                         contentCreated = true;
                         
-                        // also create a site area if it doesn't exist
-
+                        // have to link the profile to the newsletter
+                        Content newsletterContent = (Content)ws.getById(contentToUpdateId);
+                        if(newsletterContent.hasComponent("Newsletter Profile")) {
+                           if (isDebug) {
+                              s_log.log(Level.FINEST, "Setting the newsletter link to the profile to documentid "+currentDraftID);
+                           }
+                           LinkComponent lc = (LinkComponent)newsletterContent.getComponent("Newsletter Profile");
+                           lc.setDocumentReference(currentDraftID);
+                           newsletterContent.setComponent("Newsletter Profile", lc);
+                           String[] errors = ws.save(newsletterContent);
+                           if(errors.length<0 && isDebug) {
+                              for(int y=0;y<errors.length;y++) {
+                                 if (isDebug) {
+                                    s_log.log(Level.FINEST, "error during save "+errors[y]);
+                                 }
+                              }
+                           }
+                        }
                      }
                      else {
                         // have to ensure the child is a content object
