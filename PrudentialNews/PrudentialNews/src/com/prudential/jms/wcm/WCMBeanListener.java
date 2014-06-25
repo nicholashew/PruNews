@@ -36,7 +36,7 @@ import javax.jms.MessageListener;
 })
 
 public class WCMBeanListener implements MessageListener {
-	private static final Logger s_log = Logger.getLogger(JMSNewsletterProfileModified.class.getName());
+	private static final Logger s_log = Logger.getLogger(WCMBeanListener.class.getName());
 	private static Workspace wksp;
 	private static final String NEWSLETTERPROFILEAT = "AT - Newsletter Profile";
 	private static final String DISTRIBUTIONLISTAT = "AT - Distribution List";
@@ -45,11 +45,14 @@ public class WCMBeanListener implements MessageListener {
 	 *
 	 */
 	public WCMBeanListener() {
+		boolean isDebug = s_log.isLoggable(Level.FINEST);
 		try {
 			wksp = WCM_API.getRepository().getSystemWorkspace();
-			System.out.println("MDB - " + WCMBeanListener.class.getName() + " - created!");
+			if (isDebug) {
+				s_log.log(Level.FINEST, "MDB - " + WCMBeanListener.class.getName() + " - created!");
+			}
 		} catch (Exception e) {
-			System.out.println("MDB - " + WCMBeanListener.class.getName() + " - failed!");
+			System.err.println("MDB - " + WCMBeanListener.class.getName() + " - failed!");
 		}
 	}
 
@@ -80,31 +83,35 @@ public class WCMBeanListener implements MessageListener {
 					}
 					if (doc instanceof Content) {
 						String atIdS = msg.getAuthoringTemplateId();
-						if (isDebug) {
-							s_log.log(Level.FINEST, "AuthTemplate Id: " + atIdS);
-						}
-						Content cont = (Content)doc;
-						DocumentId atId = wksp.createDocumentId(atIdS);
-						if (isDebug) {
-							s_log.log(Level.FINEST, "Content Name: " + docId.getName());
-							s_log.log(Level.FINEST, "Authoring Template Name: " + atId.getName());
-						}
-						if (NEWSLETTERPROFILEAT.equals(atId.getName())) {
-							// Content based on the Newsletter Profile was modified ... start processing
-							JMSNewsletterProfileModified profileModified = new JMSNewsletterProfileModified(cont);
-							if (msg.getItemState() == ItemState.CHANGED) {
-								profileModified.processCategories();
-							} else if (msg.getItemState() == ItemState.REMOVED) {
-								profileModified.processDelete();
+						if (atIdS != null) {
+							if (isDebug) {
+								s_log.log(Level.FINEST, "AuthTemplate Id: " + atIdS);
 							}
-						} else if (DISTRIBUTIONLISTAT.equals(atId.getName())) {
-							// Content based on the Distribution List was modified ... start processing
-							JMSDistributionListModified dlistModified = new JMSDistributionListModified(cont);
-							if (msg.getItemState() == ItemState.CHANGED) {
-								dlistModified.processChange();
-							} else if (msg.getItemState() == ItemState.REMOVED) {
-								dlistModified.processDelete();
+							Content cont = (Content)doc;
+							DocumentId atId = wksp.createDocumentId(atIdS);
+							if (isDebug) {
+								s_log.log(Level.FINEST, "Content Name: " + docId.getName());
+								s_log.log(Level.FINEST, "Authoring Template Name: " + atId.getName());
 							}
+							if (NEWSLETTERPROFILEAT.equals(atId.getName())) {
+								// Content based on the Newsletter Profile was modified ... start processing
+								JMSNewsletterProfileModified profileModified = new JMSNewsletterProfileModified(cont);
+								if (msg.getItemState() == ItemState.CHANGED) {
+									profileModified.processCategories();
+								} else if (msg.getItemState() == ItemState.REMOVED) {
+									profileModified.processDelete();
+								}
+							} else if (DISTRIBUTIONLISTAT.equals(atId.getName())) {
+								// Content based on the Distribution List was modified ... start processing
+								JMSDistributionListModified dlistModified = new JMSDistributionListModified(cont);
+								if (msg.getItemState() == ItemState.CHANGED) {
+									dlistModified.processChange();
+								} else if (msg.getItemState() == ItemState.REMOVED) {
+									dlistModified.processDelete();
+								}
+							}
+						} else {
+							s_log.log(Level.WARNING, "AT ID was null.");
 						}
 					} else if (doc instanceof Category) {
 						Category cat = (Category)doc;

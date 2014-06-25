@@ -19,6 +19,8 @@ import javax.jms.*;
  * @author Pete Raleigh
  */
 public class WCMMessage {
+	private static final Logger s_log = Logger.getLogger(WCMMessage.class.getName());
+	
 	private String docId;
 	private String docName;
 	private Date docModDate;
@@ -35,6 +37,7 @@ public class WCMMessage {
 	private String atdocid = null;
 	
 	public WCMMessage(Message message) {
+		boolean isDebug = s_log.isLoggable(Level.FINEST);
 		try {
 			if (message.getJMSType().equals(MessagingConstants.MessageUpdateType.IWKContentUpdate.toString())) {
 				IWKContentUpdate = true;
@@ -42,35 +45,53 @@ public class WCMMessage {
 					MapMessage mm = (MapMessage)message;
 					//System.out.println("Message: " + message.toString());
 					
-					/*
-					Enumeration en = mm.getMapNames();
-					while (en.hasMoreElements()) {
-					String key = (String)en.nextElement();
-					String val = (String)mm.getString(key);
-					System.out.println("MapName:" + key + " - Val:" + val);
+					if (isDebug) {
+						Enumeration en = mm.getMapNames();
+						while (en.hasMoreElements()) {
+							String key = (String)en.nextElement();
+							String val = (String)mm.getString(key);
+							s_log.log(Level.FINEST, "MapName:" + key + " - Val:" + val);
+						}
+						en = mm.getPropertyNames();
+						while (en.hasMoreElements()) {
+							String key = (String)en.nextElement();
+							String val = (String)mm.getStringProperty(key);
+							s_log.log(Level.FINEST, "Property:" + key + " - Val:" + val);
+						}
 					}
-					en = mm.getPropertyNames();
-					while (en.hasMoreElements()) {
-					String key = (String)en.nextElement();
-					String val = (String)mm.getStringProperty(key);
-					System.out.println("Property:" + key + " - Val:" + val);
-					}
-					*/
 					
 					// Construct the Document / Item ID
 					String id = mm.getString(MessagingConstants.MESSAGE_PROPERTY_DOCID);
 					String type = mm.getString(MessagingConstants.MESSAGE_PROPERTY_DOCTYPE);
 					String name = mm.getString(MessagingConstants.MESSAGE_PROPERTY_DOCNAME);
 					String status = mm.getString(MessagingConstants.MESSAGE_PROPERTY_ITEM_STATUS);
+					
+					if (isDebug) {
+						s_log.log(Level.FINEST, "Doc Id: " + docId);
+						s_log.log(Level.FINEST, "Type: " + type);
+						s_log.log(Level.FINEST, "Name: " + name);
+						s_log.log(Level.FINEST, "Status: " + status);
+					}
+					
 					if (id != null && type != null && name != null && status != null) {
 						// Reconstruct the DocumentId String...
 						docId = type + "/" + name + "/" + id + "/" + status;
-						System.out.println("DocId: " + docId);
-						if (type.equals(DocumentTypes.Content.toString())) {
+						if (isDebug) {
+							s_log.log(Level.FINEST, "DocId: " + docId);
+							s_log.log(Level.FINEST, "DocumentType:Content - " + DocumentTypes.Content.toString());
+						}
+
+						if (type.equals(DocumentTypes.Content.getApiType().getName())) {
 							String atname = mm.getString(MessagingConstants.MESSAGE_PROPERTY_AUTHORING_TEMPLATE_NAME);
 							String atid = mm.getString(MessagingConstants.MESSAGE_PROPERTY_AUTHORING_TEMPLATE_DOCID);
-							atdocid = DocumentTypes.AuthoringTemplate.toString() + "/" + atname + "/" + atid + "/PUBLISHED";
-							System.out.println("Content");
+							atdocid = DocumentTypes.AuthoringTemplate.getApiType().getName() + "/" + atname + "/" + atid + "/PUBLISHED";
+							if (isDebug) {
+								s_log.log(Level.FINEST, "AT DOC ID: " + atdocid);
+							}
+						} else {
+							if (isDebug) {
+								s_log.log(Level.FINEST, "Type not a content item: " + type);
+							}
 						}
 					}
 					itemState = MessagingConstants.ItemState.valueOf(mm.getString(MessagingConstants.MESSAGE_PROPERTY_ITEM_STATE_STRING));
