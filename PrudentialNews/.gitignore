@@ -1,9 +1,11 @@
 #################
 ## Eclipse
-## .project
+##.project
+##.classpath
 #################
 
 *.pydevproject
+
 .metadata
 bin/
 tmp/
@@ -12,10 +14,8 @@ tmp/
 *.swp
 *~.nib
 local.properties
-.classpath
 .settings/
 .loadpath
-*.class
 
 # External tool builders
 .externalToolBuilders/

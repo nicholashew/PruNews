@@ -7,6 +7,8 @@
 <wcm:setExplicitContext path="/PrudentialNewsDesign/JSPAssets/CMKTestJSP" />
 <wcm:libraryComponent name="Custom Authoring Assets/HTML - InitjQuery" library="PrudentialNewsDesign" />
 <style>
+.cmk {
+}
 .klinikos-ehr .ui-autobox {
 	display:block;
 	position:relative;
