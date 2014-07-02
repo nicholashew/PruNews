@@ -20,6 +20,7 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 
 import com.ibm.workplace.wcm.api.Content;
+import com.ibm.workplace.wcm.api.ContentComponent;
 import com.ibm.workplace.wcm.api.Document;
 import com.ibm.workplace.wcm.api.DocumentId;
 import com.ibm.workplace.wcm.api.DocumentIdIterator;
@@ -262,66 +263,7 @@ public abstract class BaseEmailAction extends BaseCustomWorkflowAction {
 
    }
    
-   /**
-    * get the reviewers emails
-    */
-   ArrayList getRecipientsApprovers(Document doc) {
-      // TODO Auto-generated method stub
-      boolean isDebug = s_log.isLoggable(Level.FINEST);
-      if (isDebug) {
-         s_log.entering("ReviewApproveEmailAction", "getRecipients for doc "+doc.getName());
-      }
       
-      ArrayList recipientList = new ArrayList();
-      // get the reviewers from the doc
-      if(doc instanceof Content) {
-         Content theContent = (Content)doc;
-         // get the approvers
-         Workspace ws = doc.getSourceWorkspace();
-         boolean isDn = ws.isDistinguishedNamesUsed();
-         try {
-            
-            ws.useDistinguishedNames(true);
-            String[] theApprovers = theContent.getCurrentApprovers();
-            // need to get the principal based on the dn
-            for(int x=0;x<theApprovers.length;x++) {
-               String currentDn = theApprovers[x];
-               if (isDebug) {
-                  s_log.log(Level.FINEST, "adding email for "+currentDn);
-               }
-               User theUser = Utils.getUserByDN(currentDn);
-               if(theUser != null) {
-                  recipientList.addAll(Utils.getEmailsUser(theUser));
-               }
-               else {
-                  Group theGroup = Utils.getGroupByDistinguishedName(currentDn);
-                  if(theGroup != null) {
-                     recipientList.addAll(Utils.getEmailsGroup(theGroup));
-                  }
-               }                              
-            }
-         }
-         catch (PropertyRetrievalException e) {
-            // TODO Auto-generated catch block
-            if (s_log.isLoggable(Level.FINEST))
-            {
-               s_log.log(Level.FINEST, "", e);
-            }
-         }
-         finally {
-            ws.useDistinguishedNames(isDn);
-         }         
-      }
-      
-      if (isDebug) {
-         s_log.exiting("ReviewApproveEmailAction", "getRecipients");
-      }
-      
-      return recipientList;
-
-   }
-
-   
    /**
     * 
     * getEmailBody return the email body
@@ -472,5 +414,26 @@ public abstract class BaseEmailAction extends BaseCustomWorkflowAction {
    }         
    
    abstract String getDelayComponentName();
+   
+   /**
+    * 
+    * extractApprovers helper method to retrieve the approvers from the userselectioncmpnt
+    * @param doc the content to retrieve from
+    * @param approvers the set to add the approvers to
+    */
+   protected void extractApprovers(Document doc, Set<String> approvers, String p_componentName) {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      ContentComponent cmpnt = WCMUtils.getContentComponent(doc, p_componentName);
+      if (cmpnt instanceof UserSelectionComponent) {
+         for (Principal p : ((UserSelectionComponent) cmpnt).getSelections()) {
+            if (isDebug) {
+               s_log.log(Level.FINEST, "adding principal "+p.getName());
+            }
+            com.ibm.portal.um.Principal thePrincipal = null;
+            thePrincipal = Utils.getPrincipalById(p.getName());
+            approvers.add(Utils.getDnForPrincipal(thePrincipal));
+         }
+      }
+   }
    
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry combineaccessrules="false" kind="src" path="/WCMCoreFramework"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.base.ext.jar"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.pe.rt.api.jar"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-services.jar"/>
