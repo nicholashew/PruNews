@@ -175,8 +175,8 @@ ul.category-list > li > input[type='checkbox'] {
 	Iterator itor = categories.iterator();
 	while(itor.hasNext()) {
 		ObjectWrapper category = (ObjectWrapper)itor.next();
-		String title = category.getName();
-        String id = category.getUuid();
+		String title = category.getLabel();
+        String id = category.getId();
 %>
 <li><label for="<%= id %>"><%= title %></label> <input type="checkbox" value="<%= id %>" id="<%= id %>" /> </li>
 <%

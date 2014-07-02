@@ -91,7 +91,7 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
    String getEmailSubject(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      String subject = "Item "+doc.getName()+" is awaiting your review";
+      String subject = "Item "+doc.getName()+" is awaiting your approval";
       
       return subject;
 

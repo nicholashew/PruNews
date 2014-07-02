@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry combineaccessrules="false" kind="src" path="/WCMCoreFramework"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.model.api.jar"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.resolver.api.jar"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-api.jar"/>
@@ -23,7 +24,6 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.etools.portal.runtime.provider.v70/wps.base.v70"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/WCMCoreFramework"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/prudential-policy"/>
 	<classpathentry kind="output" path="WebContent/WEB-INF/classes"/>
 </classpath>

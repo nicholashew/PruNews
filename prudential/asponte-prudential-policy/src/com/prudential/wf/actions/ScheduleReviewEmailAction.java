@@ -49,7 +49,7 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       // retrieve from WCM      
       StringBuilder sb = new StringBuilder();
-      sb.append("A document "+doc.getName()+" is awaiting your approval.");
+      sb.append("A document "+doc.getName()+" is awaiting your review.");
       sb.append("<br><a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a><br>");
       // now check for the field
       if(doc instanceof Content) {
@@ -83,7 +83,7 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
    String getEmailSubject(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      String subject = "Item "+doc.getName()+" is awaiting your approval";
+      String subject = "Item "+doc.getName()+" is awaiting your review";
       
       return subject;
 

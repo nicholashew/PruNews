@@ -26,9 +26,9 @@ public List<CustomAuthoringItemWrapper> queryByAT(String authTempId, Object port
   ArrayList <Library>libraryList = new ArrayList<Library>(); 
   // get the workspace 
   Workspace ws = Utils.getWorkspace(); 
-  
+  ws.useUserAccess(true); 
   // get the libraries I care about 
-        Library tempLib = ws.getDocumentLibrary("PruPolicyContent"); 
+  Library tempLib = ws.getDocumentLibrary("PruPolicyContent"); 
   libraryList.add(tempLib); 
   
   queryParms.setLibraries(libraryList); 
@@ -296,6 +296,10 @@ var fullDataset = {
         if(theWrapper.getLiveDate() != null) { 
           liveDateFormatted = formatter.format(theWrapper.getLiveDate()); 
         } // end-if 
+        String expireDateFormatted = ""; 
+        if(theWrapper.getExpireDate() != null) { 
+          expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
+        } // end-if 
     
         String lastModFormatted = ""; 
     if(theWrapper.getLastModDate() != null) { 
@@ -312,23 +316,59 @@ var fullDataset = {
     
     String stage = theWrapper.getWfStage().toLowerCase(); 
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
-    
+    String retireRationale = ""; 
     if(stage.contains("draft")) { 
       stage = "Draft"; 
     } else if(stage.contains("review")) { 
       stage = "Review"; 
       // if we're in review, get the review date 
       Content theContent = (Content)doc; 
-      Date enteredStage = theContent.getDateEnteredStage();
+      Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("approval")) { 
       stage = "Approve"; 
+      // if we're in review, get the review date 
+      Content theContent = (Content)doc; 
+      Date enteredStage = theContent.getDateEnteredStage(); 
+      reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("publish")) { 
       stage = "Published"; 
     } else if(stage.contains("approveretire")) { 
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
+      stage = "Retired";     
+      Content theContent = (Content)doc; 
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	             
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
+    } else if(stage.contains("expire")) { 
       stage = "Retired"; 
+      Content theContent = (Content)doc; 
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
     } 
     
     
@@ -356,7 +396,8 @@ var fullDataset = {
     liveDateFormatted:"<%=liveDateFormatted%>", 
     lastModFormatted:"<%=lastModFormatted%>", 
     reviewDate:"<%=reviewDate%>", 
-    retiredDate:"", 
+    retiredDate:"<%=expireDateFormatted%>", 
+    retireRationale:"<%=retireRationale%>", 
     author:"<%=theWrapper.getAuthor()%>", 
     stage:"<%=stage %>", 
     path:"<%=theWrapper.getPath() %>", 
@@ -379,6 +420,10 @@ var fullDataset = {
         if(theWrapper.getLiveDate() != null) { 
           liveDateFormatted = formatter.format(theWrapper.getLiveDate()); 
         } // end-if 
+        String expireDateFormatted = ""; 
+        if(theWrapper.getExpireDate() != null) { 
+          expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
+        } // end-if 
     
         String lastModFormatted = ""; 
     if(theWrapper.getLastModDate() != null) { 
@@ -392,23 +437,60 @@ var fullDataset = {
     
     String stage = theWrapper.getWfStage().toLowerCase(); 
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
+    String retireRationale = ""; 
     if(stage.contains("draft")) { 
       stage = "Draft"; 
     } else if(stage.contains("review")) {       
       stage = "Review"; 
       // if we're in review, get the review date 
       Content theContent = (Content)doc; 
-      Date enteredStage = theContent.getDateEnteredStage();
+      Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("approval")) { 
       stage = "Approve"; 
+      // if we're in review, get the review date 
+      Content theContent = (Content)doc; 
+      Date enteredStage = theContent.getDateEnteredStage(); 
+      reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("publish")) { 
       stage = "Published"; 
     } else if(stage.contains("approveretire")) { 
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
       stage = "Retired"; 
-    } 
+      Content theContent = (Content)doc; 
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
+    } else if(stage.contains("expire")) { 
+      stage = "Retired"; 
+      Content theContent = (Content)doc; 
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
+    }   
     
     doc = getDocumentById(ws, theWrapper.getItemId()); 
     String modelPolicyId = getModelPolicyLinkValue(doc); 
@@ -453,7 +535,8 @@ var fullDataset = {
     liveDateFormatted:"<%=liveDateFormatted%>", 
     lastModFormatted:"<%=lastModFormatted%>", 
     reviewDate:"<%=reviewDate%>", 
-    retiredDate:"", 
+    retiredDate:"<%=expireDateFormatted%>", 
+    retireRationale:"<%=retireRationale%>", 
     author:"<%=theWrapper.getAuthor()%>", 
     stage:"<%=stage %>", 
     path:"<%=theWrapper.getPath() %>", 
@@ -609,7 +692,7 @@ var renderTable = function() {
       {name: 'Last Review Date', noresize: true, field: 'lastModFormatted', width: "70px"}, 
       {name: 'Scheduled Review Date', noresize: true, field: 'reviewDate', width: "70px"}, 
       {name: 'Retired Date', noresize: true, field: 'retiredDate', width: "70px"}, 
-      {name: 'Rationale For Retirement', noresize: true, field: 'retiredDate', width: "120px"}, 
+      {name: 'Rationale For Retirement', noresize: true, field: 'retireRationale', width: "120px"}, 
       {name: 'Submitter', noresize: true, field: 'reviewers', width: "120px"}, 
       {name: 'Reviewers', noresize: true, field: 'reviewers', width: "120px"}, 
       {name: 'Approvers', noresize: true, field: 'approvers', width: "120px"}, 
