@@ -98,9 +98,10 @@ public class HandleReorder implements VirtualPortalScopedAction {
       DocumentId tempDocId = null;
 
       for (int x = 0; x < uuids.length; x++) {
-          tempDocId = thisWorkspace.createDocumentId(uuids[x]);
+    	  String thisUUID = uuids[x].trim();
+          tempDocId = thisWorkspace.createDocumentId(thisUUID);
           if (isDebug) {
-              s_log.log(Level.FINEST, "Value: " + uuids[x]);
+              s_log.log(Level.FINEST, "Value: " + thisUUID);
               s_log.log(Level.FINEST, "Retrieved docId = "
                       + tempDocId);
           }
