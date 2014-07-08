@@ -71,7 +71,6 @@ public class ProcessLinkReorderDelete extends HttpServlet {
 		}
 		String uuidString = param(request, "uuid");
 		String uuidDeleteString = param(request, "uuidDelete");
-		String siteAreaId = param(request, "siteAreaID");
 		String processMLString = param(request, "processML");
 		String processAsJSONString = param(request, "processJSON");
 		boolean processML = Boolean.valueOf(processMLString);
@@ -80,22 +79,7 @@ public class ProcessLinkReorderDelete extends HttpServlet {
 
 		boolean success = true;
 
-		String uuidLinkString = null;
-		try {
-			uuidLinkString = getLinkIds(uuidString, siteAreaId, isDebug);
-		} catch (DocumentIdCreationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (DocumentRetrievalException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (AuthorizationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
 		if (isDebug) {
-			s_log.log(Level.FINEST, "uuid of content is " + uuidLinkString);
 			s_log.log(Level.FINEST, "uuid of link is " + uuidString);
 			s_log.log(Level.FINEST, "processML = " + processML);
 			s_log.log(Level.FINEST, "processAsJSON = " + processAsJSON);
@@ -106,7 +90,7 @@ public class ProcessLinkReorderDelete extends HttpServlet {
 		try {
 			VirtualPortalContext vctx = repo
 					.generateVPContextFromContextPath(Utils.getVPName());
-			HandleReorder vpA = new HandleReorder(uuidLinkString);
+			HandleReorder vpA = new HandleReorder(uuidString);
 			// check if we need to call the setters
 			if (processML) {
 				vpA.setP_processML(processML);
@@ -114,7 +98,7 @@ public class ProcessLinkReorderDelete extends HttpServlet {
 			if (processAsJSON) {
 				// vpA.setP_processAsJSON(processAsJSON);
 				HandleReorderJSON vpAJSON = new HandleReorderJSON(
-						uuidLinkString);
+						uuidString);
 				repo.executeInVP(vctx, vpAJSON);
 				success = vpAJSON.getReturnedValue();
 			} else {
@@ -152,61 +136,6 @@ public class ProcessLinkReorderDelete extends HttpServlet {
 			s_log.exiting("ProcessLinkReorderDelete()",
 					"handleRequest was success = " + success);
 		}
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private String getLinkIds(String uuidString, String siteAreaId, boolean isDebug) throws DocumentIdCreationException, DocumentRetrievalException, AuthorizationException {
-		if (isDebug) {
-			s_log.entering("ProcessLinkReorderDelete()", "getLinkIds()");
-		}
-		String uuidLinkString = null;
-		String[] uuids = uuidString.split(",");
-		ArrayList docIdList = new ArrayList();
-		Workspace thisWorkspace = Utils.getSystemWorkspace();
-
-		DocumentId tempDocId = null;
-
-		for (int x = 0; x < uuids.length; x++) {
-			tempDocId = thisWorkspace.createDocumentId(uuids[x]);
-			if (isDebug) {
-				s_log.log(Level.FINEST, "Value: " + uuids[x]);
-				s_log.log(Level.FINEST, "Retrieved docId = " + tempDocId);
-			}
-			docIdList.add(tempDocId);
-		}
-
-		DocumentId siteAreaDocId = thisWorkspace.createDocumentId(siteAreaId);
-		if (isDebug) {
-			s_log.log(Level.FINEST, "Site area id: " + siteAreaDocId.toString());
-			s_log.log(Level.FINEST, "Site area name: " + siteAreaDocId.getName());
-		}
-		
-		// Need to sort the linkedDoc ids in the same order that docIdList is in.
-		// docIdList is the correct order but is the actual documents IDs, not the content link doc ids
-		String orderedContentLinkIds[] = new String[docIdList.size()];
-		SiteArea siteArea = (SiteArea) thisWorkspace.getById(siteAreaDocId, true);
-		DocumentIdIterator linkedDocIdsIter = siteArea.getLinkedChildren();
-		if (isDebug) {
-			s_log.log(Level.FINEST, "Getting linked doc IDs for site area");
-		}
-
-		while (linkedDocIdsIter.hasNext()) {
-			DocumentId linkedDocId = linkedDocIdsIter.next();
-			ContentLink contentLink = thisWorkspace.getById(linkedDocId);
-			DocumentId realDocId = contentLink.getContentId();
-			if (isDebug) {
-				s_log.log(Level.FINEST, "Linked doc id: " + linkedDocId.toString() + " name: " + linkedDocId.getName());
-				s_log.log(Level.FINEST, "Real doc id: " + realDocId.toString() + " name: " + realDocId.getName());
-			}
-			if (docIdList.contains(realDocId)) {
-				orderedContentLinkIds[docIdList.indexOf(realDocId)] = contentLink.toString();
-			}
-		}
-		uuidLinkString = StringUtils.join(orderedContentLinkIds, ",");		
-		if (isDebug) {
-			s_log.exiting("ProcessLinkReorderDelete()", "getLinkIds() returning: " + uuidLinkString);
-		}
-		return uuidLinkString;
 	}
 
 	public static String param(HttpServletRequest request, String name) {
