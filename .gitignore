@@ -218,3 +218,5 @@ pip-log.txt
 .mr.developer.cfg
 prudential/asponte-prudential-policy/.classpath
 *.classpath
+prudential/asponte-prudential-policy/.classpath
+PrudentialNews/PrudentialNews/.classpath
