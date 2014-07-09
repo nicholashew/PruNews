@@ -1,15 +1,13 @@
 <%@ page import="java.util.*"%>
-<%@page import="java.io.File"%>
-<%@page import="java.io.InputStreamReader"%>
-<%@page import="java.net.URL"%>
-<%@page import="java.io.FileReader"%>
-<%@page import="java.io.BufferedReader"%>
+<%@ page import="java.io.File"%>
+<%@ page import="java.io.InputStreamReader"%>
+<%@ page import="java.net.URL"%>
+<%@ page import="java.io.FileReader"%>
+<%@ page import="java.io.BufferedReader"%>
 <%@ page import="com.ibm.workplace.wcm.api.*,com.ibm.workplace.wcm.api.exceptions.*"%>
 <%@ page import="com.prudential.utils.Utils"%>
+<%@ page import="com.prudential.commons.wcm.authoring.*"%>
 <%@ page import="com.prudential.wcm.WCMUtils"%>
-<%@ page import="com.prudential.commons.cache.TheCache"%>
-<%@ page import="com.prudential.commons.wcm.authoring.CategoryJSONWrapper"%>
-<%@ page import="com.prudential.commons.wcm.authoring.ObjectWrapper"%>
 <%!
 public String[] getParameterValues(javax.servlet.ServletRequest request, String name) {
 	System.out.println("getParameterValues for "+name);  
@@ -25,6 +23,8 @@ public String[] getParameterValues(javax.servlet.ServletRequest request, String 
 	System.out.println("getParameterValues values "+values); 
 	return (String[])values.toArray(new String[values.size()]);
 }
+
+
 %>
 
 <%@ taglib uri="/WEB-INF/tld/wcm.tld" prefix="wcm"%>
@@ -162,21 +162,22 @@ ul.category-list > li > input[type='checkbox'] {
 </div>
 <ul class="category-list">
 <% 
-	TheCache theCache = TheCache.getInstance();
-	// try to get the items from cache
+	String libName = "PrudentialNewsDesign";
+	String taxName = "PrudentialCategories";
 	
 	// get a system workspace
 	Workspace ws = Utils.getSystemWorkspace();
 	ws.login();
-	//ArrayList catList = (ArrayList)theCache.get("cat_list");
-	String libName = "PrudentialNewsDesign";
-	String taxName = "PrudentialCategories";
-	ArrayList<ObjectWrapper> categories = CategoryJSONWrapper.getCategoryWrapperList(ws,"PrudentialNewsDesign");
-	Iterator itor = categories.iterator();
+
+	ws.setCurrentDocumentLibrary(ws.getDocumentLibrary(libName));
+	//DocumentIterator<Document> itor = ws.getByIds(ws.findByType(DocumentTypes.Category), true, false); 
+    ArrayList<ObjectWrapper> categories = null;
+    categories = CategoryJSONWrapper.getCategoryWrapperList(ws, libName);
+    Iterator itor = categories.iterator();
 	while(itor.hasNext()) {
 		ObjectWrapper category = (ObjectWrapper)itor.next();
-		String title = category.getName();
-        String id = category.getUuid();
+		String title = category.getLabel();
+                String id = category.getId();
 %>
 <li><label for="<%= id %>"><%= title %></label> <input type="checkbox" value="<%= id %>" id="<%= id %>" /> </li>
 <%
