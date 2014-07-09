@@ -113,6 +113,8 @@ public class ProcessCreateNewsletterProfile implements CustomWorkflowAction
             
             // set the owners of this newsletter profile into the distribution list
             Content distListContent = (Content)ws.getById(distListId);
+            boolean usingDn = ws.isDistinguishedNamesUsed();
+            ws.useDistinguishedNames(true);
             String[] theOwners = theContent.getOwners();
             if(distListContent.hasComponent("Users")) {
                UserSelectionComponent usc = (UserSelectionComponent)distListContent.getComponent("Users");
@@ -120,6 +122,9 @@ public class ProcessCreateNewsletterProfile implements CustomWorkflowAction
                //Utils.getPrincipalById(p_id)
                ArrayList principals = new ArrayList();
                for(int x=0;x<theOwners.length;x++) {
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "adding user "+theOwners[x]);
+                  }
                   X500Principal tempPrincipal = new X500Principal(theOwners[x]);
                   principals.add(tempPrincipal);
                }
@@ -135,6 +140,7 @@ public class ProcessCreateNewsletterProfile implements CustomWorkflowAction
                   }                 
                }
             }
+            ws.useDistinguishedNames(usingDn);
          }
          else
          {
