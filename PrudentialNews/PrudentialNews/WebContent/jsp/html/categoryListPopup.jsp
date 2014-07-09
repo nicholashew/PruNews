@@ -17,6 +17,22 @@
 <wcm:setExplicitContext path="/PrudentialNewsDesign/JSPAssets/CMKTestJSP" />
 <wcm:libraryComponent name="Custom Authoring Assets/HTML - InitjQuery" library="PrudentialNewsDesign" />
 
+<% 
+    CustomItemBean customItem = 
+    (CustomItemBean) request.getAttribute("CustomItemBean"); 
+    customItem.setSubmitFunctionName("myoptionsubmit");
+    StringBuilder sb = new StringBuilder();
+    sb.append((String)customItem.getFieldValue());
+    // check if the first char is [.  If not, add at beginning and ] at the end
+    if(sb.indexOf("[") < 0) {
+    	sb.insert(0,"[");
+    	sb.append("]");
+    }
+    //fvalue = fvalue.replaceAll("\"", "&quot;").replaceAll("\"","&#39;");
+    String fvalue = sb.toString();
+%>
+
+
 <script>
 function getCategoryIds() {
 	var catIds = [];
@@ -108,10 +124,19 @@ $j(function(){
 });
 </script>
 
+<script type="text/javascript">
+// really get the items from the input
+function myoptionsubmit()
+{
+	$j("#<%=customItem.getFieldName()%>").val($j("#category-list-ajax").val());
+	//$j("#<%=customItem.getFieldName()%>").val(stringedCats);
+}
 
-<textarea id="SuggestedCats" style="width:500px; height:500px;">[{"id":"97dc504a-1bc9-495a-b8aa-a7c174db8a7a", "label":"401(k) - Target Date Funds"},
-{"id":"2f20f029-8cfd-4034-b3e8-b35e0192424a", "label":"403(b) Plans"},
-{"id":"20dc7a4a-6b02-455d-81dc-4db32cf25b60"}, {"label":"77 Consulting (Manila)"}]</textarea>
+</script>
+
+json:<%=fvalue%><br>
+
+<textarea id="SuggestedCats" style="width:500px; height:500px;"></textarea>
 
 <input type='button' name='basic' id="openCatModal" value='Demo' class='basic-modal'/>
 
