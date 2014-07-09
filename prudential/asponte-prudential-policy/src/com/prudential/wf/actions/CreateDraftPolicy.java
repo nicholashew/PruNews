@@ -30,6 +30,8 @@ public class CreateDraftPolicy implements CustomWorkflowAction {
    // This specifies when the custom action will be executed
    @Override
    public Date getExecuteDate(Document doc) {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      
       Content theContent = (Content)doc;
       Date returnDate = DATE_EXECUTE_NOW;
       try {
@@ -42,6 +44,10 @@ public class CreateDraftPolicy implements CustomWorkflowAction {
             s_log.log(Level.FINEST, "", e);
          }
       }
+      if (isDebug) {
+         s_log.exiting("CreateDraftPolicy", "getExecuteDate" +returnDate);
+      }
+      
       return returnDate;
    }
 
@@ -59,7 +65,8 @@ public class CreateDraftPolicy implements CustomWorkflowAction {
       RollbackDirectiveParams params = (RollbackDirectiveParams) Directives.ROLLBACK_DOCUMENT.createDirectiveParams();
       Date now = new Date();
       Date execute = this.getExecuteDate(doc);
-      if(execute.after(now)) {
+      // if execute is null, means blank general date one
+      if(execute == null || execute.after(now)) {
          shouldCreate = false;
       }
       if (doc instanceof Content && shouldCreate) {

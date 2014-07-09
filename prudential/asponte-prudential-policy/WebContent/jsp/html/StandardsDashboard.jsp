@@ -10,7 +10,7 @@
                  com.ibm.workplace.wcm.api.query.*, 
                  java.util.*, 
                  com.prudential.utils.*, 
-         com.prudential.wcm.*, 
+                 com.prudential.wcm.*, 
                  java.text.*, 
                  com.prudential.authoring.launchpage.*, 
                  com.ibm.workplace.wcm.api.LinkComponent"%> 
@@ -27,8 +27,10 @@ public List<CustomAuthoringItemWrapper> queryByAT(String authTempId, Object port
   // get the workspace 
   Workspace ws = Utils.getWorkspace(); 
   ws.useUserAccess(true); 
+  
+  
   // get the libraries I care about 
-  Library tempLib = ws.getDocumentLibrary("PruPolicyContent"); 
+        Library tempLib = ws.getDocumentLibrary("PruPolicyContent"); 
   libraryList.add(tempLib); 
   
   queryParms.setLibraries(libraryList); 
@@ -57,7 +59,7 @@ public List<CustomAuthoringItemWrapper> queryByAT(String authTempId, Object port
   
   Query theQuery = CustomAuthoringLaunchPageQueries.buildQuery(additionalSelectors,queryParms); 
   ResultIterator results = CustomAuthoringLaunchPageQueries.runQuery(ws,theQuery,queryParms); 
-  String[] additionalAttributes = {""}; 
+  String[] additionalAttributes = {"Issuing Orgainization"}; 
   // now build the items from the results 
   return CustomAuthoringLaunchPageQueries.wrapResults(results,portletRequest,portletResponse,additionalAttributes,false); 
 } 
@@ -70,8 +72,7 @@ public Document getDocumentById(Workspace ws, String contentId) throws Exception
 public String escapeText(String text) { 
   
   if(text != null) { 
-    text = text.replaceAll("\"", "\\\\\"").replaceAll("'", "&apos;").replaceAll("\n", " "); 
-    // text = text.replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("\n", " "); 
+    text = text.replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("\n", " "); 
   } 
   
   return text; 
@@ -79,21 +80,11 @@ public String escapeText(String text) {
 
 public String getStandards(Document doc) throws Exception { 
   String text = ""; 
-  boolean shouldEscape = true; 
   ContentComponent cmpnt = WCMUtils.getContentComponent(doc, "Standards"); 
   if (cmpnt instanceof RichTextComponent) { 
     text = ((RichTextComponent) cmpnt).getRichText(); 
-  } else if (cmpnt instanceof HTMLComponent) { 
-          text = ((HTMLComponent)cmpnt).getHTML(); 
-  } else if (cmpnt instanceof LinkComponent) { 
-    shouldEscape = false; 
-    LinkComponent link = (LinkComponent)cmpnt; 
-    text = "<a href=\""+link.getURL()+"\">"+link.getLinkText()+"</a>"; 
   } 
-  if(shouldEscape) { 
-          text = escapeText(text); 
-  } 
-  return text; 
+  return escapeText(text); 
 } 
 
 public String getModelPolicyLinkValue(Document doc) throws Exception { 
@@ -151,41 +142,30 @@ public DocumentId getSiteAreaByPath(Workspace ws, String path) {
 <%@ taglib uri="/WEB-INF/tld/std-portlet.tld" prefix="portlet" %> 
 <portlet:defineObjects/> 
 <wcm:initworkspace user="<%= (java.security.Principal)request.getUserPrincipal() %>" /> 
-<!-- 
-CMK RenderHitCountPlugin: <wcm:plugin name="RenderHitCountPlugin" uuid="e813613c-fd6c-4fd7-a101-c7080d2e72dd"></wcm:plugin><br> 
---> 
+
+<script> 
+        if(!window.jQuery) { 
+                document.write(unescape('%3Cscript src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"%3E%3C/script%3E')); 
+                document.write(unescape('%3Clink rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css"%3E%3C/link%3E')); 
+                document.write(unescape('%3Cscript src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"%3E%3C/script%3E')); 
+        } 
+</script> 
 
 <% 
   Workspace ws = Utils.getWorkspace(); 
   // set to use read 
   ws.useUserAccess(true); 
   ws.setCurrentDocumentLibrary(ws.getDocumentLibrary("PruPolicyContent")); 
-  String bgPolicySubPath = "prupolicycontent/Business+Group+Policies".toLowerCase(); 
-  String hrPolicyPath = "prupolicycontent/Corporate+Policies/Content/Human+Resources+Policies".toLowerCase(); 
-  String fpaPolicyPath = "prupolicycontent/Corporate+Policies/Content/US+Expense".toLowerCase(); 
-  String modelPolicyPath = "prupolicycontent/Corporate+Policies/Content/Model+Policies".toLowerCase(); 
   
   RenderingContext rc = (RenderingContext) pageContext.getRequest().getAttribute(Workspace.WCM_RENDERINGCONTEXT_KEY); 
   Content incoming = rc.getContent(); 
   DocumentId parentId = incoming.getDirectParent(); 
   String wcmContextPath = ws.getPathById(parentId, false, false); 
-  boolean isBPA = wcmContextPath.startsWith(bgPolicySubPath); 
-  boolean isMPA = wcmContextPath.startsWith(modelPolicyPath); 
   
   DocumentId[] parentIds = null;   
-  if(isBPA) { 
-        parentIds = new DocumentId[] {parentId, getSiteAreaByPath(ws, modelPolicyPath.replaceAll("\\+", " "))}; 
-  } else { 
-        parentIds = new DocumentId[] {parentId}; 
-  } 
-  
-  System.out.println("wcmContextPath: " + wcmContextPath); 
-  System.out.println("isBPA: " + isBPA); 
-  System.out.println("isMPA: " + isMPA); 
-  
+  parentIds = new DocumentId[] {parentId}; 
+
   // out.println("wcmContextPath: " + wcmContextPath); 
-  // out.println("isBPA: " + isBPA); 
-  // out.println("isMPA: " + isMPA); 
 %> 
 
 <style> 
@@ -246,59 +226,37 @@ font-size:11px;
     float: right; 
 } 
 </style> 
-<% 
-  //System.out.println("CMK:::DashboardRenderLaunchPage.jsp"); 
+<%   
   String[] additionalAttributes = {""}; 
   // now build the items from the results 
   // get the documentiditerator from the authoring template and site area 
-  String[] authTempIds = {"4143aff0-6901-4207-852b-9b2c3d098679"}; 
-  String linkATTempId = "9889d022-56d9-4e27-a2be-ded469428e15"; 
+  // get the authtemplateid for Standards 
+  String[] authTempIds = {"d7e4c27c-dee3-4e23-a3e1-15954938b5dc"}; 
   DocumentId atId = null; 
-  DocumentId atId2 = ws.createDocumentId(linkATTempId);; 
   for(int i = 0; i < authTempIds.length; ++i) { 
     atId = ws.createDocumentId(authTempIds[i]); 
   } 
-  DocumentIdIterator theWrapperResults = ws.contentSearch(atId, parentIds, null, null, Workspace.WORKFLOWSTATUS_DRAFT | Workspace.WORKFLOWSTATUS_PUBLISHED | Workspace.WORKFLOWSTATUS_EXPIRED ); 
-  DocumentIdIterator thelinkResults = ws.contentSearch(atId2, parentIds, null, null, Workspace.WORKFLOWSTATUS_DRAFT | Workspace.WORKFLOWSTATUS_PUBLISHED | Workspace.WORKFLOWSTATUS_EXPIRED ); 
+  DocumentIdIterator theWrapperResults = ws.contentSearch(atId, parentIds, null, null, Workspace.WORKFLOWSTATUS_DRAFT | Workspace.WORKFLOWSTATUS_PUBLISHED | Workspace.WORKFLOWSTATUS_EXPIRED );   
   DocumentId[] theResultArray = null; 
   
-  List<CustomAuthoringItemWrapper> linkResults = CustomAuthoringLaunchPageQueries.wrapResults(thelinkResults,renderRequest,renderResponse,additionalAttributes,false); 
   List<CustomAuthoringItemWrapper> wrapperResults = CustomAuthoringLaunchPageQueries.wrapResults(theWrapperResults,renderRequest,renderResponse,additionalAttributes,false); 
   SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); 
 %> 
-<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css"></link> 
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script> 
 <script> 
 var fullDataset = { 
       identifier: 'itemId', 
     items: [ 
 <% 
-  int id = 0; 
-  for (int i = 0; i < linkResults.size(); ++i, ++id) { 
-    CustomAuthoringItemWrapper theWrapper = linkResults.get(i); 
+  int id = 0;     
+  for (int i = 0; i < wrapperResults.size(); ++i, ++id) { 
+    CustomAuthoringItemWrapper theWrapper = wrapperResults.get(i); 
         // get the action URLs 
         CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview"); 
         String editURL = previewAction.getActionURL(); 
-
-        String curUuid = theWrapper.getItemId(); 
-        DocumentId curDocId = ws.createDocumentId(curUuid); 
-        Content curContent = (Content) ws.getById(curDocId); 
-        LinkComponent modelPolicyLinkCmpt = (LinkComponent) curContent.getComponent("ModelPolicyLink"); 
-        DocumentId modelPolicyDocId = modelPolicyLinkCmpt.getDocumentReference(); 
-        if(modelPolicyDocId != null){ 
-          String curModelPolicyPath = ws.getPathById(modelPolicyDocId, true, false); 
-          String pathToContent = "wcm%3apath%3a%2F" + curModelPolicyPath; 
-          editURL = "?1dmy&page=com.prudential.page.PP.PolicyDetail&urile=" + pathToContent; 
-        } 
-
         // ensure live date isn't null 
         String liveDateFormatted = ""; 
         if(theWrapper.getLiveDate() != null) { 
           liveDateFormatted = formatter.format(theWrapper.getLiveDate()); 
-        } // end-if 
-        String expireDateFormatted = ""; 
-        if(theWrapper.getExpireDate() != null) { 
-          expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
         } // end-if 
     
         String lastModFormatted = ""; 
@@ -306,17 +264,13 @@ var fullDataset = {
       lastModFormatted = formatter.format(theWrapper.getLastModDate()); 
     } // end-if 
     
-    String reviewDate = ""; 
+        String reviewDate = ""; 
     if(theWrapper.getReviewDate() != null) { 
       reviewDate = formatter.format(theWrapper.getReviewDate()); 
     } // end-if 
-    else { 
-    
-    } 
     
     String stage = theWrapper.getWfStage().toLowerCase(); 
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
-    String retireRationale = ""; 
     if(stage.contains("draft")) { 
       stage = "Draft"; 
     } else if(stage.contains("review")) { 
@@ -337,162 +291,10 @@ var fullDataset = {
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
       stage = "Retired";     
-      Content theContent = (Content)doc; 
-      HistoryLogIterator hli = theContent.getHistoryLog(); 
-      ArrayList comments = new ArrayList();
-      while(hli.hasNext()) { 
-        HistoryLogEntry hle = hli.nextLogEntry(); 
-        int code = hle.getCode();
-        if(code >= 10000 && code <= 19999)
-		{
-			comments.add(hle);
-		}	             
-      } 
-      if(!comments.isEmpty()) {
-        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
-      	retireRationale = hle.getMessage(); 
-      }
     } else if(stage.contains("expire")) { 
       stage = "Retired"; 
-      Content theContent = (Content)doc; 
-      HistoryLogIterator hli = theContent.getHistoryLog(); 
-      ArrayList comments = new ArrayList();
-      while(hli.hasNext()) { 
-        HistoryLogEntry hle = hli.nextLogEntry(); 
-        int code = hle.getCode();
-        if(code >= 10000 && code <= 19999)
-		{
-			comments.add(hle);
-		}	
-      } 
-      if(!comments.isEmpty()) {
-        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
-      	retireRationale = hle.getMessage(); 
-      }
     } 
     
-    
-    String modelPolicyId = getModelPolicyLinkValue(doc); 
-    Document parent = getDocumentById(ws, modelPolicyId); 
-    String contentPath = theWrapper.getPath().toLowerCase(); 
-    String policyType = "LINK"; 
-    if(modelPolicyId == null) { 
-      modelPolicyId = ""; 
-    } 
-  
-    %>{ 
-    itemId:"<%=id%>", 
-    contentId:"<%=theWrapper.getItemId()%>", 
-    viewCount:"<wcm:plugin name="RenderReferenceCount" displayCount="true" uuid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
-    //source:"/wps/wcm/myconnect/dd251369-8346-4d70-a834-21112c85f1a9/link.jpg?MOD=AJPERES&CACHEID=dd251369-8346-4d70-a834-21112c85f1a9&cache=none", 
-    source:"Link", 
-    type:"<%=policyType%>", 
-    authTemp:"<%=theWrapper.getAuthTemplateName()%>", 
-    //editURL:"<%=editURL%>", 
-    editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
-    title:"<%=theWrapper.getTitle()%>", 
-    modelPolicyId:"<%= modelPolicyId %>", 
-    status:"<%=stage%>", 
-    liveDateFormatted:"<%=liveDateFormatted%>", 
-    lastModFormatted:"<%=lastModFormatted%>", 
-    reviewDate:"<%=reviewDate%>", 
-    retiredDate:"<%=expireDateFormatted%>", 
-    retireRationale:"<%=retireRationale%>", 
-    author:"<%=theWrapper.getAuthor()%>", 
-    stage:"<%=stage %>", 
-    path:"<%=theWrapper.getPath() %>", 
-    standards:"<%= getStandards(parent) %>", 
-    reviewers:"", 
-    approvers:"", 
-    contacts:"" 
-
-    }, 
-<% 
-    } // end for-loop 
-  
-  for (int i = 0; i < wrapperResults.size(); ++i, ++id) { 
-    CustomAuthoringItemWrapper theWrapper = wrapperResults.get(i); 
-        // get the action URLs 
-        CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview"); 
-        String editURL = previewAction.getActionURL(); 
-        // ensure live date isn't null 
-        String liveDateFormatted = ""; 
-        if(theWrapper.getLiveDate() != null) { 
-          liveDateFormatted = formatter.format(theWrapper.getLiveDate()); 
-        } // end-if 
-        String expireDateFormatted = ""; 
-        if(theWrapper.getExpireDate() != null) { 
-          expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
-        } // end-if 
-    
-        String lastModFormatted = ""; 
-    if(theWrapper.getLastModDate() != null) { 
-      lastModFormatted = formatter.format(theWrapper.getLastModDate()); 
-    } // end-if 
-    
-        String reviewDate = ""; 
-    if(theWrapper.getReviewDate() != null) { 
-      reviewDate = formatter.format(theWrapper.getReviewDate()); 
-    } // end-if 
-    
-    String stage = theWrapper.getWfStage().toLowerCase(); 
-    Document doc = getDocumentById(ws, theWrapper.getItemId()); 
-    String retireRationale = ""; 
-    if(stage.contains("draft")) { 
-      stage = "Draft"; 
-    } else if(stage.contains("review")) {       
-      stage = "Review"; 
-      // if we're in review, get the review date 
-      Content theContent = (Content)doc; 
-      Date enteredStage = theContent.getDateEnteredStage(); 
-      reviewDate = formatter.format(enteredStage); 
-    } else if(stage.contains("approval")) { 
-      stage = "Approve"; 
-      // if we're in review, get the review date 
-      Content theContent = (Content)doc; 
-      Date enteredStage = theContent.getDateEnteredStage(); 
-      reviewDate = formatter.format(enteredStage); 
-    } else if(stage.contains("publish")) { 
-      stage = "Published"; 
-    } else if(stage.contains("approveretire")) { 
-      stage = "Pending Retire"; 
-    } else if(stage.contains("retire content")) { 
-      stage = "Retired"; 
-      Content theContent = (Content)doc; 
-      HistoryLogIterator hli = theContent.getHistoryLog(); 
-      ArrayList comments = new ArrayList();
-      while(hli.hasNext()) { 
-        HistoryLogEntry hle = hli.nextLogEntry(); 
-        int code = hle.getCode();
-        if(code >= 10000 && code <= 19999)
-		{
-			comments.add(hle);
-		}	
-      } 
-      if(!comments.isEmpty()) {
-        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
-      	retireRationale = hle.getMessage(); 
-      }
-    } else if(stage.contains("expire")) { 
-      stage = "Retired"; 
-      Content theContent = (Content)doc; 
-      HistoryLogIterator hli = theContent.getHistoryLog(); 
-      ArrayList comments = new ArrayList();
-      while(hli.hasNext()) { 
-        HistoryLogEntry hle = hli.nextLogEntry(); 
-        int code = hle.getCode();
-        if(code >= 10000 && code <= 19999)
-		{
-			comments.add(hle);
-		}	
-      } 
-      if(!comments.isEmpty()) {
-        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
-      	retireRationale = hle.getMessage(); 
-      }
-    }   
-    
-    doc = getDocumentById(ws, theWrapper.getItemId()); 
     String modelPolicyId = getModelPolicyLinkValue(doc); 
     Document parent = null; 
     if(modelPolicyId != null) { 
@@ -506,16 +308,6 @@ var fullDataset = {
     String contentPath = theWrapper.getPath().toLowerCase(); 
     String policyType = ""; 
     String sourceIcon = ""; 
-    if(contentPath.startsWith(modelPolicyPath)) { 
-      policyType = "MODEL"; 
-      sourceIcon = "/wps/wcm/myconnect/cf25496c-287d-4812-ac91-2e21d45dd58f/model-policy.jpg?MOD=AJPERES&CACHEID=cf25496c-287d-4812-ac91-2e21d45dd58f&cache=none"; 
-    } else if(modelPolicyId == null) { 
-      policyType = "NEW"; 
-      sourceIcon = "/wps/wcm/myconnect/b7ed5424-1ad4-43da-a717-94c5dea84fea/policy.jpg?MOD=AJPERES&CACHEID=b7ed5424-1ad4-43da-a717-94c5dea84fea&cache=none"; 
-    } else { 
-      policyType = "COPY"; 
-      sourceIcon = "/wps/wcm/myconnect/a1730a69-0971-4f86-9d20-8c8ee494ecdb/copy.jpg?MOD=AJPERES&CACHEID=a1730a69-0971-4f86-9d20-8c8ee494ecdb&cache=none"; 
-    } 
     
     if(modelPolicyId == null) { 
       modelPolicyId = ""; 
@@ -523,20 +315,19 @@ var fullDataset = {
   
     %>{ 
     itemId: <%=id%>, 
-    viewCount:"<wcm:plugin name="RenderReferenceCount" displayCount="true" uuid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
     contentId:"<%=theWrapper.getItemId()%>", 
     source:"<%=sourceIcon%>", 
     type:"<%=policyType%>", 
     authTemp:"<%=theWrapper.getAuthTemplateName()%>", 
-    editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
+    editURL:"?page=com.prudential.page.PP.PolicyDetail&urile=wcm:path:<%=theWrapper.getPath() %>&previewopt=id&previewopt=<%=theWrapper.getItemId()%>", 
+//    editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
     title:"<%=theWrapper.getTitle()%>", 
     modelPolicyId:"<%= modelPolicyId %>", 
     status:"<%=stage%>", 
     liveDateFormatted:"<%=liveDateFormatted%>", 
     lastModFormatted:"<%=lastModFormatted%>", 
     reviewDate:"<%=reviewDate%>", 
-    retiredDate:"<%=expireDateFormatted%>", 
-    retireRationale:"<%=retireRationale%>", 
+    retiredDate:"", 
     author:"<%=theWrapper.getAuthor()%>", 
     stage:"<%=stage %>", 
     path:"<%=theWrapper.getPath() %>", 
@@ -563,14 +354,13 @@ dojo.require("dojox.grid.enhanced.plugins.Pagination");
 dojo.require("dojo.data.ItemFileWriteStore"); 
 
 var gridVisibility = { 
-  "all":[true,true,true,true,true,true,false,true], 
-  "Draft":[true,true,true,false,false,false,false,true], 
-  "Review":[true,true,true,true,true,true,false,true], 
-  "Approve":[true,true,true,true,true,true,false,true], 
-  "Published":[true,true,true,true,true,true,false,true], 
-  "Pending Retire":[true,true,true,false,false,false,true,true], 
-  "Retired":[true,true,true,false,false,false,true,true], 
-  "mdlplcs":[true,true,true,true,true,true,false,true] 
+  "all":[false,true,true,true,true,true,false,true], 
+  "Draft":[false,true,true,false,false,false,false,true], 
+  "Review":[false,true,true,true,true,true,false,true], 
+  "Approve":[false,true,true,true,true,true,false,true], 
+  "Published":[false,true,true,true,true,true,false,true], 
+  "Retired":[false,true,true,false,false,false,true,true], 
+  "mdlplcs":[false,true,true,true,true,true,false,true] 
 }; 
 
 var updateGridColumns = function() { 
@@ -592,44 +382,8 @@ var filterData = function(fullDataset) {
     identifier: 'itemId', 
     items: [] 
   }; 
-
-  // if(filterValue === "all") { 
-    // data.items = fullDataset.items.slice(0); 
-  // } else if(filterValue === "mdlplcs") { 
-    // for(var i = 0; i < fullDataset.items.length; ++i) { 
-      // if(fullDataset.items[i].type == "MODEL") { 
-        // data.items.push(fullDataset.items[i]); 
-      // } 
-    // } 
-  // } else { 
-    // for(var i = 0; i < fullDataset.items.length; ++i) { 
-      // if(fullDataset.items[i].status == filterValue) { 
-        // data.items.push(fullDataset.items[i]); 
-      // } 
-    // } 
-  // } 
-<% if(isBPA) { %> 
-  if(filterValue === "mdlplcs") { 
-    for(var i = 0; i < fullDataset.items.length; ++i) { 
-      if(fullDataset.items[i].type == "MODEL" && fullDataset.items[i].status == "Published") { 
-        data.items.push(fullDataset.items[i]); 
-      } else if(fullDataset.items[i].type != "MODEL") { 
-        data.items.push(fullDataset.items[i]); 
-          } 
-    } 
-  } else if(filterValue === "all") { 
-    for(var i = 0; i < fullDataset.items.length; ++i) { 
-      if(fullDataset.items[i].type != "MODEL") { 
-        data.items.push(fullDataset.items[i]); 
-      } 
-    } 
-  } else { 
-    for(var i = 0; i < fullDataset.items.length; ++i) { 
-      if(fullDataset.items[i].type != "MODEL" && fullDataset.items[i].status == filterValue) { 
-        data.items.push(fullDataset.items[i]); 
-      } 
-    } 
-  } 
+  
+<% if(false) { %>   
 <% } else { %> 
   if(filterValue === "all") { 
     data.items = fullDataset.items.slice(0); 
@@ -659,17 +413,15 @@ var store = null;
 var activeDataSet = null; 
 var grid = null; 
 
-
-
 var gridVisibility = { 
-  "all":[<%= isBPA %>,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
-  "Draft":[<%= isBPA %>,true,true,false,false,true,true,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
-  "Review":[<%= isBPA %>,true,true,true,false,false,false,false,false,false,true,false,true,false,true,true,true,false,<%= isMPA %>], 
-  "Approve":[<%= isBPA %>,true,true,true,false,false,false,false,false,true,false,true,true,true,true,true,true,false,<%= isMPA %>], 
-  "Published":[<%= isBPA %>,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
-  "Pending Retire":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,<%= isMPA %>], 
-  "Retired":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,<%= isMPA %>], 
-  "mdlplcs":[<%= isBPA %>,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>] 
+  "all":[false,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,false], 
+  "Draft":[false,true,true,false,false,true,true,false,false,false,false,false,false,false,true,true,true,false,false], 
+  "Review":[false,true,true,true,false,false,false,false,false,false,true,false,true,false,true,true,true,false,false], 
+  "Approve":[false,true,true,true,false,false,false,false,false,true,false,true,true,true,true,true,true,false,false], 
+  "Published":[false,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,false], 
+  "Pending Retire":[false,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,false], 
+  "Retired":[false,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,false], 
+  "mdlplcs":[false,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,false] 
 }; 
 
 var renderTable = function() { 
@@ -680,10 +432,9 @@ var renderTable = function() {
     /*set up layout*/ 
     var layout = [ 
       {name: 'Source', noresize: true, field: 'source', width: "100px", formatter: function(value, index) { 
-    //return "<img alt='" + grid.getItem(index).type + "' height='20px' src='" + value + "'><div class='gid-actions "+ grid.getItem(index).type +"'><input id='accept-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='accept' 0nClick=\"getElementById('copy-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='accept-"+grid.getItem(index).itemId+"'>Adopt</label><input id='copy-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='copy' 0nClick=\"getElementById('accept-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='copy-"+grid.getItem(index).itemId+"'>Copy</label></div>"; 
-    return "<span height='20px'>"+grid.getItem(index).type+"</span><div class='gid-actions "+ grid.getItem(index).type +"'><input id='accept-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='accept' 0nClick=\"getElementById('copy-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='accept-"+grid.getItem(index).itemId+"'>Adopt</label><input id='copy-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='copy' 0nClick=\"getElementById('accept-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='copy-"+grid.getItem(index).itemId+"'>Copy</label></div>"; 
+    return "<img alt='" + grid.getItem(index).type + "' height='20px' src='" + value + "'><div class='gid-actions "+ grid.getItem(index).type +"'><input id='accept-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='accept' 0nClick=\"getElementById('copy-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='accept-"+grid.getItem(index).itemId+"'>Adopt</label><input id='copy-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='copy' 0nClick=\"getElementById('accept-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='copy-"+grid.getItem(index).itemId+"'>Copy</label></div>"; 
     }}, 
-      {name: 'Policy', noresize: true, field: 'title', width: "200px", formatter: function(value, index) { 
+      {name: 'Standard', noresize: true, field: 'title', width: "200px", formatter: function(value, index) { 
     return "<a href='"+ grid.getItem(index).editURL + "' target='_blank' >" + value + "</a>"; 
     }}, 
       {name: 'Status', noresize: true, field: 'status', width: "60px"}, 
@@ -692,7 +443,7 @@ var renderTable = function() {
       {name: 'Last Review Date', noresize: true, field: 'lastModFormatted', width: "70px"}, 
       {name: 'Scheduled Review Date', noresize: true, field: 'reviewDate', width: "70px"}, 
       {name: 'Retired Date', noresize: true, field: 'retiredDate', width: "70px"}, 
-      {name: 'Rationale For Retirement', noresize: true, field: 'retireRationale', width: "120px"}, 
+      {name: 'Rationale For Retirement', noresize: true, field: 'retiredDate', width: "120px"}, 
       {name: 'Submitter', noresize: true, field: 'reviewers', width: "120px"}, 
       {name: 'Reviewers', noresize: true, field: 'reviewers', width: "120px"}, 
       {name: 'Approvers', noresize: true, field: 'approvers', width: "120px"}, 
@@ -704,7 +455,7 @@ var renderTable = function() {
     return grid.getItem(index).standards; 
     }}, 
       {name: 'Policy Replacement', noresize: true, field: 'replacement', width: "120px"}, 
-      {name: 'Adopt/Copy', noresize: true, field: 'viewCount', width: "120px"}, 
+      {name: 'Views', noresize: true, field: 'viewCount', width: "120px"}, 
     ]; 
 
     /*create a new grid:*/ 
@@ -810,14 +561,11 @@ var gridProcess = function() {
   var targetPath = "<%= wcmContextPath %>"; 
   var accept = []; 
   var copy = []; 
-  //var inputs = document.getElementsByTagName("INPUT"); 
-  var inputs = jQuery("INPUT"); 
-  console.log(inputs); 
+  var inputs = document.getElementsByTagName("INPUT"); 
   
   for(var i = 0; i < inputs.length; ++i) { 
     var name = inputs[i].getAttribute("name"); 
-    //if(name && name.startsWith("accept-copy-") && inputs[i].checked) { 
-    if(name && name.indexOf("accept-copy-")==0 && inputs[i].checked) { 
+    if(name && name.startsWith("accept-copy-") && inputs[i].checked) { 
       var itemId = parseInt(name.substring(name.lastIndexOf("-")+1, name.length)); 
       var item = getItemById(itemId); 
       if(item) { 
@@ -870,7 +618,7 @@ jQuery(function(){
 }); 
   </script> 
 <br> 
-<div style="float:left; margin-left:<%= (isBPA? "130px": "20px") %>"> 
+<div style="float:left; margin-left:<%= (false? "130px": "20px") %>"> 
   <input type="text" id="title-filter" style="width:160px; padding:2px"/> <button id="title-filter-bttn" type="button" style="padding:0">Filter</button> 
 </div> 
 <select name="status-filter-value" id="status-filter-value" style="float:right"> 
@@ -881,24 +629,15 @@ jQuery(function(){
   <option value="Published">Published</option> 
   <option value="Pending Retire">Pending Retire</option> 
   <option value="Retired">Retired</option> 
-  <% if(isBPA) { %> 
-  <option value="mdlplcs">Available Model Policies</option> 
-  <% } %> 
 </select> 
 
 
 <div id='grid-accept-all-place-holder' style="height:20px; margin:30px 0 0 30px;"> 
-<% if(isBPA) { %> 
-<input id='grid-accept-all' type='checkbox' value='accept-all'/><label for='grid-accept-all'>Adopt All</label> 
-<% } %> 
 </div> 
 
 <div id="gridDiv" style="padding:15px 0 0"></div> 
 
 <div id='grid-process-place-holder' style="height:30px;"> 
-<% if(isBPA) { %> 
-<button id="grid-process-accept-copy" type="button">Process</button> 
-<% } %> 
 </div> 
 
 

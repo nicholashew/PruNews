@@ -4,7 +4,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.ibm.portal.um.Group;
 import com.ibm.portal.um.User;
@@ -46,7 +49,7 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       // retrieve from WCM      
       StringBuilder sb = new StringBuilder();
-      sb.append("A document "+doc.getName()+" is awaiting your approval.");
+      sb.append("A document "+doc.getName()+" is awaiting your review.");
       sb.append("<br><a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a><br>");
       // now check for the field
       if(doc instanceof Content) {
@@ -80,7 +83,7 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
    String getEmailSubject(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      String subject = "Item "+doc.getName()+" is awaiting your approval";
+      String subject = "Item "+doc.getName()+" is awaiting your review";
       
       return subject;
 
@@ -93,5 +96,75 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       
       return s_delayCmpntName;
       
-   }     
+   }  
+   /**
+    * instead of sending to wcm approvers, send to the PolicyApprovers
+    * @see com.prudential.wf.actions.BaseEmailAction#getRecipients(com.ibm.workplace.wcm.api.Document)
+    */
+   ArrayList getRecipients(Document doc) {
+      // TODO Auto-generated method stub
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      if (isDebug) {
+         s_log.entering("ScheduleReviewEmailAction", "getRecipients for doc "+doc.getName());
+      }
+      Set recipientSet = new HashSet();
+      ArrayList recipientList = null;
+      // get the approvers from the doc
+      if(doc instanceof Content) {
+         Content theContent = (Content)doc;
+         // set the workspace to use dn
+         Workspace ws = doc.getSourceWorkspace();
+         boolean dnUsed = ws.isDistinguishedNamesUsed();
+         ws.useDistinguishedNames(true);
+         try {
+            //String[] approvers = theContent.getCurrentApprovers();
+            Set<String> approverSet = new HashSet<String>();
+            extractApprovers(doc, approverSet, m_usercmpntname);
+            String[] approvers = approverSet.toArray(new String[approverSet.size()]);
+            // need string[] of dn values
+            if(approvers != null) {
+               for(int x=0;x<approvers.length;x++) {
+                  String dn = approvers[x];
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "dn = "+dn+", retrieve email");
+                  }
+                  User theUser = Utils.getUserByDN(dn);
+                  if(theUser != null) {
+                     recipientSet.addAll(Utils.getEmailsUser(theUser));
+                  } 
+                  else {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "theUser was null, try group");
+                     }
+                     Group theGroup = Utils.getGroupByDistinguishedName(dn);
+                     if(theGroup != null) {
+                        recipientSet.addAll(Utils.getEmailsGroup(theGroup));
+                     }
+                     else {
+                        if (isDebug) {
+                           s_log.log(Level.FINEST, "theGroup was null");
+                        }
+                        
+                     }
+                  }
+                  
+               }
+            }
+         }
+         finally {
+            if(ws != null) {
+               ws.useDistinguishedNames(dnUsed);
+            }
+         }
+         
+      }
+      
+      if (isDebug) {
+         s_log.exiting("ScheduleReviewEmailAction", "getRecipients");
+      }
+      
+      recipientList = new ArrayList(Arrays.asList(recipientSet.toArray()));
+      return recipientList;
+
+   }
 }

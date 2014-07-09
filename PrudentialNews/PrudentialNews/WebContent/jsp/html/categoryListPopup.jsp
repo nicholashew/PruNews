@@ -37,7 +37,7 @@
 function getCategoryIds() {
 	var catIds = [];
 	try {
-		var catsJson = jQuery.parseJSON(unescape($j("#SuggestedCats").val()));
+		var catsJson = jQuery.parseJSON(unescape($j("#SelectedCats").val()));
 		$j.each(catsJson, function(i, obj) {
 			catIds.push(obj.id);
 		});
@@ -54,7 +54,7 @@ function updateCategory() {
 		//obj.label = $j(this).find("label").text();
 		categories.push(obj);
 	});
-	$j("#SuggestedCats").val(JSON.stringify(categories));
+	$j("#SelectedCats").val(JSON.stringify(categories));
 }
 
 function updateCategory_old() {
@@ -65,7 +65,7 @@ function updateCategory_old() {
 		obj.label = $j(this).find("label").text();
 		categories.push(obj);
 	});
-	$j("#SuggestedCats").val(JSON.stringify(categories));
+	$j("#SelectedCats").val(JSON.stringify(categories));
 }
 function updateCategoryListSelection(catIds) {
 	$j("#category-modal-container ul.category-list > li > input[type='checkbox']").prop("checked", false);
@@ -128,7 +128,11 @@ $j(function(){
 // really get the items from the input
 function myoptionsubmit()
 {
+<<<<<<< HEAD
 	$j("#<%=customItem.getFieldName()%>").val($j("#category-list-ajax").val());
+=======
+	$j("#<%=customItem.getFieldName()%>").val($j("#SelectedCats").val());
+>>>>>>> origin/master
 	//$j("#<%=customItem.getFieldName()%>").val(stringedCats);
 }
 
@@ -136,7 +140,11 @@ function myoptionsubmit()
 
 json:<%=fvalue%><br>
 
+<<<<<<< HEAD
 <textarea id="SuggestedCats" style="width:500px; height:500px;"></textarea>
+=======
+<textarea id="SelectedCats" style="width:500px; height:500px;"></textarea>
+>>>>>>> origin/master
 
 <input type='button' name='basic' id="openCatModal" value='Demo' class='basic-modal'/>
 

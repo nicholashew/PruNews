@@ -64,21 +64,33 @@ public class ApplySiteAreaManagers implements CustomWorkflowAction {
 					wksp = WCM_API.getRepository().getSystemWorkspace();
 					wksp.useDistinguishedNames(false);
 				}
-				DocumentId parId = ((Hierarchical)cont).getParentId();
-				boolean foundManagers = false;
-				while (parId != null && !foundManagers) {
-					Document parent = wksp.getById(parId);
-					String[] managers = parent.getMembersForAccess(Access.MANAGER);
-					if (managers != null) {
-						foundManagers = true;
-						cont.addOwners(managers);
-						if (isDebug) {
-                           s_log.log(Level.FINEST, "Owners field set to: {0}", Arrays.toString(managers));
-                        }
-					} else {
-						parId = ((Hierarchical)parent).getParentId();
-					}
+				// cmk just get the inherited manager access from the content itself
+				//String[] managersContent = cont.getInheritedManagerAccessMembers();
+				String[] managersContent = cont.getMembersForInheritedAccess(Access.MANAGER);
+				if(managersContent != null && managersContent.length > 0) {
+				   if (isDebug) {
+                     s_log.log(Level.FINEST, "found content managers, using to populate the authors");
+                  }
+				   cont.addOwners(managersContent);
 				}
+				else {
+				   DocumentId parId = ((Hierarchical)cont).getParentId();
+	                boolean foundManagers = false;
+	                while (parId != null && !foundManagers) {
+	                    Document parent = wksp.getById(parId);
+	                    String[] managers = parent.getMembersForAccess(Access.MANAGER);
+	                    if (managers != null) {
+	                        foundManagers = true;
+	                        cont.addOwners(managers);
+	                        if (isDebug) {
+	                           s_log.log(Level.FINEST, "Owners field set to: {0}", Arrays.toString(managers));
+	                        }
+	                    } else {
+	                        parId = ((Hierarchical)parent).getParentId();
+	                    }
+	                }
+				}
+				
 			} catch (OperationFailedException e) {
 			   if (isDebug) {
                   s_log.log(Level.FINEST, "exception occurred "+e.getMessage());
