@@ -81,6 +81,7 @@ public class ProcessLinkReorderDelete extends HttpServlet {
 
 		if (isDebug) {
 			s_log.log(Level.FINEST, "uuid of link is " + uuidString);
+			s_log.log(Level.FINEST, "uuidDelete is " + uuidDeleteString);
 			s_log.log(Level.FINEST, "processML = " + processML);
 			s_log.log(Level.FINEST, "processAsJSON = " + processAsJSON);
 			s_log.log(Level.FINEST, "configContentName = " + configContentName);
@@ -90,24 +91,28 @@ public class ProcessLinkReorderDelete extends HttpServlet {
 		try {
 			VirtualPortalContext vctx = repo
 					.generateVPContextFromContextPath(Utils.getVPName());
-			HandleReorder vpA = new HandleReorder(uuidString);
-			// check if we need to call the setters
-			if (processML) {
-				vpA.setP_processML(processML);
-			}
-			if (processAsJSON) {
-				// vpA.setP_processAsJSON(processAsJSON);
-				HandleReorderJSON vpAJSON = new HandleReorderJSON(
-						uuidString);
-				repo.executeInVP(vctx, vpAJSON);
-				success = vpAJSON.getReturnedValue();
-			} else {
-				if (configContentName != null && !configContentName.equals("")) {
-					vpA.setP_configContentName(configContentName);
-				}
+			if (uuidString != null && uuidString.length() > 0) {
 
-				repo.executeInVP(vctx, vpA);
-				success = vpA.getReturnedValue();
+				HandleReorder vpA = new HandleReorder(uuidString);
+				// check if we need to call the setters
+				if (processML) {
+					vpA.setP_processML(processML);
+				}
+				if (processAsJSON) {
+					// vpA.setP_processAsJSON(processAsJSON);
+					HandleReorderJSON vpAJSON = new HandleReorderJSON(
+							uuidString);
+					repo.executeInVP(vctx, vpAJSON);
+					success = vpAJSON.getReturnedValue();
+				} else {
+					if (configContentName != null
+							&& !configContentName.equals("")) {
+						vpA.setP_configContentName(configContentName);
+					}
+
+					repo.executeInVP(vctx, vpA);
+					success = vpA.getReturnedValue();
+				}
 			}
 
 			// content = vpA.getReturnedValue();
