@@ -1,72 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-<<<<<<< HEAD
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.base.ext.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.pe.rt.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilwwcm-services.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.user.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.model.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.base.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilwwcm-events.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/FavoritesJPA.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/com.ibm.ffdc.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilwwcm-commons-XMLpersistency.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilwwcm-commons-utils.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.content.repository.client.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.tagging.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.services.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.resolver.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/wp.ac.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilel-seedlist.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilwwcm-domain.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilwwcm-server.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilwwcm-api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bryant/Documents/SametimeFileTransfers/v8/v8/ilwwcm-api-impl.jar"/>
-=======
-	<classpathentry combineaccessrules="false" kind="src" path="/WCMCoreFramework"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.base.ext.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.pe.rt.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-services.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.user.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.model.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.base.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-events.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/FavoritesJPA.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/com.ibm.ffdc.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-commons-XMLpersistency.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-commons-utils.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.content.repository.client.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.tagging.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.services.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.resolver.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.ac.api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilel-seedlist.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-domain.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-server.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-api-impl.jar"/>
->>>>>>> origin/master
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/WebSphere Application Server v8.0 JRE">
-		<attributes>
-			<attribute name="owner.project.facets" value="java"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.etools.portal.runtime.provider.v70/wps.base.v70"/>
 	<classpathentry kind="src" path=".apt_generated">
 		<attributes>
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.ws.ast.st.runtime.runtimeTarget.v80/was.base.v8">
-		<attributes>
-			<attribute name="owner.project.facets" value="jst.web"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry kind="lib" path="C:/Program Files/IBM/SDP/runtimes/base_v8_stub/dev/was_public.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/IBM/SDP/runtimes/base_v8_stub/dev/was_internals.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.etools.portal.runtime.provider.v80/wps.base.v80"/>
-	<classpathentry kind="output" path="WebContent/WEB-INF/classes"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
