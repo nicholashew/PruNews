@@ -128,11 +128,7 @@ $j(function(){
 // really get the items from the input
 function myoptionsubmit()
 {
-<<<<<<< HEAD
-	$j("#<%=customItem.getFieldName()%>").val($j("#category-list-ajax").val());
-=======
 	$j("#<%=customItem.getFieldName()%>").val($j("#SelectedCats").val());
->>>>>>> origin/master
 	//$j("#<%=customItem.getFieldName()%>").val(stringedCats);
 }
 
@@ -140,11 +136,7 @@ function myoptionsubmit()
 
 json:<%=fvalue%><br>
 
-<<<<<<< HEAD
-<textarea id="SuggestedCats" style="width:500px; height:500px;"></textarea>
-=======
 <textarea id="SelectedCats" style="width:500px; height:500px;"></textarea>
->>>>>>> origin/master
 
 <input type='button' name='basic' id="openCatModal" value='Demo' class='basic-modal'/>
 
