@@ -29,6 +29,7 @@ import com.ibm.workplace.wcm.api.custom.Directives;
 import com.ibm.workplace.wcm.api.exceptions.OperationFailedException;
 import com.ibm.workplace.wcm.api.exceptions.ServiceNotAvailableException;
 import com.prudential.commons.wcm.authoring.ObjectWrapper;
+import com.prudential.utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -58,7 +59,8 @@ public class PopulateCategories implements CustomWorkflowAction {
       try {
          InitialContext ctx = new InitialContext();
          WebContentService webContentService = (WebContentService) ctx.lookup("portal:service/wcm/WebContentService");
-         ws = webContentService.getRepository().getSystemWorkspace();
+         //ws = webContentService.getRepository().getSystemWorkspace();
+         ws = Utils.getSystemWorkspace();
          // Retrieve Custom Workflow Service
          webContentCustomWorkflowService = (WebContentCustomWorkflowService) ctx
             .lookup("portal:service/wcm/WebContentCustomWorkflowService");

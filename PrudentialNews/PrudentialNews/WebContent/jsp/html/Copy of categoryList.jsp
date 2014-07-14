@@ -44,41 +44,41 @@ var selectedCategories = [<%
 
 function filterCategories(filterText) {
 	filterText = filterText.toLowerCase();
-	$(".category-list li").each(function(){
-		var text = $(this).text().toLowerCase();
+	$j(".category-list li").each(function(){
+		var text = $j(this).text().toLowerCase();
 		var display = true;
 		if(filterText != "" && text.indexOf(filterText) < 0) {
 			display = false;
 		}
 		if(display) {
-			$(this).show();
+			$j(this).show();
 		} else {
-			$(this).hide();
+			$j(this).hide();
 		}
 	});
 }
 
-$(function(){
-	$(".category-filter .clear-icon").click(function(){
-		$(".category-filter input").val("");
+$j(function(){
+	$j(".category-filter .clear-icon").click(function(){
+		$j(".category-filter input").val("");
 		filterCategories("");
 	});
-	$(".category-filter .search-icon").click(function(){
-		filterCategories($(".category-filter input").val());
+	$j(".category-filter .search-icon").click(function(){
+		filterCategories($j(".category-filter input").val());
 	});
 	
 	for(var i = 0; i < selectedCategories.length; ++i) {
-		$("ul.category-list > li > input#"+selectedCategories[i]).prop("checked", true);
+		$j("ul.category-list > li > input#"+selectedCategories[i]).prop("checked", true);
 	}
 	
-	$("[placeholder]").focus(function() {
-	  var input = $(this);
+	$j("[placeholder]").focus(function() {
+	  var input = $j(this);
 	  if (input.val() == input.attr("'placeholder'")) {
 		input.val("''");
 		input.removeClass("'placeholder'");
 	  }
 	}).blur(function() {
-	  var input = $(this);
+	  var input = $j(this);
 	  if (input.val() == "''" || input.val() == input.attr("'placeholder'")) {
 		input.addClass("'placeholder'");
 		input.val(input.attr("'placeholder'"));

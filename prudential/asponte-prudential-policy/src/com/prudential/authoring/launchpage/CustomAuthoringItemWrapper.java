@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.ibm.workplace.wcm.*;
 import com.ibm.workplace.wcm.api.*;
-import com.ibm.ws.webcontainer.util.ExtDocRootFile;
 
 public class CustomAuthoringItemWrapper {
 

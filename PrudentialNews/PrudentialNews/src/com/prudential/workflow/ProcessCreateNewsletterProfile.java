@@ -85,7 +85,8 @@ public class ProcessCreateNewsletterProfile implements CustomWorkflowAction
       {
          InitialContext ctx = new InitialContext();
          WebContentService webContentService = (WebContentService) ctx.lookup("portal:service/wcm/WebContentService");
-         ws = webContentService.getRepository().getSystemWorkspace();
+         //ws = webContentService.getRepository().getSystemWorkspace();
+         ws = Utils.getSystemWorkspace();
          // Retrieve Custom Workflow Service
          webContentCustomWorkflowService = (WebContentCustomWorkflowService) ctx
             .lookup("portal:service/wcm/WebContentCustomWorkflowService");
@@ -111,11 +112,13 @@ public class ProcessCreateNewsletterProfile implements CustomWorkflowAction
                }
             }
             
+            /*
             // set the owners of this newsletter profile into the distribution list
             Content distListContent = (Content)ws.getById(distListId);
             boolean usingDn = ws.isDistinguishedNamesUsed();
             ws.useDistinguishedNames(true);
             String[] theOwners = theContent.getOwners();
+            
             if(distListContent.hasComponent("Users")) {
                UserSelectionComponent usc = (UserSelectionComponent)distListContent.getComponent("Users");
                // get Principal array based on the array of owners
@@ -141,6 +144,7 @@ public class ProcessCreateNewsletterProfile implements CustomWorkflowAction
                }
             }
             ws.useDistinguishedNames(usingDn);
+            */
          }
          else
          {

@@ -39,6 +39,8 @@ public class CustomEmailAction implements CustomWorkflowAction {
 
    private static String presentationTemplate = "emailTemplate";
 
+   private static String sendMailComponent = "Send Mail";
+
    @Override
    /**
     * method to send 
@@ -55,20 +57,47 @@ public class CustomEmailAction implements CustomWorkflowAction {
       Directive directive = Directives.CONTINUE;
       String message = "";
       boolean successful = true;
-
+      boolean shouldSend = true;
       try {
          InitialContext ctx = new InitialContext();
          WebContentService webContentService = (WebContentService) ctx.lookup("portal:service/wcm/WebContentService");
-         ws = webContentService.getRepository().getSystemWorkspace();
+         //ws = webContentService.getRepository().getSystemWorkspace();
+         ws = Utils.getSystemWorkspace();
          // Retrieve Custom Workflow Service
          webContentCustomWorkflowService = (WebContentCustomWorkflowService) ctx
             .lookup("portal:service/wcm/WebContentCustomWorkflowService");
          result = webContentCustomWorkflowService.createResult(directive, message);
 
          Content theContent = (Content) document;
-         // get the email addresses
-         ArrayList emailAddresses = getEmailAddresses(theContent, ws);
-         email(emailAddresses, theContent);
+         if (theContent.hasComponent(sendMailComponent)) {
+            OptionSelectionComponent osc = (OptionSelectionComponent) theContent.getComponent(sendMailComponent);
+            String[] selections = osc.getSelections();
+            if (selections.length > 0) {
+               String selected = selections[0];
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "Value from selection " + selected);
+               }
+               if(selected.equalsIgnoreCase("no")) {
+                  shouldSend = false;
+               }               
+            }
+         }
+         else {
+            if (isDebug) {
+               s_log.log(Level.FINEST, "Content doesn't have the component to determine whether to send or not, sending mail");
+            }
+         }
+         if (shouldSend) {
+            // get the email addresses
+            ArrayList emailAddresses = getEmailAddresses(theContent, ws);
+            email(emailAddresses, theContent);
+         }
+         else {
+            if (isDebug) {
+               s_log.log(Level.FINEST, "Email should not send, not emailing newsletter");
+            }
+         }
+
       }
       catch (Exception e) {
          if (isDebug) {
@@ -119,7 +148,7 @@ public class CustomEmailAction implements CustomWorkflowAction {
          String url = "http://wcmwidgets.com:12222/wps/wcm/connect/prudential/prudentialnewsdesign/jspassets/rendernewsletter.jsp";
          String response = this.excutePost(url, urlParameters);
          if (isDebug) {
-            s_log.log(Level.FINEST, "response ="+response);
+            s_log.log(Level.FINEST, "response =" + response);
          }
          emailMessage.append(response);
          /*

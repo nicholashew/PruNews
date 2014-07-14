@@ -97,28 +97,28 @@ function myoptionsubmit()
 {
 	var categories = [];
 	// iterate the autobox items
-	$j(".autobox-bubble").each(function() {
+	$(".autobox-bubble").each(function() {
 		var obj = {id:"", label:""};
-		obj.id = $j(this).data("id");
-		obj.label = $j(this).data("label");
+		obj.id = $(this).data("id");
+		obj.label = $(this).data("label");
 		categories.push(obj);
 	});
 	var stringedCats = JSON.stringify(categories);
 	alert(stringedCats);
-	//$j("#<%=customItem.getFieldName()%>").val($j("#<%=customItem.getFieldName()%>_mycustomoption").val());
-	$j("#<%=customItem.getFieldName()%>").val(stringedCats);
+	//$("#<%=customItem.getFieldName()%>").val($("#<%=customItem.getFieldName()%>_mycustomoption").val());
+	$("#<%=customItem.getFieldName()%>").val(stringedCats);
 }
-$j(function() {
+$(function() {
 	//var theData = '[<%=fvalue%>]';
 	var theData = '<%=fvalue%>';
-	var jsonData = $j.parseJSON(theData);
+	var jsonData = $.parseJSON(theData);
 	
-	var $jselect = $j('#select-test');
-	$j(jsonData).each(function (index, o) {    
-	    var $joption = $j("<option/>").attr("value", o.id).text(o.label).attr("selected",o.selected);
-	    $jselect.append($joption);
+	var $select = $('#select-test');
+	$(jsonData).each(function (index, o) {    
+	    var $option = $("<option/>").attr("value", o.id).text(o.label).attr("selected",o.selected);
+	    $select.append($option);
 	});	
-	$j("#catField").autobox({
+	$("#catField").autobox({
 		styleClasses: {
 			"autobox-bg":"ui-autobox ui-widget ui-widget-content ui-corner-all",
 			"autobox-text":null,
@@ -131,7 +131,7 @@ $j(function() {
 		//data:[<%=fvalue%>]
 		data:<%=fvalue%>
 	}); // end autobox	
-	$j("#select-test").autobox({styleClasses:{"autobox-bg":"my-widget"}});
+	$("#select-test").autobox({styleClasses:{"autobox-bg":"my-widget"}});
 }); // end function	
 
 </script>

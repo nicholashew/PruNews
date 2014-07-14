@@ -253,7 +253,7 @@ var dataNewsletter = [
         { field: 'author', caption: 'Author', size: '40%', resizable: true }
     ];
 
-$j('#gridNews').w2grid({
+$('#gridNews').w2grid({
     name: 'gridNews',
     header: 'Recent News',
     show: {
@@ -265,7 +265,7 @@ $j('#gridNews').w2grid({
     records: dataNews
 });
 
-$j('#gridNewsletter').w2grid({
+$('#gridNewsletter').w2grid({
     name: 'gridNewsletter',
     header: 'Recent News',
     show: {

@@ -36,8 +36,8 @@
 function getCategoryIds() {
 	var catIds = [];
 	try {
-		var catsJson = jQuery.parseJSON(unescape($("#SelectedCats").val()));
-		$.each(catsJson, function(i, obj) {
+		var catsJson = jQuery.parseJSON(unescape($j("#SelectedCats").val()));
+		$j.each(catsJson, function(i, obj) {
 			catIds.push(obj.id);
 		});
 	} catch(ex) {
@@ -47,15 +47,15 @@ function getCategoryIds() {
 function updateCategory() {
     
 	var categories = [];
-	$(":checkbox:checked").each(function() {
+	$j(":checkbox:checked").each(function() {
 		var obj = {id:"", label:""};
-		obj.id = $(this).val();
-		obj.label = $('label[for="'+obj.id+'"]').text();
-		//obj.label = $(this).find("label").text();
+		obj.id = $j(this).val();
+		obj.label = $j('label[for="'+obj.id+'"]').text();
+		//obj.label = $j(this).find("label").text();
 		categories.push(obj);
-		//$("#tokenfield").tokenfield('createToken', { value: obj.id, label: obj.label });
+		$j("#tokenfield").tokenfield('createToken', { value: obj.id, label: obj.label });
 	});
-	$("#SelectedCats").val(JSON.stringify(categories));
+	$j("#SelectedCats").val(JSON.stringify(categories));
 	
 	// update with the tokenfield
 	
@@ -63,40 +63,39 @@ function updateCategory() {
 
 function updateCategory_old() {
 	var categories = [];
-	$("#category-modal-container .category-list li:has( input[type=checkbox]:checked )").each(function() {
+	$j("#category-modal-container .category-list li:has( input[type=checkbox]:checked )").each(function() {
 		var obj = {id:"", label:""};
-		obj.id = $(this).find("input[type=checkbox]").val();
-		obj.label = $(this).find("label").text();
+		obj.id = $j(this).find("input[type=checkbox]").val();
+		obj.label = $j(this).find("label").text();
 		categories.push(obj);
 	});
-	$("#SelectedCats").val(JSON.stringify(categories));
+	$j("#SelectedCats").val(JSON.stringify(categories));
 }
 function updateCategoryListSelection(catIds) {
-	$("#category-modal-container ul.category-list > li > input[type='checkbox']").prop("checked", false);
+	$j("#category-modal-container ul.category-list > li > input[type='checkbox']").prop("checked", false);
 	for(var i = 0; i < catIds.length; ++i) {
-		$("#category-modal-container ul.category-list > li > input#"+catIds[i]).prop("checked", true);
+		$j("#category-modal-container ul.category-list > li > input#"+catIds[i]).prop("checked", true);
 	}
 }
-
-$( document ).ready(function() {
-    console.log( "ready!" );
-	$("#tokenfield").tokenfield();			    
+$j(function(){
+$("#tokenfield").tokenfield({autocomplete: {
+    source: ['red','blue','green','yellow','violet','brown','purple','black','white'],
+    delay: 100
+  },
+  showAutocompleteOnFocus: true
 });
-$(function(){
-
-
 	function showCategoryList(html) {
-		$("#category-list-ajax").html(html);
+		$j("#category-list-ajax").html(html);
 		// get the catIds first
 		//updateCategoryListSelection(catIds);
 		updateCategoryListSelection(getCategoryIds());
 	}
 	var categoryListHtml = null;	
-	$( "#openCatModal" ).button().click(function() {
-		$( "#categoryModal" ).dialog( "open" );
+	$j( "#openCatModal" ).button().click(function() {
+		$j( "#categoryModal" ).dialog( "open" );
 	});
 	
-	$("#categoryModal").dialog({
+	$j("#categoryModal").dialog({
 		autoOpen: false,
 		height: 600,
 		width: 1000,
@@ -104,17 +103,17 @@ $(function(){
 		buttons: {
 		 Accept : function() {
 			 updateCategory();
-			 $("#categoryModal").dialog( "close" );
+			 $j("#categoryModal").dialog( "close" );
 		 },
 		 Cancel: function() {
-			 $("#categoryModal").dialog( "close" );
+			 $j("#categoryModal").dialog( "close" );
 		 }
         	},
 		open: function( event, ui ) {
-			$("#category-list-ajax").html("<div class='loading'><br><br><img src='http://www.jlg.com/images/layout/loadingGif.gif'></div>");
+			$j("#category-list-ajax").html("<div class='loading'><br><br><img src='http://www.jlg.com/images/layout/loadingGif.gif'></div>");
 			var catIds = getCategoryIds();			
 			if(categoryListHtml == null) {
-			$.ajax({
+			$j.ajax({
 				url:"/wps/wcm/myconnect/prudential/PrudentialNewsDesign/JSPAssets/CategoryList",
 				traditional: true,
 				success: function(html){
@@ -127,7 +126,7 @@ $(function(){
 			}
 		},
 		close: function() {
-		      	 $("#categoryModal").dialog( "close" );
+		      	 $j("#categoryModal").dialog( "close" );
       		} // end close
 	
 	}); // end dialog	
@@ -139,8 +138,8 @@ $(function(){
 // really get the items from the input
 function myoptionsubmit()
 {
-	$("#<%=customItem.getFieldName()%>").val($("#SelectedCats").val());
-	//$("#<%=customItem.getFieldName()%>").val(stringedCats);
+	$j("#<%=customItem.getFieldName()%>").val($j("#SelectedCats").val());
+	//$j("#<%=customItem.getFieldName()%>").val(stringedCats);
 }
 
 </script>

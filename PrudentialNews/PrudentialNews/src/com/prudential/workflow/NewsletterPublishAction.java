@@ -93,7 +93,8 @@ public class NewsletterPublishAction implements CustomWorkflowAction {
       try {
          InitialContext ctx = new InitialContext();
          WebContentService webContentService = (WebContentService) ctx.lookup("portal:service/wcm/WebContentService");
-         ws = webContentService.getRepository().getSystemWorkspace();
+         //ws = webContentService.getRepository().getSystemWorkspace();
+         ws = Utils.getSystemWorkspace();
          // Retrieve Custom Workflow Service
          webContentCustomWorkflowService = (WebContentCustomWorkflowService) ctx
             .lookup("portal:service/wcm/WebContentCustomWorkflowService");
