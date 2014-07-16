@@ -14,19 +14,22 @@
                  java.text.*,
                  com.prudential.authoring.launchpage.*"%>
 <%@ taglib uri="/WEB-INF/tld/wcm.tld" prefix="wcm"%>
-<%@ taglib uri="/WEB-INF/tld/std-portlet.tld" prefix="portlet" %>
-<portlet:defineObjects/>
+<%@ taglib uri="/WEB-INF/tld/std-portlet.tld" prefix="portlet"%>
+<portlet:defineObjects />
 <wcm:initworkspace
 	user="<%= (java.security.Principal)request.getUserPrincipal() %>" />
 
 
-<wcm:libraryComponent name="Custom Authoring Assets/HTML - InitjQuery" library="PrudentialNewsDesign" />	
+<wcm:libraryComponent name="Custom Authoring Assets/HTML - InitjQuery"
+	library="PrudentialNewsDesign" />
 <wcm:libraryComponent
 	name="Custom Authoring Assets/HTML - NewButtonPanel"
 	library="PrudentialNewsDesign" />
-	<wcm:libraryComponent name="Custom Authoring Assets/HTML - New News Button" library="PrudentialNewsDesign"/>
-	
-	<%
+<wcm:libraryComponent
+	name="Custom Authoring Assets/HTML - New News Button"
+	library="PrudentialNewsDesign" />
+
+<%
 	RenderingContext rc = (RenderingContext) pageContext.getRequest().getAttribute(Workspace.WCM_RENDERINGCONTEXT_KEY);
 	Content incoming = rc.getContent();
 	DocumentId parentId = incoming.getDirectParent();
@@ -220,13 +223,17 @@ var dataNewsletter = [
 ];
 
 </script>
-<div id="gridNews" style="height: 200px;" name="gridNews" class="w2ui-reset w2ui-grid"></div><br><br>
-<div id="gridNewsletter" style="height: 200px;" name="gridNewsletter" class="w2ui-reset w2ui-grid"></div>
+<div id="gridNews" style="height: 200px;" name="gridNews"
+	class="w2ui-reset w2ui-grid"></div>
+<br>
+<br>
+<div id="gridNewsletter" style="height: 200px;" name="gridNewsletter"
+	class="w2ui-reset w2ui-grid"></div>
 <script>
 /*set up layout*/
         var layoutNewsletters = [
         { field: 'actions', caption: 'actions', size: '30%', sortable: true, resizable: true,render: function (record, index, column_index) {
-					var html = '<div style="display: inline-block"><span class="ui-icon ui-icon-circle-check" style="display: inline-block"></span><span class="ui-icon ui-icon-circlesmall-plus" style="display: inline-block"></span></div>';
+					var html = '<div style="display: inline-block"><span class="ui-icon ui-icon-circle-check" style="display: inline-block"></span><span class="ui-icon ui-icon-circlesmall-plus" style="display: inline-block"></span><span onclick="ajaxDeleteNewsletter(\'' + record.contentId + '\',\'' + record.title + '\')" class="ui-icon ui-icon-trash" style="display: inline-block"></span></div>';
 					return html;
 				}  },
         { field: 'title', caption: 'Newsletter', size: '30%', sortable: true, resizable: true,render: function (record, index, column_index) {					
@@ -276,4 +283,35 @@ $('#gridNewsletter').w2grid({
     sortData: [{ field: 'title', direction: 'ASC' }],
     records: dataNewsletter
 });
+
+
+function ajaxCallback(result) {
+	console.log ("Inside ajaxCallback with result = " + result);
+	if (result.match(/.*success.*/ig)) {
+	   console.log ("It succeeded");
+	} else {
+	   console.log ("It failed");
+	   alert ("Failure in deleting newsletter, contact your System Administrator");
+	}
+    window.location.reload(true);
+}
+
+function ajaxDeleteNewsletter (contentId, title) {
+    var encodedContentId = encodeURIComponent(contentId);
+    var deleteNewsLetter = confirm("Delete newsletter " + title + "?");
+    if (deleteNewsLetter == true) {
+     // make an http request to get the content
+      return $.ajax({
+         url: "/wps/wcm/connect/prudential/prudentialnewsdesign/jspassets/deletenewsletter.jsp",
+         type: "POST",
+         data: {'newsletter_uuid' : encodedContentId},
+         success: ajaxCallback,
+//         complete: function(data, returnMsg) { 
+//             alert ("Got success path and data: " + $(data).text() + " and msg: " + returnMsg);
+//             window.location.reload(true);
+//         }
+//       error: errorFunction
+      });
+    } 
+}
 </script>
