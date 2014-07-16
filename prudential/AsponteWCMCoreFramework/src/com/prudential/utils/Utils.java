@@ -35,6 +35,7 @@ import com.ibm.workplace.wcm.api.DocumentId;
 import com.ibm.workplace.wcm.api.DocumentIdIterator;
 import com.ibm.workplace.wcm.api.DocumentLibrary;
 import com.ibm.workplace.wcm.api.DocumentTypes;
+import com.ibm.workplace.wcm.api.Folder;
 import com.ibm.workplace.wcm.api.LibraryShortTextComponent;
 import com.ibm.workplace.wcm.api.MoveOptions;
 import com.ibm.workplace.wcm.api.Placement;
@@ -1301,6 +1302,36 @@ public class Utils {
       DocumentIdIterator folders = ws.findByName(DocumentTypes.Folder, folderName);
       if (folders.hasNext()) {
          returnId = (DocumentId) folders.next();
+      }
+      // if it doesnt, create the folder
+      else {
+         DocumentId tempId = null;
+         Folder theFolder;
+         try {
+            theFolder = ws.createFolder(tempId);
+            returnId = theFolder.getId();
+         }
+         catch (DocumentCreationException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+            }
+         }
+         catch (AuthorizationException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+            }
+         }
+         catch (IllegalDocumentTypeException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+            }
+         }         
       }
 
       if (isDebug) {

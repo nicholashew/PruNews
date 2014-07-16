@@ -220,3 +220,7 @@ prudential/asponte-prudential-policy/.classpath
 *.classpath
 prudential/asponte-prudential-policy/.classpath
 PrudentialNews/PrudentialNews/.classpath
+*.classpath
+prudential/asponte-prudential-policy/.classpath
+*.classpath
+*.class
