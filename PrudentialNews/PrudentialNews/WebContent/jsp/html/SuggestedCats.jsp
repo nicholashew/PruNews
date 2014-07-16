@@ -105,36 +105,32 @@ function myoptionsubmit()
 	});
 	var stringedCats = JSON.stringify(categories);
 	alert(stringedCats);
+	$("#<%=customItem.getFieldName()%>").val($("#SuggestedCats").val());
 	//$("#<%=customItem.getFieldName()%>").val($("#<%=customItem.getFieldName()%>_mycustomoption").val());
 	$("#<%=customItem.getFieldName()%>").val(stringedCats);
 }
 $(function() {
-	//var theData = '[<%=fvalue%>]';
 	var theData = '<%=fvalue%>';
 	var jsonData = $.parseJSON(theData);
-	
-	var $select = $('#select-test');
-	$(jsonData).each(function (index, o) {    
-	    var $option = $("<option/>").attr("value", o.id).text(o.label).attr("selected",o.selected);
-	    $select.append($option);
-	});	
-	$("#catField").autobox({
-		styleClasses: {
-			"autobox-bg":"ui-autobox ui-widget ui-widget-content ui-corner-all",
-			"autobox-text":null,
-			"autobox-bubbles":null,
-			"autobox-input":null,
-			"autobox-option-list":null,
-			"autobox-bubble":null,
-			"autobox-bubble-remove":null
-		},
-		//data:[<%=fvalue%>]
-		data:<%=fvalue%>
-	}); // end autobox	
-	$("#select-test").autobox({styleClasses:{"autobox-bg":"my-widget"}});
+	$("#suggestedCatTokenfield").tokenfield();	
+	//var $select = $('#select-test');
+	var categories = [];
+	$(jsonData).each(function (index, o) {  
+		var obj = {id:"", label:""};
+		obj.id = o.id;
+		obj.label = o.label;
+		//obj.label = $(this).find("label").text();
+		categories.push(obj);
+		$("#suggestedCatTokenfield").tokenfield('createToken', { value: obj.id, label: obj.label });
+	});
+	$("#SuggestedCats").val(JSON.stringify(categories));
+		
+	//$("#select-test").autobox({styleClasses:{"autobox-bg":"my-widget"}});
 }); // end function	
 
 </script>
 
 json:<%=fvalue%><br>
+<input type="hidden" id="SuggestedCats" />
+<input type="text" id="suggestedCatTokenfield" />
 <div class="autobox" id="catField" name="docids"></div>

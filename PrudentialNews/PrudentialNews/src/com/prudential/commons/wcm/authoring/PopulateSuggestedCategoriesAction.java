@@ -107,7 +107,7 @@ public class PopulateSuggestedCategoriesAction implements AuthoringAction {
       Document theDoc = fc.document();
       if (theDoc instanceof Content) {
          Content theContent = (Content) theDoc;
-         if (theContent.hasComponent(s_newsBodyName) && theContent.hasComponent(s_newsSuggestedCats)) {
+         if (theContent.hasComponent(s_newsBodyName) && theContent.hasComponent(s_newsSuggestedCats) && !fc.isFormReadOnly()) {
             isValid = true;
          }
       }

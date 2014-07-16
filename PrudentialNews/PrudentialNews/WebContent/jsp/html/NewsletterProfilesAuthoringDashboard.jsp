@@ -135,7 +135,7 @@ var dataNewsletter = [
         	changeStatus = "Active";
         }
         // generate a URL to the change status content
-        String changeStatusURL = "/"
+        String changeStatusURL = "/";
 	if(theWrapperNewsletter.getLastModDate() != null) {
 		lastModFormatted = formatter.format(theWrapperNewsletter.getLastModDate());
     } // end-if%>{

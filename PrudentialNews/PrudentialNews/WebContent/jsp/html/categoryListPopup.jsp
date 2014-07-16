@@ -28,7 +28,7 @@
     	sb.append("]");
     }
     //fvalue = fvalue.replaceAll("\"", "&quot;").replaceAll("\"","&#39;");
-    String fvalue = sb.toString();
+    String catListPopupvalue = sb.toString();
 %>
 
 
@@ -47,13 +47,16 @@ function getCategoryIds() {
 function updateCategory() {
     
 	var categories = [];
+	$("#SelectedCats").val("");
+	$("#tokenfield").tokenfield('destroy');	
+	$("#tokenfield").tokenfield();	
 	$(":checkbox:checked").each(function() {
 		var obj = {id:"", label:""};
 		obj.id = $(this).val();
 		obj.label = $('label[for="'+obj.id+'"]').text();
 		//obj.label = $(this).find("label").text();
 		categories.push(obj);
-		//$("#tokenfield").tokenfield('createToken', { value: obj.id, label: obj.label });
+		$("#tokenfield").tokenfield('createToken', { value: obj.id, label: obj.label });
 	});
 	$("#SelectedCats").val(JSON.stringify(categories));
 	
@@ -72,18 +75,28 @@ function updateCategory_old() {
 	$("#SelectedCats").val(JSON.stringify(categories));
 }
 function updateCategoryListSelection(catIds) {
-	$("#category-modal-container ul.category-list > li > input[type='checkbox']").prop("checked", false);
+	//$("#category-modal-container ul.category-list > li > input[type='checkbox']").prop("checked", false);
 	for(var i = 0; i < catIds.length; ++i) {
-		$("#category-modal-container ul.category-list > li > input#"+catIds[i]).prop("checked", true);
+		//$("#category-modal-container ul.category-list > li > input#"+catIds[i]).prop("checked", true);
+		$("#"+catIds[i]+"").prop("checked", true);
 	}
 }
 
-$( document ).ready(function() {
-    console.log( "ready!" );
-	$("#tokenfield").tokenfield();			    
-});
 $(function(){
-
+	var theData = '<%=catListPopupvalue%>';
+	var jsonData = $.parseJSON(theData);
+	$("#tokenfield").tokenfield();	
+	//var $select = $('#select-test');
+	var categories = [];
+	$(jsonData).each(function (index, o) {  
+		var obj = {id:"", label:""};
+		obj.id = o.id;
+		obj.label = o.label;
+		//obj.label = $(this).find("label").text();
+		categories.push(obj);
+		$("#tokenfield").tokenfield('createToken', { value: obj.id, label: obj.label });
+	});
+	$("#SelectedCats").val(JSON.stringify(categories));
 
 	function showCategoryList(html) {
 		$("#category-list-ajax").html(html);
@@ -112,7 +125,7 @@ $(function(){
         	},
 		open: function( event, ui ) {
 			$("#category-list-ajax").html("<div class='loading'><br><br><img src='http://www.jlg.com/images/layout/loadingGif.gif'></div>");
-			var catIds = getCategoryIds();			
+			//var catIds = getCategoryIds();			
 			if(categoryListHtml == null) {
 			$.ajax({
 				url:"/wps/wcm/myconnect/prudential/PrudentialNewsDesign/JSPAssets/CategoryList",
@@ -145,10 +158,8 @@ function myoptionsubmit()
 
 </script>
 
-json:<%=fvalue%><br>
-
-<textarea id="SelectedCats" style="width:500px; height:500px;"></textarea>
-<input type="text" id="tokenfield" value="red,green,blue" />
+<input type="hidden" id="SelectedCats" style="width:500px; height:500px;"></textarea>
+<input type="text" id="tokenfield" />
 
 <input type='button' name='basic' id="openCatModal" value='Demo' class='basic-modal'/>
 

@@ -29,9 +29,9 @@
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.services.api.jar"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.tagging.api.jar"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/wp.user.api.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.etools.portal.runtime.provider.v70/wps.base.v70"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/Downloads/google-gson-2.2.4-release/google-gson-2.2.4/gson-2.2.4.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/IBM/SDP/runtimes/base_v8_stub/dev/was_dependencies.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.etools.portal.runtime.provider.v80/wps.base.v80"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

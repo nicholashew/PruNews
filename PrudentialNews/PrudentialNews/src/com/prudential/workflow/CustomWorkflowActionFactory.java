@@ -15,7 +15,7 @@ public class CustomWorkflowActionFactory implements com.ibm.workplace.wcm.api.cu
 {
    private static String FACTORY_TITLE = "CustomWorkflowActionFactory";
    private static String FACTORY_NAME = "CustomWorkflowActionFactory";
-   private static String[] FACTORY_ACTIONNAMES = {"CustomEmailAction","ProcessCreateNewsletterProfile","NewsCreatedAction","PopulateCategories","PopulateExpireDate"};
+   private static String[] FACTORY_ACTIONNAMES = {"EmailNewsletters","ProcessCreateNewsletterProfile","NewsCreatedAction","PopulateCategories","PopulateExpireDate"};
 
    /** Logger for the class */
    private static final Logger s_log = Logger.getLogger(CustomWorkflowActionFactory.class.getName());
@@ -30,7 +30,7 @@ public class CustomWorkflowActionFactory implements com.ibm.workplace.wcm.api.cu
       // TODO Auto-generated method stub
       if(p_arg0.equalsIgnoreCase(FACTORY_ACTIONNAMES[0]))
       {
-         return new CustomEmailAction();
+         return new EmailNewsletters();
       }     
       else if(p_arg0.equalsIgnoreCase(FACTORY_ACTIONNAMES[1]))
       {
