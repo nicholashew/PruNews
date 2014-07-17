@@ -56,6 +56,7 @@ public void setModelPolicyLinkValue(Document doc, DocumentId modelPolicyId) thro
 Workspace wsUser = Utils.getWorkspace();
 String userName = wsUser.getUserProfile().getUsername();
 Workspace ws = Utils.getSystemWorkspace();
+ws.login();
 ws.useUserAccess(true); 
 ws.setCurrentDocumentLibrary(ws.getDocumentLibrary("prupolicycontent")); 
 
@@ -138,4 +139,5 @@ for(int y=0;y<linkContent.length;y++) {
                 } 
         } 
 } 
+ws.logout();
 %>
