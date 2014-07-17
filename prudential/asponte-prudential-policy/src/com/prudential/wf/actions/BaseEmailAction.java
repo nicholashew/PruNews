@@ -386,7 +386,7 @@ public abstract class BaseEmailAction extends BaseCustomWorkflowAction {
                if (isDebug) {
                   s_log.log(Level.FINEST, "component not found, create");
                }
-               DocumentId folderId = Utils.getFolderId(ws, p_emailedFolder);
+               DocumentId folderId = Utils.getFolderId(ws, "PruPolicyContent", p_emailedFolder);
                ldc = ws.createDateComponent();
                ldc.setName(uuid);
                ldc.setDate(updatedDate);

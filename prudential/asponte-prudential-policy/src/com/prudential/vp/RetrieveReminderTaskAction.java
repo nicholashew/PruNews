@@ -63,7 +63,7 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
          oldLib = ws.getCurrentDocumentLibrary();
          DocumentLibrary designLib = ws.getDocumentLibrary("PruPolicyDesign");
          ws.setCurrentDocumentLibrary(designLib);
-         folderId = Utils.getFolderId(ws, p_emailedFolder);
+         folderId = Utils.getFolderId(ws, "PruPolicyContent", p_emailedFolder);
 
          DocumentLibrary[] libs = {designLib};
          // use WCM API queries to find content in specific workflow stages

@@ -40,6 +40,7 @@ import com.ibm.workplace.wcm.api.LibraryShortTextComponent;
 import com.ibm.workplace.wcm.api.MoveOptions;
 import com.ibm.workplace.wcm.api.Placement;
 import com.ibm.workplace.wcm.api.PlacementLocation;
+import com.ibm.workplace.wcm.api.PresetFolderType;
 import com.ibm.workplace.wcm.api.Repository;
 import com.ibm.workplace.wcm.api.ShortTextComponent;
 import com.ibm.workplace.wcm.api.SiteArea;
@@ -1292,7 +1293,7 @@ public class Utils {
     * @param folderName
     * @return
     */
-   public static DocumentId getFolderId(Workspace ws, String folderName) {
+   public static DocumentId getFolderId(Workspace ws, String libraryName, String folderName) {
       DocumentId returnId = null;
       boolean isDebug = s_log.isLoggable(Level.FINEST);
 
@@ -1300,6 +1301,9 @@ public class Utils {
          s_log.entering("Utils", "getFolderId " + folderName);
       }
       DocumentIdIterator folders = ws.findByName(DocumentTypes.Folder, folderName);
+      DocumentLibrary lib = ws.getDocumentLibrary(libraryName);
+      ws.setCurrentDocumentLibrary(lib);
+      
       if (folders.hasNext()) {
          returnId = (DocumentId) folders.next();
       }
@@ -1308,7 +1312,10 @@ public class Utils {
          DocumentId tempId = null;
          Folder theFolder;
          try {
-            theFolder = ws.createFolder(tempId);
+            Folder componentFolder = lib.getPresetFolder(PresetFolderType.COMPONENT);
+            theFolder = ws.createFolder(componentFolder);
+            theFolder.setName(folderName);
+            ws.save(theFolder);
             returnId = theFolder.getId();
          }
          catch (DocumentCreationException e) {
@@ -1324,8 +1331,22 @@ public class Utils {
             {
                s_log.log(Level.FINEST, "", e);
             }
+         }        
+         catch (DocumentRetrievalException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+            }
          }
-         catch (IllegalDocumentTypeException e) {
+         catch (DocumentSaveException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+            }
+         }
+         catch (DuplicateChildException e) {
             // TODO Auto-generated catch block
             if (s_log.isLoggable(Level.FINEST))
             {
