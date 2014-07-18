@@ -1287,9 +1287,9 @@ public class Utils {
 
    /**
     * 
-    * getFolderId helper method to get folder by name in the library thats already been associated in the 
-    * workspace
+    * getFolderId helper method to get folder by name in the library thats been passed in 
     * @param ws
+    * @param libraryName
     * @param folderName
     * @return
     */
@@ -1301,6 +1301,7 @@ public class Utils {
          s_log.entering("Utils", "getFolderId " + folderName);
       }
       DocumentIdIterator folders = ws.findByName(DocumentTypes.Folder, folderName);
+      DocumentLibrary currentLib = ws.getCurrentDocumentLibrary();
       DocumentLibrary lib = ws.getDocumentLibrary(libraryName);
       ws.setCurrentDocumentLibrary(lib);
       
@@ -1359,6 +1360,7 @@ public class Utils {
          s_log.exiting("Utils", "getFolderId returning " + returnId);
       }
 
+      ws.setCurrentDocumentLibrary(currentLib);
       return returnId;
    }
 
