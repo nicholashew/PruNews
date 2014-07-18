@@ -26,7 +26,9 @@ public class CheckNotificationEmail extends HttpServlet {
    private static Logger s_log = Logger.getLogger(CheckNotificationEmail.class.getName());
 
    // daily
-   private static long interval = 86400000;
+   // every 10 minutes for testing
+   //private static long interval = 86400000;
+   private static long interval = 600000;
 
    /**
     * @see HttpServlet#HttpServlet()

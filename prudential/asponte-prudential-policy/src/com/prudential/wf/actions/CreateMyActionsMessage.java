@@ -16,6 +16,10 @@ import com.ibm.workplace.wcm.api.custom.Directives;
 import com.ibm.workplace.wcm.api.custom.RollbackDirectiveParams; 
 import com.ibm.workplace.wcm.api.security.Access; 
 import com.prudential.objects.MyActionsResponse; 
+import com.prudential.utils.Utils;
+import com.prudential.wcm.WCMUtils;
+
+import java.security.Principal;
 import java.util.*; 
 import java.lang.Math; 
 import java.util.logging.Level; 
@@ -34,6 +38,9 @@ public class CreateMyActionsMessage implements CustomWorkflowAction {
    private static Workspace wksp; 
 
    private String message = ""; 
+   
+   private String reviewerComponent = "PolicyReviewers";
+   private String approverComponent = "PolicyApprovers";
 
    // This specifies when the custom action will be executed 
    @Override 
@@ -83,10 +90,21 @@ public class CreateMyActionsMessage implements CustomWorkflowAction {
 
             DocumentId wfsid = cont.getWorkflowStageId(); 
             // Get the approvers... 
-            WorkflowStage wfs = (WorkflowStage) wksp.getById(wfsid); 
+            //WorkflowStage wfs = (WorkflowStage) wksp.getById(wfsid);
+            String currentStage = wfsid.getName();
+            String componentToRetrieve = approverComponent;
+            // pull the users from the content
+            // if we're in the review stage send to reviewers. If we're in approve stage send to the approvers.
+            if(currentStage.contains("Review")) {
+               componentToRetrieve = reviewerComponent;
+            }
+            
+            Set<String> approverSet = new HashSet<String>();
+            extractApprovers(doc, approverSet, componentToRetrieve);
+            String[] approvers = approverSet.toArray(new String[approverSet.size()]);
             
             //String[] approvers = wfs.getMembersForWorkflowDefinedAccess(Access.APPROVER); 
-            String[] approvers = cont.getCurrentApprovers(); 
+            //String[] approvers = cont.getCurrentApprovers(); 
 
             // Create a message and send to MyActions for each Approver 
             JSON j = new JSON(); 
@@ -144,4 +162,19 @@ public class CreateMyActionsMessage implements CustomWorkflowAction {
       params.setCustomErrorMsg(message); 
       return webContentCustomWorkflowService.createResult(directive, "Rolling back document.", params); 
    } 
+   
+   protected void extractApprovers(Document doc, Set<String> approvers, String p_componentName) {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      ContentComponent cmpnt = WCMUtils.getContentComponent(doc, p_componentName);
+      if (cmpnt instanceof UserSelectionComponent) {
+         for (Principal p : ((UserSelectionComponent) cmpnt).getSelections()) {
+            if (isDebug) {
+               s_log.log(Level.FINEST, "adding principal "+p.getName());
+            }
+            com.ibm.portal.um.Principal thePrincipal = null;
+            thePrincipal = Utils.getPrincipalById(p.getName());
+            approvers.add(Utils.getDnForPrincipal(thePrincipal));
+         }
+      }
+   }
 }

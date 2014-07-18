@@ -6,6 +6,8 @@
 package com.prudential.objects; 
 
 import com.ibm.workplace.wcm.api.Content; 
+import com.prudential.utils.Utils;
+
 import java.io.BufferedReader; 
 import java.io.InputStreamReader; 
 import java.io.OutputStreamWriter; 
@@ -87,12 +89,15 @@ public class JSON {
       LinkedList user = new LinkedList(); 
       user.addAll(Arrays.asList(approvers)); 
 
+      String linkString = Utils.getPreviewURL(cont);
+      //String linkString = "https://" + authoringhostname + "/wps/myportal/wcmAuthoring?wcmAuthoringAction=read&docid=" + cont.getId().toString();
+      
       LinkedHashMap userList = new LinkedHashMap(); 
       userList.put("UserType", "IONS_ID"); 
       userList.put("User", user); 
       header.put("userList", userList); 
       header.put("language", "en"); 
-      header.put("link", "https://" + authoringhostname + "/wps/myportal/wcmAuthoring?wcmAuthoringAction=read&docid=" + cont.getId().toString()); 
+      header.put("link", linkString); 
 
       body.put("notificationType", "Note"); 
       body.put("priority", 2); 

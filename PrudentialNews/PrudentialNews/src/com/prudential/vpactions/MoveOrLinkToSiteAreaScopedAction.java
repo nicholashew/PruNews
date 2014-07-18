@@ -171,6 +171,13 @@ public class MoveOrLinkToSiteAreaScopedAction implements VirtualPortalScopedActi
                   if(isDebug) {
                      s_log.log(Level.FINEST, "about to attempt to move "+theContent.getName()+" under "+loc.getTargetDocId());
                   }
+                  // unlock the cntent if necessary                  
+                  if(ws.isLocked(theContentId)) {
+                     ws.unlock(theContentId);
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "content unlocked to move");
+                     }
+                  }
                   ws.move(theContent, loc, opts);
                   returnedValue = true;
                }
