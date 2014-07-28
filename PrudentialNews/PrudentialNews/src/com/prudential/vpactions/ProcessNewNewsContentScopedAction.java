@@ -121,16 +121,40 @@ public class ProcessNewNewsContentScopedAction implements VirtualPortalScopedAct
                            }
                            LinkComponent lc = (LinkComponent)newsletterContent.getComponent("Newsletter Profile");
                            lc.setDocumentReference(currentDraftID);
-                           newsletterContent.setComponent("Newsletter Profile", lc);
-                           String[] errors = ws.save(newsletterContent);
-                           if(errors.length<0 && isDebug) {
-                              for(int y=0;y<errors.length;y++) {
-                                 if (isDebug) {
-                                    s_log.log(Level.FINEST, "error during save "+errors[y]);
-                                 }
+                           newsletterContent.setComponent("Newsletter Profile", lc);                           
+                        }
+                        // have to link to the distribution list as well
+                        if(newsletterContent.hasComponent("Distribution Lists")) {
+                           if (isDebug) {
+                              s_log.log(Level.FINEST, "Setting the Distribution Lists for the content");
+                           }
+                           HTMLComponent distlists = (HTMLComponent)newsletterContent.getComponent("Distribution Lists");
+                           String distListsContent = distlists.getHTML();
+                           StringBuilder sb = new StringBuilder();
+                           sb.append(distListsContent);
+                           if(sb.length()>0) {
+                              sb.append(";");
+                           }
+                           // have to get the distList from the newsletter profile
+                           Content theProfileContent = (Content)ws.getById(currentDraftID);
+                           if(theProfileContent != null && theProfileContent.hasComponent("Distribution List")) {
+                              LinkComponent lc = (LinkComponent)theProfileContent.getComponent("Distribution List");
+                              DocumentId distListId = lc.getDocumentReference();
+                              sb.append(distListId.getName());
+                              distlists.setHTML(sb.toString());
+                              newsletterContent.setComponent("Distribution Lists", distlists);                              
+                           }
+                           
+                        }
+                        String[] errors = ws.save(newsletterContent);
+                        if(errors.length<0 && isDebug) {
+                           for(int y=0;y<errors.length;y++) {
+                              if (isDebug) {
+                                 s_log.log(Level.FINEST, "error during save "+errors[y]);
                               }
                            }
                         }
+                        
                      }
                      else {
                         // have to ensure the child is a content object

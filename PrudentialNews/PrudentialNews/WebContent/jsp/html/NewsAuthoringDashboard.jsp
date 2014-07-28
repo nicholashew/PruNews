@@ -117,8 +117,9 @@ var dataNews = [
 		recid:"<%=i%>",
 		authTemplate:"<%=theWrapper.getAuthTemplateName()%>",
 		contentId:"<%=theWrapper.getItemId()%>",		
-		editURL:"<wcm:plugin name="RemoteAction" dialog="true" action="edit" docid="<%=theWrapper.getItemId()%>" dialog="true"></wcm:plugin>",
-		deleteURL:"<wcm:plugin name="RemoteAction" dialog="true" action="delete" docid="<%=theWrapper.getItemId()%>" dialog="true"></wcm:plugin>",
+		editURL:"<wcm:plugin name="RemoteAction" action="edit" docid="<%=theWrapper.getItemId()%>" dialog="true"></wcm:plugin>",
+		readURL:"<wcm:plugin name="RemoteAction" action="read" docid="<%=theWrapper.getItemId()%>" dialog="true"></wcm:plugin>",
+		deleteURL:"<wcm:plugin name="RemoteAction" action="delete" docid="<%=theWrapper.getItemId()%>" dialog="true"></wcm:plugin>",
 		title:"<%=theWrapper.getTitle()%>",
 		status:"<%=theWrapper.getStatus()%>",
 		liveDateFormatted:"<%=liveDateFormatted%>",
@@ -208,7 +209,9 @@ var dataNewsletter = [
 		contentId:"<%=theWrapperNewsletter.getItemId()%>",
 		source:"<%=theWrapperNewsletter.getIconPath()%>",
 		editURL:"<wcm:plugin name="RemoteAction" dialog="false" action="preview" docid="<%=theWrapperNewsletter.getItemId()%>" ></wcm:plugin>",
-		deleteURL:"<wcm:plugin name="RemoteAction" dialog="true" action="delete" docid="<%=theWrapperNewsletter.getItemId()%>" dialog="true"></wcm:plugin>",
+		readURL:"<wcm:plugin name="RemoteAction" dialog="true" action="read" docid="<%=theWrapperNewsletter.getItemId()%>" ></wcm:plugin>",
+		deleteURL:"<wcm:plugin name="RemoteAction" action="delete" docid="<%=theWrapperNewsletter.getItemId()%>" dialog="true"></wcm:plugin>",
+		approveURL:"<wcm:plugin name="RemoteAction" action="approve" docid="<%=theWrapperNewsletter.getItemId()%>" dialog="true"></wcm:plugin>",
 		title:"<%=theWrapperNewsletter.getTitle()%>",
 		status:"<%=theWrapperNewsletter.getStatus()%>",
 		liveDateFormatted:"<%=liveDateFormatted%>",
@@ -233,7 +236,7 @@ var dataNewsletter = [
 /*set up layout*/
         var layoutNewsletters = [
         { field: 'actions', caption: 'actions', size: '30%', sortable: true, resizable: true,render: function (record, index, column_index) {
-					var html = '<div style="display: inline-block"><span class="ui-icon ui-icon-circle-check" style="display: inline-block"></span><span class="ui-icon ui-icon-circlesmall-plus" style="display: inline-block"></span><span onclick="ajaxDeleteNewsletter(\'' + record.contentId + '\',\'' + record.title + '\')" class="ui-icon ui-icon-trash" style="display: inline-block"></span></div>';
+					var html = '<div style="display: inline-block"><a href="'+ record.readURL + '"><span class="ui-icon ui-icon-circle-check" style="display: inline-block"></span></a><span class="ui-icon ui-icon-circlesmall-plus" style="display: inline-block"></span><span onclick="ajaxDeleteNewsletter(\'' + record.contentId + '\',\'' + record.title + '\')" class="ui-icon ui-icon-trash" style="display: inline-block"></span></div>';
 					return html;
 				}  },
         { field: 'title', caption: 'Newsletter', size: '30%', sortable: true, resizable: true,render: function (record, index, column_index) {					
@@ -248,7 +251,7 @@ var dataNewsletter = [
     ];
     var layoutNews = [
         { field: 'actions', caption: 'actions', size: '30%', sortable: true, resizable: true,render: function (record, index, column_index) {
-					var html = '<div style="display: inline-block"><span class="ui-icon ui-icon-circle-check" style="display: inline-block"></span><span class="ui-icon ui-icon-circlesmall-plus" style="display: inline-block"></span><a href="'+ record.deleteURL + '"><span class="ui-icon ui-icon-trash" style="display: inline-block"></span></a></div>';
+					var html = '<div style="display: inline-block"><a href="'+ record.readURL + '"><span class="ui-icon ui-icon-circle-check" style="display: inline-block"></span></a><span class="ui-icon ui-icon-circlesmall-plus" style="display: inline-block"></span><a href="'+ record.deleteURL + '"><span class="ui-icon ui-icon-trash" style="display: inline-block"></span></a></div>';
 					return html;
 				}  },				
         { field: 'title', caption: 'News', size: '30%', sortable: true, resizable: true,render: function (record, index, column_index) {

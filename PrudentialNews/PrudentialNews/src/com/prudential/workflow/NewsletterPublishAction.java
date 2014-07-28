@@ -106,9 +106,9 @@ public class NewsletterPublishAction implements CustomWorkflowAction {
          // create a date object
          LinkComponent clc = null;
          String distListHolder = "No Profile";
-         if(theContent.hasComponent("Distribution List"))
+         if(theContent.hasComponent("Newsletter Profile"))
          {
-            clc = (LinkComponent)theContent.getComponent("Distribution List");               
+            clc = (LinkComponent)theContent.getComponent("Newsletter Profile");               
             DocumentId newsletterProfileId = clc.getDocumentReference();
             if(newsletterProfileId != null) {
                distListHolder = newsletterProfileId.getName();
