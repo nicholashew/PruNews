@@ -22,7 +22,10 @@ import com.ibm.workplace.wcm.api.Document;
 import com.ibm.workplace.wcm.api.DocumentId;
 import com.ibm.workplace.wcm.api.DocumentIdIterator;
 import com.ibm.workplace.wcm.api.DocumentLibrary;
+import com.ibm.workplace.wcm.api.HTMLComponent;
+import com.ibm.workplace.wcm.api.LibraryComponent;
 import com.ibm.workplace.wcm.api.OptionSelectionComponent;
+import com.ibm.workplace.wcm.api.ShortTextComponent;
 import com.ibm.workplace.wcm.api.SiteArea;
 import com.ibm.workplace.wcm.api.TextComponent;
 import com.ibm.workplace.wcm.api.WebContentCustomWorkflowService;
@@ -42,13 +45,15 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
    private static Logger s_log = Logger.getLogger(NotifyAllPolicyAdmins.class.getName());
 
    private String p_componentName = "NotifyAllAdmins";
+
    private String p_designLibraryName = "PruPolicyDesign";
+
    private String p_contentLibraryName = "PruPolicyContent";
 
    public NotifyAllPolicyAdmins(WebContentCustomWorkflowService customWorkflowService) {
       super(customWorkflowService);
    }
-   
+
    @Override
    public CustomWorkflowActionResult execute(Document theDoc) {
       // TODO Auto-generated method stub
@@ -64,48 +69,58 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
 
       // check the content for the setting
       try {
+         //   
          if (theDoc instanceof Content) {
             Content theContent = (Content) theDoc;
-            // check to ensure this is a Model policy
-            DocumentId parentId = theContent.getDirectParent();
-            // the /Model Policy/Content site area is the parent for all model policies.
-            String modelPolicyContentUUID = "13f11a12-5251-44dd-a9ee-9cc84c00a878";
-            DocumentId modelPolicyID = ws.createDocumentId(modelPolicyContentUUID);
-            
-            if(parentId.equals(modelPolicyID)) {
+            if (((Content) theDoc).isWorkflowMovingBackward()) {
                if (isDebug) {
-                  s_log.log(Level.FINEST, "Content is a model policy");
+                  s_log.log(Level.FINEST, "not sending because content is moving backwards");
                }
-               if (theContent.hasComponent(p_componentName)) {
-                  if (isDebug) {
-                     s_log.log(Level.FINEST, "Content has component " + p_componentName);
-                  }
-                  OptionSelectionComponent osc = (OptionSelectionComponent) theContent.getComponentByReference(p_componentName);
-                  String[] values = osc.getSelections();
-                  if (values != null) {
-                     if (values[0].equalsIgnoreCase("yes")) {
-                        if (isDebug) {
-                           s_log.log(Level.FINEST, "should send alerts");                        
-                        }
-                        sendAlerts = true;
-                        actionMessage = this.getClass().getName() + " sending notification to policy administrators";
-                     }
-                  }
-
-               }
-            }           
+            }
             else {
-               if (isDebug) {
-                  s_log.log(Level.FINEST, "Content is not a model policy");
-                  s_log.log(Level.FINEST, "parentId = "+parentId);
-                  s_log.log(Level.FINEST, "modelPolicyID = "+modelPolicyID);
+               // check to ensure this is a Model policy
+               DocumentId parentId = theContent.getDirectParent();
+               // the /Model Policy/Content site area is the parent for all model policies.
+               String modelPolicyContentUUID = "13f11a12-5251-44dd-a9ee-9cc84c00a878";
+               String usExpenseContentUUID = "a5d337e5-bd53-4561-93a3-8f968dff729c";
+               DocumentId modelPolicyID = ws.createDocumentId(modelPolicyContentUUID);
+               DocumentId usExpensePolicyId = ws.createDocumentId(usExpenseContentUUID);
+
+               if (parentId.equals(modelPolicyID) || parentId.equals(usExpensePolicyId)) {
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "Content is a model policy or US Expense Policy");
+                  }
+                  if (theContent.hasComponent(p_componentName)) {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "Content has component " + p_componentName);
+                     }
+                     OptionSelectionComponent osc = (OptionSelectionComponent) theContent.getComponentByReference(p_componentName);
+                     String[] values = osc.getSelections();
+                     if (values != null) {
+                        if (values[0].equalsIgnoreCase("yes")) {
+                           if (isDebug) {
+                              s_log.log(Level.FINEST, "should send alerts");
+                           }
+                           sendAlerts = true;
+                           actionMessage = this.getClass().getName() + " sending notification to policy administrators";
+                        }
+                     }
+
+                  }
                }
-               actionMessage = this.getClass().getName() + " Skipping notification because content not a model policy";
+               else {
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "Content is not a model policy");
+                     s_log.log(Level.FINEST, "parentId = " + parentId);
+                     s_log.log(Level.FINEST, "modelPolicyID = " + modelPolicyID);
+                  }
+                  actionMessage = this.getClass().getName() + " Skipping notification because content not a model policy";
+               }
             }
          }
-         if(sendAlerts) {
+         if (sendAlerts) {
             if (isDebug) {
-               s_log.log(Level.FINEST, "sending alerts");               
+               s_log.log(Level.FINEST, "sending alerts");
             }
             // get a list of all the admins in question
             /**
@@ -114,57 +129,57 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
              * 3) Email those people.
              */
             // the uuid of the authoring template
-            String templateUUID = "9aebb85f-9ddf-4dfd-ac78-d7be346d998b";                       
+            String templateUUID = "9aebb85f-9ddf-4dfd-ac78-d7be346d998b";
             ws.setCurrentDocumentLibrary(ws.getDocumentLibrary(p_designLibraryName));
             DocumentId atID = ws.createDocumentId(templateUUID);
             ws.setCurrentDocumentLibrary(ws.getDocumentLibrary(p_contentLibraryName));
             DocumentIdIterator theSAs = ws.findContentByAuthoringTemplate(atID);
             Set emailUserSet = new HashSet();
             ArrayList emailUsers = new ArrayList();
-            while(theSAs.hasNext()) {
-               DocumentId tempId = (DocumentId)theSAs.next();
+            while (theSAs.hasNext()) {
+               DocumentId tempId = (DocumentId) theSAs.next();
                if (isDebug) {
-                  s_log.log(Level.FINEST, "processing "+tempId);
+                  s_log.log(Level.FINEST, "processing " + tempId);
                }
-               Document tempDoc = (Document)ws.getById(tempId);
+               Document tempDoc = (Document) ws.getById(tempId);
                String[] managers = tempDoc.getManagerAccessMembers();
-               for(int x=0;x<managers.length;x++) {
+               for (int x = 0; x < managers.length; x++) {
                   String dn = managers[x];
                   if (isDebug) {
-                     s_log.log(Level.FINEST, "dn = "+dn+", retrieve email");
+                     s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
                   }
                   User theUser = Utils.getUserByDN(dn);
-                  if(theUser != null) {                     
+                  if (theUser != null) {
                      emailUserSet.addAll(Utils.getEmailsUser(theUser));
-                  } 
+                  }
                   else {
                      if (isDebug) {
                         s_log.log(Level.FINEST, "theUser was null, try group");
                      }
                      Group theGroup = Utils.getGroupByDistinguishedName(dn);
-                     if(theGroup != null) {
+                     if (theGroup != null) {
                         emailUserSet.addAll(Utils.getEmailsGroup(theGroup));
                      }
                      else {
                         if (isDebug) {
                            s_log.log(Level.FINEST, "theGroup was null");
-                        }                        
+                        }
                      }
                   }
-                  
+
                }
             }
-            
+
             // now send the mail
             if (isDebug) {
-               s_log.log(Level.FINEST, "sending mail");               
+               s_log.log(Level.FINEST, "sending mail");
             }
-            
+
             Properties props = WCMUtils.getStandardMailProperties();
-            
+
             StringBuffer emailMessage = new StringBuffer();
 
-            emailMessage.append(getEmailBody(theDoc));     
+            emailMessage.append(getEmailBody(theDoc));
 
             String fromEmailAddress = props.getProperty("prudential.mail.fromaddress");
             String subject = getEmailSubject(theDoc);
@@ -172,13 +187,12 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
             String emailUser = props.getProperty("prudential.mail.username");
             //String emailPassword = props.getProperty("prudential.mail.password");
             String emailPassword = props.getProperty("prudential.mail.pass");
-            String emailBodyType = "text/html";        
+            String emailBodyType = "text/html";
             emailUsers = new ArrayList(Arrays.asList(emailUserSet.toArray()));
             WCMUtils.sendMessage(props, emailUser, emailPassword, fromEmailAddress, emailUsers, subject, emailBody, emailBodyType);
 
-            
          }
-         
+
       }
       catch (Exception e) {
          if (isDebug) {
@@ -187,7 +201,7 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
          }
       }
       finally {
-         if(ws != null) {
+         if (ws != null) {
             ws.setCurrentDocumentLibrary(origLib);
          }
       }
@@ -204,7 +218,7 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
       return new Date();
 
    }
-   
+
    /**
     * 
     * getEmailBody helper method to get the email body
@@ -214,49 +228,87 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
    String getEmailBody(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      
+
       if (isDebug) {
          s_log.entering("NotifyAllPolicyAdmins", "getEmailBody");
       }
-      
+
+      Content theContent = (Content) doc;
       // retrieve from WCM      
       StringBuilder sb = new StringBuilder();
-      String message = "The model policy "+doc.getName()+" has been updated.";
-      Content theContent = (Content)doc;
+
+      // get it from the component if possible
+      String componentText = "";
+      // try to get the component
+      String cmpntName = WCMUtils.p_pendingAvailableEmailTextCmpnt;
       try {
-         if(theContent.isPublished()) {
-            message = "The model policy "+doc.getName()+" is ready to be adopted.";
+         if (theContent.isPublished()) {
+            cmpntName = WCMUtils.p_availableEmailTextCmpnt;
          }
-         if(theContent.isDraft()) {
-            if(!theContent.isDraftOfPublishedDocument()) {
-               message = "The new policy "+doc.getName()+" has been created and will become available to adopt.";
+         if (theContent.isDraft()) {
+            if (!theContent.isDraftOfPublishedDocument()) {
+               cmpntName = WCMUtils.p_pendingAvailableEmailTextCmpnt;
             }
             else {
-               message = "The policy "+doc.getName()+" has been updated and will become available to adopt.";
+               cmpntName = WCMUtils.p_pendingAvailableNewEmailTextCmpnt;
             }
          }
       }
-      catch (PropertyRetrievalException e) {
+      catch (PropertyRetrievalException e1) {
          // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST))
-         {
-            s_log.log(Level.FINEST, "", e);
+         if (s_log.isLoggable(Level.FINEST)) {
+            s_log.log(Level.FINEST, "", e1);
          }
       }
-      
-      sb.append(message);
-      sb.append("<br><a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a><br>");
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), cmpntName, "PruPolicyDesign");
+      if (bodyComponent != null) {
+         HTMLComponent stc = (HTMLComponent) bodyComponent;
+         componentText = stc.getHTML();
+         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
+         componentText.replaceAll("[DOCUMENTURL]", Utils.getPreviewURL(doc));
+      }
+
+      if (!componentText.isEmpty()) {
+         sb.append(componentText);
+      }
+      else {
+         String message = "The model policy " + doc.getName() + " has been updated.";
+
+         try {
+            if (theContent.isPublished()) {
+               message = "The model policy " + doc.getName() + " is ready to be adopted.";
+            }
+            if (theContent.isDraft()) {
+               if (!theContent.isDraftOfPublishedDocument()) {
+                  message = "The new policy " + doc.getName() + " has been created and will become available to adopt.";
+               }
+               else {
+                  message = "The policy " + doc.getName() + " has been updated and will become available to adopt.";
+               }
+            }
+         }
+         catch (PropertyRetrievalException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST)) {
+               s_log.log(Level.FINEST, "", e);
+            }
+         }
+
+         sb.append(message);
+         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
+      }
+
       // now check for the field                     
       String body = sb.toString();
-      
+
       if (isDebug) {
-         s_log.exiting("NotifyAllPolicyAdmins", "getEmailBody returning "+body);
+         s_log.exiting("NotifyAllPolicyAdmins", "getEmailBody returning " + body);
       }
-      
+
       return body;
 
    }
-   
+
    /**
     * 
     * getEmailBody helper method to get the email body
@@ -266,43 +318,77 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
    String getEmailSubject(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      
+
       if (isDebug) {
          s_log.entering("NotifyAllPolicyAdmins", "getEmailSubject");
       }
-      String message = "The model policy "+doc.getName()+" has been updated.";
-      // retrieve from WCM      
       StringBuilder sb = new StringBuilder();
-      // if its published, state that its published
-      Content theContent = (Content)doc;
+      String componentText = "";
+      Content theContent = (Content) doc;
+      // try to get the component
+      String cmpntName = WCMUtils.p_pendingAvailableEmailSubjectCmpnt;
       try {
-         if(theContent.isPublished()) {
-            message = "The model policy "+doc.getName()+" is ready to be adopted.";
+         if (theContent.isPublished()) {
+            cmpntName = WCMUtils.p_availableEmailSubjectCmpnt;
          }
-         if(theContent.isDraft()) {
-            if(!theContent.isDraftOfPublishedDocument()) {
-               message = "The new policy "+doc.getName()+" has been created and will become available to adopt.";
+         if (theContent.isDraft()) {
+            if (!theContent.isDraftOfPublishedDocument()) {
+               cmpntName = WCMUtils.p_pendingAvailableEmailSubjectCmpnt;
             }
             else {
-               message = "The policy "+doc.getName()+" has been updated and will become available to adopt.";
+               cmpntName = WCMUtils.p_pendingAvailableNewEmailSubjectCmpnt;
             }
          }
       }
-      catch (PropertyRetrievalException e) {
+      catch (PropertyRetrievalException e1) {
          // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST))
-         {
-            s_log.log(Level.FINEST, "", e);
+         if (s_log.isLoggable(Level.FINEST)) {
+            s_log.log(Level.FINEST, "", e1);
          }
       }
-      sb.append(message);
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), cmpntName, "PruPolicyDesign");
+      if (bodyComponent != null) {
+         ShortTextComponent stc = (ShortTextComponent) bodyComponent;
+         componentText = stc.getText();
+         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
+      }
+      if (!componentText.isEmpty()) {
+         sb.append(componentText);
+      }
+      else {
+         String message = "The model policy " + doc.getName() + " has been updated.";
+         // retrieve from WCM            
+         // if its published, state that its published
+
+         try {
+            if (theContent.isPublished()) {
+               message = "The model policy " + doc.getName() + " is ready to be adopted.";
+            }
+            if (theContent.isDraft()) {
+               if (!theContent.isDraftOfPublishedDocument()) {
+                  message = "The new policy " + doc.getName() + " has been created and will become available to adopt.";
+               }
+               else {
+                  message = "The policy " + doc.getName() + " has been updated and will become available to adopt.";
+               }
+            }
+         }
+         catch (PropertyRetrievalException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST)) {
+               s_log.log(Level.FINEST, "", e);
+            }
+         }
+         sb.append(message);
+      }
+
       // now check for the field                     
       String body = sb.toString();
-      
+
       if (isDebug) {
-         s_log.exiting("NotifyAllPolicyAdmins", "getEmailSubject returning "+body);
+         s_log.exiting("NotifyAllPolicyAdmins", "getEmailSubject returning " + body);
       }
-      
+
       return body;
 
    }

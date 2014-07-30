@@ -171,9 +171,11 @@ public class CreateMyActionsMessage implements CustomWorkflowAction {
             if (isDebug) {
                s_log.log(Level.FINEST, "adding principal "+p.getName());
             }
-            com.ibm.portal.um.Principal thePrincipal = null;
-            thePrincipal = Utils.getPrincipalById(p.getName());
-            approvers.add(Utils.getDnForPrincipal(thePrincipal));
+            //com.ibm.portal.um.Principal thePrincipal = null;
+            // get the xid
+            //thePrincipal = Utils.getPrincipalById(p.getName());
+            //approvers.add(Utils.getDnForPrincipal(thePrincipal));
+            approvers.add(p.getName());
          }
       }
    }

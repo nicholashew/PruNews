@@ -14,6 +14,9 @@ import com.ibm.portal.um.User;
 import com.ibm.workplace.wcm.api.Content;
 import com.ibm.workplace.wcm.api.Document;
 import com.ibm.workplace.wcm.api.DocumentId;
+import com.ibm.workplace.wcm.api.HTMLComponent;
+import com.ibm.workplace.wcm.api.LibraryComponent;
+import com.ibm.workplace.wcm.api.ShortTextComponent;
 import com.ibm.workplace.wcm.api.SiteArea;
 import com.ibm.workplace.wcm.api.TextComponent;
 import com.ibm.workplace.wcm.api.WebContentCustomWorkflowService;
@@ -48,32 +51,49 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       // retrieve from WCM      
+   // retrieve from WCM      
       StringBuilder sb = new StringBuilder();
-      sb.append("A document "+doc.getName()+" is awaiting your review.");
-      sb.append("<br><a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a><br>");
-      // now check for the field
-      if(doc instanceof Content) {
+      String componentText = "";
+      // try to get the component
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reviewEmailTextCmpnt, "PruPolicyDesign");
+      if(bodyComponent != null) {
+         HTMLComponent stc = (HTMLComponent)bodyComponent;
+         componentText = stc.getHTML();
+         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
+         componentText.replaceAll("[DOCUMENTURL]", Utils.getPreviewURL(doc));
+      }
+      
+      if(componentText.isEmpty()) {
+         sb.append("A document " + doc.getName() + " is awaiting your review.");
+         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
+         // now check for the field         
+      } else {
+         sb.append(componentText);
+      }
+      
+      // include additional text
+      if (doc instanceof Content) {
          // get the parent sa
          try {
-            Content theContent = (Content)doc;
+            Content theContent = (Content) doc;
             DocumentId parentID = theContent.getDirectParent();
             Workspace ws = doc.getSourceWorkspace();
-            SiteArea parent = (SiteArea)ws.getById(parentID);
-            if(parent.hasComponent(p_messageComponentName)) {
-               TextComponent tc = (TextComponent)parent.getComponentByReference(p_messageComponentName);
+            SiteArea parent = (SiteArea) ws.getById(parentID);
+            if (parent.hasComponent(p_messageComponentName)) {
+               TextComponent tc = (TextComponent) parent.getComponentByReference(p_messageComponentName);
                sb.append(tc.getText());
             }
-         } catch (Exception e) {
+         }
+         catch (Exception e) {
             if (isDebug) {
-               s_log.log(Level.FINEST, "Exception "+e.getMessage());
+               s_log.log(Level.FINEST, "Exception " + e.getMessage());
                e.printStackTrace();
             }
          }
-         
+
       }
       
-      String body = sb.toString();
-      
+      String body = sb.toString();      
       
       return body;
 
@@ -84,6 +104,14 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       String subject = "Item "+doc.getName()+" is awaiting your review";
+      
+      // try to get the component
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reviewEmailSubjectCmpnt, "PruPolicyDesign");
+      if(subjectComponent != null) {
+         ShortTextComponent stc = (ShortTextComponent)subjectComponent;
+         subject = stc.getText();
+         subject.replaceAll("[DOCUMENTNAME]", doc.getName());
+      }
       
       return subject;
 

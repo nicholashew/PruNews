@@ -62,7 +62,7 @@ public class NotifyReferences implements CustomWorkflowAction {
             wksp = WCM_API.getRepository().getSystemWorkspace();
          }
          if (wksp != null) {
-            Set targetListSet = new HashSet();            
+            Set targetListSet = new HashSet();
             ArrayList targetList = new ArrayList();
             boolean dnUsed = wksp.isDistinguishedNamesUsed();
             wksp.useDistinguishedNames(true);
@@ -74,87 +74,90 @@ public class NotifyReferences implements CustomWorkflowAction {
 
                try {
                   Document refDoc = wksp.getById(refId);
-
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "Processing " + refId);
+                  }
                   // Only look for Content items
                   if (refDoc instanceof Content) {
                      Content refCont = (Content) refDoc;
 
                      // Only look for Content items - which are Published
-                     if (refCont.isPublished()) {
-                        DocumentId refATid = refCont.getAuthoringTemplateID();
-                        String refATname = refATid.getName();
+                     // don't exclude drafts.
+                     //if (refCont.isPublished()) {
+                     DocumentId refATid = refCont.getAuthoringTemplateID();
+                     String refATname = refATid.getName();
 
-                        // Check if the Referenced Content item is a Policy document
-                        if (policyTemplateList.contains(refATname)) {
+                     // Check if the Referenced Content item is a Policy document
+                     if (policyTemplateList.contains(refATname)) {
 
-                           /**********************************************
-                            ** Perform necessary email notifications to **
-                            ** Authors / Owners of referring documents  **
-                            **********************************************/
-                           String[] authors = refDoc.getAuthors();
-                           String[] owners = refDoc.getOwners();                           
-                           targetListSet.addAll(Arrays.asList(authors));
-                           targetListSet.addAll(Arrays.asList(owners));
-                           if (authors != null) {
-                              for (int x = 0; x < authors.length; x++) {
-                                 String dn = authors[x];
+                        /**********************************************
+                         ** Perform necessary email notifications to **
+                         ** Authors / Owners of referring documents  **
+                         **********************************************/
+                        String[] authors = refDoc.getAuthors();
+                        String[] owners = refDoc.getOwners();
+                        targetListSet.addAll(Arrays.asList(authors));
+                        targetListSet.addAll(Arrays.asList(owners));
+                        if (authors != null) {
+                           for (int x = 0; x < authors.length; x++) {
+                              String dn = authors[x];
+                              if (isDebug) {
+                                 s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
+                              }
+                              User theUser = Utils.getUserByDN(dn);
+                              if (theUser != null) {
+                                 targetListSet.addAll(Utils.getEmailsUser(theUser));
+                              }
+                              else {
                                  if (isDebug) {
-                                    s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
+                                    s_log.log(Level.FINEST, "theUser was null, try group");
                                  }
-                                 User theUser = Utils.getUserByDN(dn);
-                                 if (theUser != null) {
-                                    targetListSet.addAll(Utils.getEmailsUser(theUser));
+                                 Group theGroup = Utils.getGroupByDistinguishedName(dn);
+                                 if (theGroup != null) {
+                                    targetListSet.addAll(Utils.getEmailsGroup(theGroup));
                                  }
                                  else {
                                     if (isDebug) {
-                                       s_log.log(Level.FINEST, "theUser was null, try group");
+                                       s_log.log(Level.FINEST, "theGroup was null");
                                     }
-                                    Group theGroup = Utils.getGroupByDistinguishedName(dn);
-                                    if (theGroup != null) {
-                                       targetListSet.addAll(Utils.getEmailsGroup(theGroup));
-                                    }
-                                    else {
-                                       if (isDebug) {
-                                          s_log.log(Level.FINEST, "theGroup was null");
-                                       }
 
-                                    }
                                  }
-
                               }
+
                            }
-                           if (owners != null) {
-                              for (int x = 0; x < owners.length; x++) {
-                                 String dn = owners[x];
-                                 if (isDebug) {
-                                    s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
-                                 }
-                                 User theUser = Utils.getUserByDN(dn);
-                                 if (theUser != null) {
-                                    targetListSet.addAll(Utils.getEmailsUser(theUser));
-                                 }
-                                 else {
-                                    if (isDebug) {
-                                       s_log.log(Level.FINEST, "theUser was null, try group");
-                                    }
-                                    Group theGroup = Utils.getGroupByDistinguishedName(dn);
-                                    if (theGroup != null) {
-                                       targetListSet.addAll(Utils.getEmailsGroup(theGroup));
-                                    }
-                                    else {
-                                       if (isDebug) {
-                                          s_log.log(Level.FINEST, "theGroup was null");
-                                       }
-
-                                    }
-                                 }
-
-                              }
-                           }
-                           // Email the "targetList"...
-
                         }
+                        if (owners != null) {
+                           for (int x = 0; x < owners.length; x++) {
+                              String dn = owners[x];
+                              if (isDebug) {
+                                 s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
+                              }
+                              User theUser = Utils.getUserByDN(dn);
+                              if (theUser != null) {
+                                 targetListSet.addAll(Utils.getEmailsUser(theUser));
+                              }
+                              else {
+                                 if (isDebug) {
+                                    s_log.log(Level.FINEST, "theUser was null, try group");
+                                 }
+                                 Group theGroup = Utils.getGroupByDistinguishedName(dn);
+                                 if (theGroup != null) {
+                                    targetListSet.addAll(Utils.getEmailsGroup(theGroup));
+                                 }
+                                 else {
+                                    if (isDebug) {
+                                       s_log.log(Level.FINEST, "theGroup was null");
+                                    }
+
+                                 }
+                              }
+
+                           }
+                        }
+                        // Email the "targetList"...
+
                      }
+                     //}
                   }
                }
                catch (Exception ex) {
@@ -167,10 +170,10 @@ public class NotifyReferences implements CustomWorkflowAction {
             wksp.useDistinguishedNames(dnUsed);
 
             Properties props = WCMUtils.getStandardMailProperties();
-            
+
             StringBuffer emailMessage = new StringBuffer();
 
-            emailMessage.append(getEmailBody(doc));     
+            emailMessage.append(getEmailBody(doc));
 
             String fromEmailAddress = props.getProperty("prudential.mail.fromaddress");
             String subject = getEmailSubject(doc);
@@ -181,10 +184,22 @@ public class NotifyReferences implements CustomWorkflowAction {
             String emailBodyType = "text/html";
 
             targetList = new ArrayList(Arrays.asList(targetListSet.toArray()));
+            if (isDebug) {
+               s_log.log(Level.FINEST, "targetListSet is ");
+               Iterator targetListIterator = targetListSet.iterator();
+               while (targetListIterator.hasNext()) {
+                  s_log.log(Level.FINEST, "targetListIterator contains " + targetListIterator.next().toString());
+               }
+               targetListIterator = targetList.iterator();
+               while (targetListIterator.hasNext()) {
+                  s_log.log(Level.FINEST, "targetListIterator from targetList contains " + targetListIterator.next().toString());
+               }
+            }
+
             WCMUtils.sendMessage(props, emailUser, emailPassword, fromEmailAddress, targetList, subject, emailBody, emailBodyType);
 
             // now create the library date component if necessary
-            
+
          }
       }
       catch (ServiceNotAvailableException ex) {
@@ -224,7 +239,7 @@ public class NotifyReferences implements CustomWorkflowAction {
       params.setCustomErrorMsg(message);
       return webContentCustomWorkflowService.createResult(directive, "Rolling back document.", params);
    }
-   
+
    /**
     * 
     * getEmailBody helper method to get the email body
@@ -234,26 +249,42 @@ public class NotifyReferences implements CustomWorkflowAction {
    String getEmailBody(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      
+
       if (isDebug) {
          s_log.entering("NotifyReferences", "getEmailBody");
       }
-      
+
       // retrieve from WCM      
       StringBuilder sb = new StringBuilder();
-      sb.append("The model policy "+doc.getName()+" has been marked for retire.");
-      sb.append("<br><a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a><br>");
-      // now check for the field                     
-      String body = sb.toString();
       
-      if (isDebug) {
-         s_log.exiting("NotifyReferences", "getEmailBody returning "+body);
+      String componentText = "";
+      // try to get the component
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailTextCmpnt, "PruPolicyDesign");
+      if(bodyComponent != null) {
+         HTMLComponent stc = (HTMLComponent)bodyComponent;
+         componentText = stc.getHTML();
+         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
+         componentText.replaceAll("[DOCUMENTURL]", Utils.getPreviewURL(doc));
       }
       
+      if(componentText.isEmpty()) {
+         sb.append("The model policy " + doc.getName() + " has been marked for retire.");
+         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
+      }
+      else {
+         sb.append(componentText);
+      }
+      
+      String body = sb.toString();
+
+      if (isDebug) {
+         s_log.exiting("NotifyReferences", "getEmailBody returning " + body);
+      }
+
       return body;
 
    }
-   
+
    /**
     * 
     * getEmailBody helper method to get the email body
@@ -263,23 +294,37 @@ public class NotifyReferences implements CustomWorkflowAction {
    String getEmailSubject(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      
+
       if (isDebug) {
          s_log.entering("NotifyReferences", "getEmailSubject");
       }
-      
-      // retrieve from WCM      
+
+      // try to get the component
+      String subject = "";
       StringBuilder sb = new StringBuilder();
-      sb.append("The model policy "+doc.getName()+" has been marked for retire.");
-      // now check for the field                     
-      String body = sb.toString();
-      
-      if (isDebug) {
-         s_log.exiting("NotifyReferences", "getEmailSubject returning "+body);
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailSubjectCmpnt, "PruPolicyDesign");
+      if(subjectComponent != null) {
+         ShortTextComponent stc = (ShortTextComponent)subjectComponent;
+         subject = stc.getText();
+         subject.replaceAll("[DOCUMENTNAME]", doc.getName());
       }
       
+      // retrieve from WCM      
+      if(subject.isEmpty()) {
+         sb.append("The model policy " + doc.getName() + " has been marked for retire.");   
+      }
+      else {
+         sb.append(subject);
+      }
+      String body = sb.toString();
+
+      
+      if (isDebug) {
+         s_log.exiting("NotifyReferences", "getEmailSubject returning " + body);
+      }
+
       return body;
 
    }
-   
+
 }

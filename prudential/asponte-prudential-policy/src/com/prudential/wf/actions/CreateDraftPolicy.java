@@ -85,7 +85,15 @@ public class CreateDraftPolicy implements CustomWorkflowAction {
             // now clear the genDateOne 
             draft.setGeneralDateOne(null);
             // Run both the Exit Actions and the Entry Actions of the next stage
+            if (isDebug) {
+               s_log.log(Level.FINEST, "draft documents stage is "+draft.getWorkflowStageId());
+            }
             draft.nextWorkflowStage(true, true, "Moved automatically - via " + CreateDraftPolicy.class.getName());
+            if (isDebug) {
+               s_log.log(Level.FINEST, "after next stage, draft documents stage is "+draft.getWorkflowStageId());
+            }
+            // if the draft was created, roll back to Published stage so that the content is not in pending retire
+            
          }
          catch (AuthorizationException e) {
             // Exception thrown...

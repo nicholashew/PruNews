@@ -14,14 +14,19 @@ import com.prudential.wcm.WCMUtils;
 import com.prudential.wf.actions.ApplyApproversAction;
 import com.prudential.wf.actions.ApplyReviewersAction;
 import com.prudential.wf.actions.ApplySiteAreaManagers;
+import com.prudential.wf.actions.ApproveDelayPopulatePreviousStage;
 import com.prudential.wf.actions.CreateMyActionsMessage;
+import com.prudential.wf.actions.GenDateOnePopulatePreviousStage;
 import com.prudential.wf.actions.NotifyAllPolicyAdmins;
 import com.prudential.wf.actions.PopulateFutureReviewDate;
+import com.prudential.wf.actions.PopulateLastRevisedDate;
+import com.prudential.wf.actions.PreviousStageIfNecessary;
 import com.prudential.wf.actions.RejectApproveIfCreator;
 import com.prudential.wf.actions.RemoveEmailReminderDates;
 import com.prudential.wf.actions.RemoveMyActionsMessage;
 import com.prudential.wf.actions.ReviewApproveEmailAction;
 import com.prudential.wf.actions.NotifyReferences;
+import com.prudential.wf.actions.ReviewDelayPopulatePreviousStage;
 import com.prudential.wf.actions.ScheduleReviewEmailAction;
 import com.prudential.wf.actions.CreateDraftPolicy;
 
@@ -52,6 +57,13 @@ public class PruCustomWorkflowActionFactory implements
 		actions.put("CreateMyActionsMessage", new CreateMyActionsMessage());
 		actions.put("RemoveMyActionsMessage", new RemoveMyActionsMessage());
 		actions.put("ApplySiteAreaManagers", new ApplySiteAreaManagers());
+		actions.put("GenDateOnePopulatePreviousStage", new GenDateOnePopulatePreviousStage(customWorkflowService));
+		actions.put("ReviewDelayPopulatePreviousStage", new ReviewDelayPopulatePreviousStage(customWorkflowService));
+		actions.put("ApproveDelayPopulatePreviousStage", new ApproveDelayPopulatePreviousStage(customWorkflowService));
+		actions.put("PopulateLastRevisedDate", new PopulateLastRevisedDate(customWorkflowService));
+		actions.put("PreviousStageIfNecessary", new PreviousStageIfNecessary(customWorkflowService));
+		//ReviewDelayPopulatePreviousStage
+		//ApproveDelayPopulatePreviousStage
 	}
 
 	@Override
