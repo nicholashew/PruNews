@@ -36,6 +36,7 @@ import com.ibm.workplace.wcm.api.DocumentIdIterator;
 import com.ibm.workplace.wcm.api.DocumentLibrary;
 import com.ibm.workplace.wcm.api.DocumentTypes;
 import com.ibm.workplace.wcm.api.Folder;
+import com.ibm.workplace.wcm.api.LibraryComponent;
 import com.ibm.workplace.wcm.api.LibraryShortTextComponent;
 import com.ibm.workplace.wcm.api.MoveOptions;
 import com.ibm.workplace.wcm.api.Placement;
@@ -94,7 +95,50 @@ public class Utils {
 
    /** The primary email attribute key */
    public static final String PRIMARY_EMAIL_KEY = "ibm-primaryEmail";
+   
+   public static String p_prevStageCmpnt = "PreviousStage";
 
+   public static LibraryComponent getLibraryComponentByName(Workspace ws, String name, String libraryName) {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      LibraryComponent returnComponent = null;
+      DocumentLibrary originalLib = null;
+      if (isDebug) {
+         s_log.entering("Utils", "getLibraryComponentByName called for " + name + " in library " + libraryName);
+      }
+      try {
+         if(ws != null) {
+         
+            ws.login();
+            originalLib = ws.getCurrentDocumentLibrary();
+            ws.setCurrentDocumentLibrary(ws.getDocumentLibrary(libraryName));
+            
+            DocumentIdIterator results = ws.findComponentByName(name);
+            if(results.hasNext()) {
+               returnComponent = (LibraryComponent)results.next();
+            }
+         }
+         
+      
+      } finally {
+         if(ws != null) {
+            if(originalLib != null) {
+               ws.setCurrentDocumentLibrary(originalLib);
+            }
+            ws.logout();
+         }
+      }
+      
+      if (isDebug) {
+         String componentName = "null";
+         if(returnComponent != null) {
+            componentName = returnComponent.getName();
+         }
+         s_log.exiting("Utils", "getLibraryComponentByName returning "+componentName);
+      }
+      
+      
+      return returnComponent;
+   }
    /**
     * 
     * getDistributionListId helper method to get the site area

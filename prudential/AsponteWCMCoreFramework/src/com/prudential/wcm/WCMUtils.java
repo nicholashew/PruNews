@@ -63,6 +63,24 @@ public class WCMUtils {
    private static final String WCM_CWF_SERVICE_JNDI_NAME = "portal:service/wcm/WebContentCustomWorkflowService";
 
    private static final Timer TIMER_SERVICE = new Timer();
+   
+   public static String p_reviewEmailSubjectCmpnt = "ReviewEmailSubject";
+   public static String p_approveEmailSubjectCmpnt = "ApproveEmailSubject";
+   public static String p_reviewEmailTextCmpnt = "ReviewEmailText";
+   public static String p_approveEmailTextCmpnt = "ApproveEmailText";
+   
+   public static String p_retiringEmailSubjectCmpnt = "RetiringEmailSubject";
+   public static String p_pendingAvailableEmailSubjectCmpnt = "PendingAvailableEmailSubject";
+   public static String p_pendingAvailableNewEmailSubjectCmpnt = "PendingAvailableNewEmailSubject";
+   public static String p_pendingRetireEmailSubjectCmpnt = "PendingRetireEmailSubject";
+   public static String p_availableEmailSubjectCmpnt = "AvailableEmailSubject";
+   
+   public static String p_pendingAvailableEmailTextCmpnt = "PendingAvailableEmailText";
+   public static String p_pendingAvailableNewEmailTextCmpnt = "PendingAvailableNewEmailText";
+   public static String p_retiringEmailTextCmpnt = "RetiringEmailText";
+   public static String p_pendingRetireEmailTextCmpnt = "PendingRetireEmailText";   
+   public static String p_availableEmailTextCmpnt = "AvailableEmailText";   
+   
 
    private static PumaHome pumaHome = null;
 
@@ -356,14 +374,18 @@ public class WCMUtils {
 
          // Associate multi-part with message
          message.setContent(multipart);
-         InternetAddress[] address = new InternetAddress[toEmailList.size()];
+         ArrayList internetAddresses = new ArrayList();
+         
          for (int i = 0; i < toEmailList.size(); i++) {
             String addressString = (String)toEmailList.get(i);
             if (isDebug) {
                s_log.log(Level.FINEST, "adding address "+addressString);
             }
             try {
-               address[i] = new InternetAddress(addressString);   
+               InternetAddress tempAddress = new InternetAddress(addressString);   
+               if(tempAddress != null) {
+                  internetAddresses.add(tempAddress);
+               }
             }
             catch(Exception e) {
                if (isDebug) {
@@ -372,6 +394,8 @@ public class WCMUtils {
                }               
             }            
          }
+         InternetAddress[] address = (InternetAddress[]) internetAddresses.toArray(new InternetAddress[internetAddresses.size()]);
+         //InternetAddress[] address = new InternetAddress[toEmailList.size()];
 
          message.setRecipients(Message.RecipientType.TO, address);
          message.setFrom(new InternetAddress(fromEmailAddress));
