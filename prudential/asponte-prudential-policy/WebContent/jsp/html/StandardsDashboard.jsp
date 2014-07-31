@@ -59,7 +59,7 @@ public List<CustomAuthoringItemWrapper> queryByAT(String authTempId, Object port
   
   Query theQuery = CustomAuthoringLaunchPageQueries.buildQuery(additionalSelectors,queryParms); 
   ResultIterator results = CustomAuthoringLaunchPageQueries.runQuery(ws,theQuery,queryParms); 
-  String[] additionalAttributes = {"Issuing Orgainization"}; 
+  String[] additionalAttributes = {""}; 
   // now build the items from the results 
   return CustomAuthoringLaunchPageQueries.wrapResults(results,portletRequest,portletResponse,additionalAttributes,false); 
 } 
@@ -72,7 +72,8 @@ public Document getDocumentById(Workspace ws, String contentId) throws Exception
 public String escapeText(String text) { 
   
   if(text != null) { 
-    text = text.replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("\n", " "); 
+    text = text.replaceAll("\"", "\\\\\"").replaceAll("'", "&apos;").replaceAll("\n", " "); 
+    // text = text.replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("\n", " "); 
   } 
   
   return text; 
@@ -80,11 +81,21 @@ public String escapeText(String text) {
 
 public String getStandards(Document doc) throws Exception { 
   String text = ""; 
+  boolean shouldEscape = true; 
   ContentComponent cmpnt = WCMUtils.getContentComponent(doc, "Standards"); 
   if (cmpnt instanceof RichTextComponent) { 
     text = ((RichTextComponent) cmpnt).getRichText(); 
+  } else if (cmpnt instanceof HTMLComponent) { 
+          text = ((HTMLComponent)cmpnt).getHTML(); 
+  } else if (cmpnt instanceof LinkComponent) { 
+    shouldEscape = false; 
+    LinkComponent link = (LinkComponent)cmpnt; 
+    text = "<a href=\""+link.getURL()+"\">"+link.getLinkText()+"</a>"; 
   } 
-  return escapeText(text); 
+  if(shouldEscape) { 
+          text = escapeText(text); 
+  } 
+  return text; 
 } 
 
 public String getModelPolicyLinkValue(Document doc) throws Exception { 
@@ -253,6 +264,9 @@ var fullDataset = {
         // get the action URLs 
         CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview"); 
         String editURL = previewAction.getActionURL(); 
+        String curUuid = theWrapper.getItemId(); 
+        DocumentId curDocId = ws.createDocumentId(curUuid); 
+        Content theContent = (Content) ws.getById(curDocId); 
         // ensure live date isn't null 
         String liveDateFormatted = ""; 
         if(theWrapper.getLiveDate() != null) { 
@@ -263,6 +277,10 @@ var fullDataset = {
     if(theWrapper.getLastModDate() != null) { 
       lastModFormatted = formatter.format(theWrapper.getLastModDate()); 
     } // end-if 
+    String expireDateFormatted = ""; 
+        if(theWrapper.getExpireDate() != null) { 
+          expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
+        } // end-if 
     
         String reviewDate = ""; 
     if(theWrapper.getReviewDate() != null) { 
@@ -271,18 +289,19 @@ var fullDataset = {
     
     String stage = theWrapper.getWfStage().toLowerCase(); 
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
+    String retireRationale = "";
     if(stage.contains("draft")) { 
       stage = "Draft"; 
     } else if(stage.contains("review")) { 
       stage = "Review"; 
       // if we're in review, get the review date 
-      Content theContent = (Content)doc; 
+      //Content theContent = (Content)doc; 
       Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("approval")) { 
       stage = "Approve"; 
       // if we're in review, get the review date 
-      Content theContent = (Content)doc; 
+      //Content theContent = (Content)doc; 
       Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("publish")) { 
@@ -291,8 +310,38 @@ var fullDataset = {
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
       stage = "Retired";     
+      //Content theContent = (Content)doc; 
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	             
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
     } else if(stage.contains("expire")) { 
       stage = "Retired"; 
+      //Content theContent = (Content)doc; 
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
     } 
     
     String modelPolicyId = getModelPolicyLinkValue(doc); 
@@ -327,7 +376,8 @@ var fullDataset = {
     liveDateFormatted:"<%=liveDateFormatted%>", 
     lastModFormatted:"<%=lastModFormatted%>", 
     reviewDate:"<%=reviewDate%>", 
-    retiredDate:"", 
+    retiredDate:"<%=expireDateFormatted%>", 
+    retireRationale:"<%=retireRationale%>",
     author:"<%=theWrapper.getAuthor()%>", 
     stage:"<%=stage %>", 
     path:"<%=theWrapper.getPath() %>", 
@@ -352,6 +402,9 @@ fullDataset.items.sort(function(a, b) {
 dojo.require("dojox.grid.EnhancedGrid"); 
 dojo.require("dojox.grid.enhanced.plugins.Pagination"); 
 dojo.require("dojo.data.ItemFileWriteStore"); 
+/* SDD */
+dojo.require("dojo.date.locale");
+/* /SDD */
 
 var gridVisibility = { 
   "all":[false,true,true,true,true,true,false,true], 
@@ -408,7 +461,17 @@ var filterData = function(fullDataset) {
   
   return data; 
 }; 
-
+/* SDD */
+var _policyDateFormat={formatLength:'short', selector:'date', locale:'en-us'};
+var _policyDateCompare=function(a, b){
+	var ret = 0;
+	var dateA = dojo.date.locale.parse(a,_policyDateFormat);
+	var dateB=dojo.date.locale.parse(b,_policyDateFormat);
+	if(dateA>dateB){ret=1;}
+	else if(dateA<dateB){ret=-1;}
+	return ret;
+};
+/* /SDD */
 var store = null; 
 var activeDataSet = null; 
 var grid = null; 
@@ -428,6 +491,12 @@ var renderTable = function() {
   var data = filterData(fullDataset); 
     /*set up data store*/ 
     store = new dojo.data.ItemFileWriteStore({data: data}); 
+    	/* SDD */
+	// Define the comparator function for dates.
+    store.comparatorMap = {};
+    store.comparatorMap["liveDateFormatted"] = _policyDateCompare;
+    store.comparatorMap["lastModFormatted"] = _policyDateCompare;
+	/* /SDD */
   activeDataSet = data; 
     /*set up layout*/ 
     var layout = [ 
@@ -443,7 +512,7 @@ var renderTable = function() {
       {name: 'Last Review Date', noresize: true, field: 'lastModFormatted', width: "70px"}, 
       {name: 'Scheduled Review Date', noresize: true, field: 'reviewDate', width: "70px"}, 
       {name: 'Retired Date', noresize: true, field: 'retiredDate', width: "70px"}, 
-      {name: 'Rationale For Retirement', noresize: true, field: 'retiredDate', width: "120px"}, 
+      {name: 'Rationale For Retirement', noresize: true, field: 'retireRationale', width: "120px"}, 
       {name: 'Submitter', noresize: true, field: 'reviewers', width: "120px"}, 
       {name: 'Reviewers', noresize: true, field: 'reviewers', width: "120px"}, 
       {name: 'Approvers', noresize: true, field: 'approvers', width: "120px"}, 
@@ -455,7 +524,7 @@ var renderTable = function() {
     return grid.getItem(index).standards; 
     }}, 
       {name: 'Policy Replacement', noresize: true, field: 'replacement', width: "120px"}, 
-      {name: 'Views', noresize: true, field: 'viewCount', width: "120px"}, 
+      {name: 'Adopt/Copy', noresize: true, field: 'viewCount', width: "120px"}, 
     ]; 
 
     /*create a new grid:*/ 
@@ -561,11 +630,14 @@ var gridProcess = function() {
   var targetPath = "<%= wcmContextPath %>"; 
   var accept = []; 
   var copy = []; 
-  var inputs = document.getElementsByTagName("INPUT"); 
+  //var inputs = document.getElementsByTagName("INPUT"); 
+  var inputs = jQuery("INPUT"); 
+  console.log(inputs); 
   
   for(var i = 0; i < inputs.length; ++i) { 
     var name = inputs[i].getAttribute("name"); 
-    if(name && name.startsWith("accept-copy-") && inputs[i].checked) { 
+    //if(name && name.startsWith("accept-copy-") && inputs[i].checked) { 
+    if(name && name.indexOf("accept-copy-")==0 && inputs[i].checked) { 
       var itemId = parseInt(name.substring(name.lastIndexOf("-")+1, name.length)); 
       var item = getItemById(itemId); 
       if(item) { 

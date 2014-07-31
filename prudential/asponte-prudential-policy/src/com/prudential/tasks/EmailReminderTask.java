@@ -15,8 +15,14 @@ import com.ibm.portal.um.Group;
 import com.ibm.portal.um.User;
 import com.ibm.workplace.wcm.api.Content;
 import com.ibm.workplace.wcm.api.Document;
+import com.ibm.workplace.wcm.api.DocumentId;
+import com.ibm.workplace.wcm.api.HTMLComponent;
 import com.ibm.workplace.wcm.api.Identity;
+import com.ibm.workplace.wcm.api.LibraryComponent;
 import com.ibm.workplace.wcm.api.Repository;
+import com.ibm.workplace.wcm.api.ShortTextComponent;
+import com.ibm.workplace.wcm.api.SiteArea;
+import com.ibm.workplace.wcm.api.TextComponent;
 import com.ibm.workplace.wcm.api.VirtualPortalContext;
 import com.ibm.workplace.wcm.api.WCM_API;
 import com.ibm.workplace.wcm.api.Workspace;
@@ -30,14 +36,13 @@ public class EmailReminderTask extends TimerTask {
 
    /** Logger for the class */
    private static Logger s_log = Logger.getLogger(EmailReminderTask.class.getName());
-
-   private static String emailText;
-   
-   private static String s_host = "https://inside-dev.prudential.com/wps/myportal";
   
    private static String s_uuid;
 
    private static String s_defaultMessage = "";
+   
+   private static String p_messageComponentNameReviewer = "ReviewerMessage";
+   private static String p_messageComponentNameApprover = "ApproverMessage";
    
    public static String getDefaultMessage() {
       return s_defaultMessage;
@@ -53,24 +58,7 @@ public class EmailReminderTask extends TimerTask {
 
    public static void setUuid(String p_uuid) {
       s_uuid = p_uuid;
-   }
-
-   public static String getEmailText(String s_id, boolean isDraft) {
-      StringBuilder sb = new StringBuilder();
-      sb.append("An item is waiting your review.<br>");
-      sb.append("<a href='");
-      sb.append(getItemURL(s_id,isDraft));
-      sb.append("'>Open Item</a>");
-      sb.append("<br>");
-      sb.append(s_defaultMessage);
-      sb.append("<br>");
-      emailText = sb.toString();
-      return emailText;
-   }
-
-   public static void setEmailText(String p_emailText) {
-      emailText = p_emailText;
-   }
+   }  
 
    public ArrayList getEmailAddresses() {
       return emailAddresses;
@@ -104,12 +92,26 @@ public class EmailReminderTask extends TimerTask {
          Properties emailProps = WCMUtils.getStandardMailProperties();
 
          StringBuffer emailMessage = new StringBuffer();
-
-         emailMessage.append(getEmailText(theId,isDraft));
+         Content theContent = (Content)theResult;
+         DocumentId stageId = theContent.getWorkflowStageId();
+         String stageName = stageId.getName().toLowerCase();
+         String subject = "";
+         boolean isReview = true;
+         if(stageName.contains("approve")) {
+            isReview = false;
+         }
+         if(isReview) {
+            emailMessage.append(getEmailBodyReview(theContent));
+            subject = getEmailSubjectReview(theContent);
+         } else {
+            emailMessage.append(getEmailBodyApprove(theContent));
+            subject = getEmailSubjectApprove(theContent);
+         }
+         
          // set the email addresses to the approvers
 
          String fromEmailAddress = emailProps.getProperty("prudential.mail.fromaddress");
-         String subject = "Awaiting your approval";
+         //String subject = "Awaiting your approval";
          String emailBody = emailMessage.toString();
          String emailUser = emailProps.getProperty("prudential.mail.username");
          String emailPassword = emailProps.getProperty("prudential.mail.pass");
@@ -128,27 +130,154 @@ public class EmailReminderTask extends TimerTask {
          s_log.exiting("EmailReminderTask", "run");
       }
 
-   }
-   /**
-    * Retrieve the URL for a given IdentityReference
-    * @param p_idr the IdentityReference
-    * @param p_isDraft flag whether item is draft of not
-    * @return the URL as String
-    */
-   private static String getItemURL(String p_idr, boolean p_isDraft)
-   {
-      String baseURL = s_host;
-      StringBuilder urlStr = new StringBuilder(baseURL);
-
-      // Modified the email action to use remote action URLs instead of the old OpenContent
-      // and OpenObject URL commands.
-      // generate a preview URL
-      urlStr.append("?wcmAuthoringAction=preview&docid=com.ibm.workplace.wcm.api.WCM_Content/"+p_idr);
-      if (p_isDraft)
-      {
-         urlStr.append("&isdraft=true");
-      }
-      return urlStr.toString();
    }   
+   
+   String getEmailBodyReview(Document doc) {
+      // TODO Auto-generated method stub
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      // retrieve from WCM      
+   // retrieve from WCM      
+      StringBuilder sb = new StringBuilder();
+      String componentText = "";
+      // try to get the component
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reviewEmailTextCmpnt, "PruPolicyDesign");
+      if(bodyComponent != null) {
+         HTMLComponent stc = (HTMLComponent)bodyComponent;
+         componentText = stc.getHTML();
+         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
+         componentText.replaceAll("[DOCUMENTURL]", Utils.getPreviewURL(doc));
+      }
+      
+      if(componentText.isEmpty()) {
+         sb.append("A document " + doc.getName() + " is awaiting your review.");
+         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
+         // now check for the field         
+      } else {
+         sb.append(componentText);
+      }
+      
+      // include additional text
+      if (doc instanceof Content) {
+         // get the parent sa
+         try {
+            Content theContent = (Content) doc;
+            DocumentId parentID = theContent.getDirectParent();
+            Workspace ws = doc.getSourceWorkspace();
+            SiteArea parent = (SiteArea) ws.getById(parentID);
+            if (parent.hasComponent(p_messageComponentNameReviewer)) {
+               TextComponent tc = (TextComponent) parent.getComponentByReference(p_messageComponentNameReviewer);
+               sb.append(tc.getText());
+            }
+         }
+         catch (Exception e) {
+            if (isDebug) {
+               s_log.log(Level.FINEST, "Exception " + e.getMessage());
+               e.printStackTrace();
+            }
+         }
+
+      }
+      
+      String body = sb.toString();      
+      
+      return body;
+
+   }
+   
+   String getEmailBodyApprove(Document doc) {
+      // TODO Auto-generated method stub
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      
+      if (isDebug) {
+         s_log.entering("ReviewApproveEmailAction", "getEmailBody");
+      }
+      
+      // retrieve from WCM      
+      StringBuilder sb = new StringBuilder();
+      String componentText = "";
+      // try to get the component
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailTextCmpnt, "PruPolicyDesign");
+      if(bodyComponent != null) {
+         HTMLComponent stc = (HTMLComponent)bodyComponent;
+         componentText = stc.getHTML();
+         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
+         componentText.replaceAll("[DOCUMENTURL]", Utils.getPreviewURL(doc));
+      }
+      
+      if(componentText.isEmpty()) {
+         sb.append("A document " + doc.getName() + " is awaiting your approval.");
+         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
+         // now check for the field         
+      } else {
+         sb.append(componentText);
+      }
+      
+      // include additional text
+      if (doc instanceof Content) {
+         // get the parent sa
+         try {
+            Content theContent = (Content) doc;
+            DocumentId parentID = theContent.getDirectParent();
+            Workspace ws = doc.getSourceWorkspace();
+            SiteArea parent = (SiteArea) ws.getById(parentID);
+            if (parent.hasComponent(p_messageComponentNameApprover)) {
+               TextComponent tc = (TextComponent) parent.getComponentByReference(p_messageComponentNameApprover);
+               sb.append(tc.getText());
+            }
+         }
+         catch (Exception e) {
+            if (isDebug) {
+               s_log.log(Level.FINEST, "Exception " + e.getMessage());
+               e.printStackTrace();
+            }
+         }
+
+      }
+      
+      String body = sb.toString();
+      
+      if (isDebug) {
+         s_log.exiting("ReviewApproveEmailAction", "getEmailBody returning "+body);
+      }
+      
+      return body;
+
+   }
+   
+   String getEmailSubjectReview(Document doc) {
+      // TODO Auto-generated method stub
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      String subject = "Item "+doc.getName()+" is awaiting your review";
+      
+      // try to get the component
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reviewEmailSubjectCmpnt, "PruPolicyDesign");
+      if(subjectComponent != null) {
+         ShortTextComponent stc = (ShortTextComponent)subjectComponent;
+         subject = stc.getText();
+         subject.replaceAll("[DOCUMENTNAME]", doc.getName());
+      }
+      
+      return subject;
+
+   }
+   
+   String getEmailSubjectApprove(Document doc) {
+      // TODO Auto-generated method stub
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      String subject = "Item "+doc.getName()+" is awaiting your approval";
+      
+      // try to get the component
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailSubjectCmpnt, "PruPolicyDesign");
+      if(subjectComponent != null) {
+         ShortTextComponent stc = (ShortTextComponent)subjectComponent;
+         subject = stc.getText();
+         subject.replaceAll("[DOCUMENTNAME]", doc.getName());
+      }
+      
+      return subject;
+
+   }
+   
+   
    
 }

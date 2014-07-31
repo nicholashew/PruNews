@@ -17,19 +17,19 @@
 <%!
 public List<CustomAuthoringItemWrapper> queryByAT(String authTempId, Object portletRequest, Object portletResponse) throws Exception {
 
-  // get the items and iterate them
-  // set the libraries and limit to drafts
-  CustomAuthoringLaunchPageQueryParams queryParms = new CustomAuthoringLaunchPageQueryParams();
-  // set the sort to show last mod first
-  queryParms.setModifiedSortActive(true);
-  // set the library selectors
-  ArrayList <Library>libraryList = new ArrayList<Library>();
-  // get the workspace
-  Workspace ws = Utils.getWorkspace();
-  
-  // get the libraries I care about
-        Library tempLib = ws.getDocumentLibrary("PruPolicyContent");
-  libraryList.add(tempLib);
+  // get the items and iterate them 
+  // set the libraries and limit to drafts 
+  CustomAuthoringLaunchPageQueryParams queryParms = new CustomAuthoringLaunchPageQueryParams(); 
+  // set the sort to show last mod first 
+  queryParms.setModifiedSortActive(true); 
+  // set the library selectors 
+  ArrayList <Library>libraryList = new ArrayList<Library>(); 
+  // get the workspace 
+  Workspace ws = Utils.getWorkspace(); 
+  ws.useUserAccess(true); 
+  // get the libraries I care about 
+  Library tempLib = ws.getDocumentLibrary("PruPolicyContent"); 
+  libraryList.add(tempLib); 
   
   queryParms.setLibraries(libraryList);
   // now add the Content selector
@@ -55,35 +55,46 @@ public List<CustomAuthoringItemWrapper> queryByAT(String authTempId, Object port
     }
   }
   
-  Query theQuery = CustomAuthoringLaunchPageQueries.buildQuery(additionalSelectors,queryParms);
-  ResultIterator results = CustomAuthoringLaunchPageQueries.runQuery(ws,theQuery,queryParms);
-  String[] additionalAttributes = {"Issuing Orgainization"};
-  // now build the items from the results
-  return CustomAuthoringLaunchPageQueries.wrapResults(results,portletRequest,portletResponse,additionalAttributes,false);
-}
+  Query theQuery = CustomAuthoringLaunchPageQueries.buildQuery(additionalSelectors,queryParms); 
+  ResultIterator results = CustomAuthoringLaunchPageQueries.runQuery(ws,theQuery,queryParms); 
+  String[] additionalAttributes = {""}; 
+  // now build the items from the results 
+  return CustomAuthoringLaunchPageQueries.wrapResults(results,portletRequest,portletResponse,additionalAttributes,false); 
+} 
 
 public Document getDocumentById(Workspace ws, String contentId) throws Exception {
   DocumentId docId = ws.createDocumentId(contentId);
   return ws.getById(docId);
 }
 
-public String escapeText(String text) {
+public String escapeText(String text) { 
   
-  if(text != null) {
-    text = text.replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("\n", " ");
-  }
+  if(text != null) { 
+    text = text.replaceAll("\"", "\\\\\"").replaceAll("'", "&apos;").replaceAll("\n", " "); 
+    // text = text.replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("\n", " "); 
+  } 
   
   return text;
 }
 
-public String getStandards(Document doc) throws Exception {
-  String text = "";
-  ContentComponent cmpnt = WCMUtils.getContentComponent(doc, "Standards");
-  if (cmpnt instanceof RichTextComponent) {
-    text = ((RichTextComponent) cmpnt).getRichText();
-  }
-  return escapeText(text);
-}
+public String getStandards(Document doc) throws Exception { 
+  String text = ""; 
+  boolean shouldEscape = true; 
+  ContentComponent cmpnt = WCMUtils.getContentComponent(doc, "Standards"); 
+  if (cmpnt instanceof RichTextComponent) { 
+    text = ((RichTextComponent) cmpnt).getRichText(); 
+  } else if (cmpnt instanceof HTMLComponent) { 
+          text = ((HTMLComponent)cmpnt).getHTML(); 
+  } else if (cmpnt instanceof LinkComponent) { 
+    shouldEscape = false; 
+    LinkComponent link = (LinkComponent)cmpnt; 
+    text = "<a href=\""+link.getURL()+"\">"+link.getLinkText()+"</a>"; 
+  } 
+  if(shouldEscape) { 
+          text = escapeText(text); 
+  } 
+  return text; 
+} 
 
 public String getModelPolicyLinkValue(Document doc) throws Exception {
   String modelPolicyId = null;
@@ -140,10 +151,6 @@ public DocumentId getSiteAreaByPath(Workspace ws, String path) {
 <%@ taglib uri="/WEB-INF/tld/std-portlet.tld" prefix="portlet" %>
 <portlet:defineObjects/>
 <wcm:initworkspace user="<%= (java.security.Principal)request.getUserPrincipal() %>" />
-<!--
-CMK RenderHitCountPlugin: <wcm:plugin name="RenderHitCountPlugin" uuid="e813613c-fd6c-4fd7-a101-c7080d2e72dd"></wcm:plugin><br>
--->
-
 <script>
 	if(!window.jQuery) { 
 		document.write(unescape('%3Cscript src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"%3E%3C/script%3E'));
@@ -154,6 +161,8 @@ CMK RenderHitCountPlugin: <wcm:plugin name="RenderHitCountPlugin" uuid="e813613c
 
 <%
   Workspace ws = Utils.getWorkspace();
+  // set to use read
+  ws.useUserAccess(true);
   ws.setCurrentDocumentLibrary(ws.getDocumentLibrary("PruPolicyContent"));
   String bgPolicySubPath = "prupolicycontent/Business+Group+Policies".toLowerCase();
   String hrPolicyPath = "prupolicycontent/Corporate+Policies/Content/Human+Resources+Policies".toLowerCase();
@@ -221,37 +230,37 @@ font-size:11px;
 }
 </style>
 
-<style>
-@import "/wps/portal_dojo/v1.7/dojo/resources/dojo.css";
-@import "/wps/portal_dojo/v1.7/dijit/themes/claro/claro.css";
-@import "/wps/portal_dojo/v1.7/dojox/grid/enhanced/resources/claro/EnhancedGrid.css";
-@import "/wps/portal_dojo/v1.7/dojox/grid/enhanced/resources/EnhancedGrid_rtl.css";
-</style>
-<style>
-#grid {
-    width: 100%;
-    height: 30em;
-    margin:5px 0;
-}
-.hidded {
-  display:none;
-}
-.dojoxGridArrowButtonChar {
-    display: inline;
-    float: right;
-}
-</style>
-<%
-  System.out.println("CMK:::DashboardRenderLaunchPage.jsp");
-  String[] additionalAttributes = {"Issuing Orgainization"};
-  // now build the items from the results
-  // get the documentiditerator from the authoring template and site area
-  String[] authTempIds = {"4143aff0-6901-4207-852b-9b2c3d098679"};
-  String linkATTempId = "9889d022-56d9-4e27-a2be-ded469428e15";
-  DocumentId atId = null;
-  DocumentId atId2 = ws.createDocumentId(linkATTempId);;
-  for(int i = 0; i < authTempIds.length; ++i) {
-    atId = ws.createDocumentId(authTempIds[i]);
+<style> 
+@import "/wps/portal_dojo/v1.7/dojo/resources/dojo.css"; 
+@import "/wps/portal_dojo/v1.7/dijit/themes/claro/claro.css"; 
+@import "/wps/portal_dojo/v1.7/dojox/grid/enhanced/resources/claro/EnhancedGrid.css"; 
+@import "/wps/portal_dojo/v1.7/dojox/grid/enhanced/resources/EnhancedGrid_rtl.css"; 
+</style> 
+<style> 
+#grid { 
+    width: 100%; 
+    height: 30em; 
+    margin:5px 0; 
+} 
+.hidded { 
+  display:none; 
+} 
+.dojoxGridArrowButtonChar { 
+    display: inline; 
+    float: right; 
+} 
+</style> 
+<% 
+  
+  String[] additionalAttributes = {"PolicyOwner"}; 
+  // now build the items from the results 
+  // get the documentiditerator from the authoring template and site area 
+  String[] authTempIds = {"4143aff0-6901-4207-852b-9b2c3d098679"}; 
+  String linkATTempId = "9889d022-56d9-4e27-a2be-ded469428e15"; 
+  DocumentId atId = null; 
+  DocumentId atId2 = ws.createDocumentId(linkATTempId);; 
+  for(int i = 0; i < authTempIds.length; ++i) { 
+    atId = ws.createDocumentId(authTempIds[i]); 
   } 
   DocumentIdIterator theWrapperResults = ws.contentSearch(atId, parentIds, null, null, Workspace.WORKFLOWSTATUS_DRAFT | Workspace.WORKFLOWSTATUS_PUBLISHED | Workspace.WORKFLOWSTATUS_EXPIRED );
   DocumentIdIterator thelinkResults = ws.contentSearch(atId2, parentIds, null, null, Workspace.WORKFLOWSTATUS_DRAFT | Workspace.WORKFLOWSTATUS_PUBLISHED | Workspace.WORKFLOWSTATUS_EXPIRED );
@@ -261,6 +270,8 @@ font-size:11px;
   List<CustomAuthoringItemWrapper> wrapperResults = CustomAuthoringLaunchPageQueries.wrapResults(theWrapperResults,renderRequest,renderResponse,additionalAttributes,false);
   SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 %>
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css"></link> 
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script> 
 <script>
 var fullDataset = {
       identifier: 'itemId',
@@ -275,8 +286,9 @@ var fullDataset = {
 
         String curUuid = theWrapper.getItemId();
         DocumentId curDocId = ws.createDocumentId(curUuid);
-        Content curContent = (Content) ws.getById(curDocId);
-        LinkComponent modelPolicyLinkCmpt = (LinkComponent) curContent.getComponent("ModelPolicyLink");
+        Content theContent = (Content) ws.getById(curDocId); 
+        editURL="<a href='"+Utils.getPreviewURL(theContent)+"'>"+theContent.getName()+"</a>";
+        LinkComponent modelPolicyLinkCmpt = (LinkComponent) theContent.getComponent("ModelPolicyLink"); 
         DocumentId modelPolicyDocId = modelPolicyLinkCmpt.getDocumentReference();
         if(modelPolicyDocId != null){
           String curModelPolicyPath = ws.getPathById(modelPolicyDocId, true, false);
@@ -289,6 +301,10 @@ var fullDataset = {
         if(theWrapper.getLiveDate() != null) {
           liveDateFormatted = formatter.format(theWrapper.getLiveDate());
         } // end-if
+        String expireDateFormatted = ""; 
+        if(theWrapper.getExpireDate() != null) { 
+          expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
+        } // end-if 
     
         String lastModFormatted = "";
     if(theWrapper.getLastModDate() != null) {
@@ -301,20 +317,60 @@ var fullDataset = {
     } // end-if
     
     String stage = theWrapper.getWfStage().toLowerCase();
-    
-    if(stage.contains("draft")) {
-      stage = "Draft";
-    } else if(stage.contains("review")) {
-      stage = "Review";
-    } else if(stage.contains("approval")) {
-      stage = "Approve";
-    } else if(stage.contains("publish")) {
-      stage = "Published";
-    } else if(stage.contains("retire")) {
-      stage = "Retired";
-    }
-    
-    Document doc = getDocumentById(ws, theWrapper.getItemId());
+    Document doc = getDocumentById(ws, theWrapper.getItemId()); 
+    String editURL="<a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a>";
+    Content theContent = (Content)doc; 
+    String retireRationale = ""; 
+    if(stage.contains("draft")) { 
+      stage = "Draft"; 
+    } else if(stage.contains("review")) {       
+      stage = "Review"; 
+      // if we're in review, get the review date 
+      Date enteredStage = theContent.getDateEnteredStage(); 
+      reviewDate = formatter.format(enteredStage); 
+    } else if(stage.contains("approval")) { 
+      stage = "Approve"; 
+      // if we're in review, get the review date 
+      Date enteredStage = theContent.getDateEnteredStage(); 
+      reviewDate = formatter.format(enteredStage); 
+    } else if(stage.contains("publish")) { 
+      stage = "Published"; 
+    } else if(stage.contains("approveretire")) { 
+      stage = "Pending Retire"; 
+    } else if(stage.contains("retire content")) { 
+      stage = "Retired";           
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	             
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
+    } else if(stage.contains("expire")) { 
+      stage = "Retired"; 
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
+    } 
+        
     String modelPolicyId = getModelPolicyLinkValue(doc);
     Document parent = getDocumentById(ws, modelPolicyId);
     String contentPath = theWrapper.getPath().toLowerCase();
@@ -326,8 +382,8 @@ var fullDataset = {
     %>{
     itemId:"<%=id%>",
     contentId:"<%=theWrapper.getItemId()%>",
-    viewCount:"<wcm:plugin name="RenderHitCountPlugin" uuid="<%=theWrapper.getItemId()%>" ></wcm:plugin>",
-    source:"/wps/wcm/myconnect/prudential/dd251369-8346-4d70-a834-21112c85f1a9/link.jpg?MOD=AJPERES&CACHEID=dd251369-8346-4d70-a834-21112c85f1a9&cache=none",
+    viewCount:"<wcm:plugin name="RenderReferenceCount" displayCount="true" uuid="<%=theWrapper.getItemId()%>" ></wcm:plugin>",
+    source:"/wps/wcm/myconnect/dd251369-8346-4d70-a834-21112c85f1a9/link.jpg?MOD=AJPERES&CACHEID=dd251369-8346-4d70-a834-21112c85f1a9&cache=none",
     type:"<%=policyType%>",
     authTemp:"<%=theWrapper.getAuthTemplateName()%>",
     editURL:"<%=editURL%>",
@@ -337,7 +393,8 @@ var fullDataset = {
     liveDateFormatted:"<%=liveDateFormatted%>",
     lastModFormatted:"<%=lastModFormatted%>",
     reviewDate:"<%=reviewDate%>",
-    retiredDate:"",
+    retiredDate:"<%=expireDateFormatted%>", 
+    retireRationale:"<%=retireRationale%>",
     author:"<%=theWrapper.getAuthor()%>",
     stage:"<%=stage %>",
     path:"<%=theWrapper.getPath() %>",
@@ -355,11 +412,16 @@ var fullDataset = {
         // get the action URLs
         CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview");
         String editURL = previewAction.getActionURL();
+	
         // ensure live date isn't null
         String liveDateFormatted = "";
         if(theWrapper.getLiveDate() != null) {
           liveDateFormatted = formatter.format(theWrapper.getLiveDate());
         } // end-if
+        String expireDateFormatted = ""; 
+        if(theWrapper.getExpireDate() != null) { 
+          expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
+        } // end-if 
     
         String lastModFormatted = "";
     if(theWrapper.getLastModDate() != null) {
@@ -372,20 +434,59 @@ var fullDataset = {
     } // end-if
     
     String stage = theWrapper.getWfStage().toLowerCase();
-    
-    if(stage.contains("draft")) {
-      stage = "Draft";
-    } else if(stage.contains("review")) {
-      stage = "Review";
-    } else if(stage.contains("approval")) {
-      stage = "Approve";
-    } else if(stage.contains("publish")) {
-      stage = "Published";
-    } else if(stage.contains("retire")) {
-      stage = "Retired";
-    }
-    
-    Document doc = getDocumentById(ws, theWrapper.getItemId());
+    Document doc = getDocumentById(ws, theWrapper.getItemId()); 
+    Content theContent = (Content) ws.getById(theWrapper.getItemId());
+    String retireRationale = "";
+    if(stage.contains("draft")) { 
+      stage = "Draft"; 
+    } else if(stage.contains("review")) {       
+      stage = "Review"; 
+      // if we're in review, get the review date 
+      Date enteredStage = theContent.getDateEnteredStage();
+      reviewDate = formatter.format(enteredStage); 
+    } else if(stage.contains("approval")) { 
+      stage = "Approve"; 
+      // if we're in review, get the review date 
+      Date enteredStage = theContent.getDateEnteredStage();
+      reviewDate = formatter.format(enteredStage); 
+    } else if(stage.contains("publish")) { 
+      stage = "Published"; 
+    } else if(stage.contains("approveretire")) { 
+      stage = "Pending Retire"; 
+    } else if(stage.contains("retire content")) { 
+      stage = "Retired";     
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	             
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
+    } else if(stage.contains("expire")) { 
+      stage = "Retired"; 
+      HistoryLogIterator hli = theContent.getHistoryLog(); 
+      ArrayList comments = new ArrayList();
+      while(hli.hasNext()) { 
+        HistoryLogEntry hle = hli.nextLogEntry(); 
+        int code = hle.getCode();
+        if(code >= 10000 && code <= 19999)
+		{
+			comments.add(hle);
+		}	
+      } 
+      if(!comments.isEmpty()) {
+        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
+      	retireRationale = hle.getMessage(); 
+      }
+    }  
+        
     String modelPolicyId = getModelPolicyLinkValue(doc);
     Document parent = null;
     if(modelPolicyId != null) {
@@ -401,42 +502,47 @@ var fullDataset = {
     String sourceIcon = "";
     if(contentPath.startsWith(modelPolicyPath)) {
       policyType = "MODEL";
-      sourceIcon = "/wps/wcm/myconnect/prudential/cf25496c-287d-4812-ac91-2e21d45dd58f/model-policy.jpg?MOD=AJPERES&CACHEID=cf25496c-287d-4812-ac91-2e21d45dd58f&cache=none";
+      sourceIcon = "/wps/wcm/myconnect/cf25496c-287d-4812-ac91-2e21d45dd58f/model-policy.jpg?MOD=AJPERES&CACHEID=cf25496c-287d-4812-ac91-2e21d45dd58f&cache=none";
     } else if(modelPolicyId == null) {
       policyType = "NEW";
-      sourceIcon = "/wps/wcm/myconnect/prudential/b7ed5424-1ad4-43da-a717-94c5dea84fea/policy.jpg?MOD=AJPERES&CACHEID=b7ed5424-1ad4-43da-a717-94c5dea84fea&cache=none";
+      sourceIcon = "/wps/wcm/myconnect/b7ed5424-1ad4-43da-a717-94c5dea84fea/policy.jpg?MOD=AJPERES&CACHEID=b7ed5424-1ad4-43da-a717-94c5dea84fea&cache=none";
     } else {
       policyType = "COPY";
-      sourceIcon = "/wps/wcm/myconnect/prudential/a1730a69-0971-4f86-9d20-8c8ee494ecdb/copy.jpg?MOD=AJPERES&CACHEID=a1730a69-0971-4f86-9d20-8c8ee494ecdb&cache=none";
+      sourceIcon = "/wps/wcm/myconnect/a1730a69-0971-4f86-9d20-8c8ee494ecdb/copy.jpg?MOD=AJPERES&CACHEID=a1730a69-0971-4f86-9d20-8c8ee494ecdb&cache=none";
     }
     
     if(modelPolicyId == null) {
       modelPolicyId = "";
     }
   
-    %>{
-    itemId: <%=id%>,
-    viewCount:"<wcm:plugin name="RenderHitCountPlugin" uuid="<%=theWrapper.getItemId()%>" ></wcm:plugin>",
-    contentId:"<%=theWrapper.getItemId()%>",
-    source:"<%=sourceIcon%>",
-    type:"<%=policyType%>",
-    authTemp:"<%=theWrapper.getAuthTemplateName()%>",
-    editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>",
-    title:"<%=theWrapper.getTitle()%>",
-    modelPolicyId:"<%= modelPolicyId %>",
-    status:"<%=stage%>",
-    liveDateFormatted:"<%=liveDateFormatted%>",
-    lastModFormatted:"<%=lastModFormatted%>",
-    reviewDate:"<%=reviewDate%>",
-    retiredDate:"",
-    author:"<%=theWrapper.getAuthor()%>",
-    stage:"<%=stage %>",
-    path:"<%=theWrapper.getPath() %>",
-    standards:"<%= getStandards(doc) %>",
-    reviewers:"<%= getUsers(doc, "PolicyReviewers") %>",
-    approvers:"<%= getUsers(doc, "PolicyApprovers") %>",
-    contacts:"<%= getUsers(doc, "Contacts") %>",
-    replacement:"<%= modelPolicyTitle %>"
+    /* SDD 10863*/
+    String _policyOwner=theWrapper.getAdditionalAttribute("PolicyOwner");
+	if(_policyOwner==null){_policyOwner="";}
+	else{_policyOwner=_policyOwner.replace("\"","\\\"").replaceAll("[\\r\\n]+"," ").split("[|]")[0].trim();}
+    %>{ 
+    itemId: <%=id%>, 
+    viewCount:"<wcm:plugin name="RenderReferenceCount" displayCount="true" uuid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
+    contentId:"<%=theWrapper.getItemId()%>", 
+    source:"<%=sourceIcon%>", 
+    type:"<%=policyType%>", 
+    authTemp:"<%=theWrapper.getAuthTemplateName()%>", 
+    editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
+    title:"<%=theWrapper.getTitle()%>", 
+    modelPolicyId:"<%= modelPolicyId %>", 
+    status:"<%=stage%>", 
+    liveDateFormatted:"<%=liveDateFormatted%>", 
+    lastModFormatted:"<%=lastModFormatted%>", 
+    reviewDate:"<%=reviewDate%>", 
+    retiredDate:"<%=expireDateFormatted%>", 
+    retireRationale:"<%=retireRationale%>", 
+    author:"<%=_policyOwner%>", 
+    stage:"<%=stage %>", 
+    path:"<%=theWrapper.getPath() %>", 
+    standards:"<%= getStandards(doc) %>", 
+    reviewers:"<%= getUsers(doc, "PolicyReviewers") %>", 
+    approvers:"<%= getUsers(doc, "PolicyApprovers") %>", 
+    contacts:"<%= getUsers(doc, "Contacts") %>", 
+    replacement:"<%= modelPolicyTitle %>" 
 
     }<%
     if(i < wrapperResults.size()-1) {
@@ -450,19 +556,23 @@ fullDataset.items.sort(function(a, b) {
 	return a.title < b.title ? -1 : a.title > b.title;
 });
 
-dojo.require("dojox.grid.EnhancedGrid");
-dojo.require("dojox.grid.enhanced.plugins.Pagination");
-dojo.require("dojo.data.ItemFileWriteStore");
+dojo.require("dojox.grid.EnhancedGrid"); 
+dojo.require("dojox.grid.enhanced.plugins.Pagination"); 
+dojo.require("dojo.data.ItemFileWriteStore"); 
+/* SDD */
+dojo.require("dojo.date.locale");
+/* /SDD */
 
-var gridVisibility = {
-  "all":[true,true,true,true,true,true,false,true],
-  "Draft":[true,true,true,false,false,false,false,true],
-  "Review":[true,true,true,true,true,true,false,true],
-  "Approve":[true,true,true,true,true,true,false,true],
-  "Published":[true,true,true,true,true,true,false,true],
-  "Retired":[true,true,true,false,false,false,true,true],
-  "mdlplcs":[true,true,true,true,true,true,false,true]
-};
+var gridVisibility = { 
+  "all":[true,true,true,true,true,true,false,true], 
+  "Draft":[true,true,true,false,false,false,false,true], 
+  "Review":[true,true,true,true,true,true,false,true], 
+  "Approve":[true,true,true,true,true,true,false,true], 
+  "Published":[true,true,true,true,true,true,false,true], 
+  "Pending Retire":[true,true,true,false,false,false,true,true], 
+  "Retired":[true,true,true,false,false,false,true,true], 
+  "mdlplcs":[true,true,true,true,true,true,false,true] 
+}; 
 
 var updateGridColumns = function() {
   var filterValue = getFilterValue();
@@ -484,29 +594,33 @@ var filterData = function(fullDataset) {
     items: []
   };
 
-  // if(filterValue === "all") {
-    // data.items = fullDataset.items.slice(0);
-  // } else if(filterValue === "mdlplcs") {
-    // for(var i = 0; i < fullDataset.items.length; ++i) {
-      // if(fullDataset.items[i].type == "MODEL") {
-        // data.items.push(fullDataset.items[i]);
-      // }
-    // }
-  // } else {
-    // for(var i = 0; i < fullDataset.items.length; ++i) {
-      // if(fullDataset.items[i].status == filterValue) {
-        // data.items.push(fullDataset.items[i]);
-      // }
-    // }
-  // }
-<% if(isBPA) { %>
-  if(filterValue === "mdlplcs") {
-    for(var i = 0; i < fullDataset.items.length; ++i) {
-      if(fullDataset.items[i].type == "MODEL" && fullDataset.items[i].status == "Published") {
-        data.items.push(fullDataset.items[i]);
-      } else if(fullDataset.items[i].type != "MODEL") {
-        data.items.push(fullDataset.items[i]);
-	  }
+  // if(filterValue === "all") { 
+    // data.items = fullDataset.items.slice(0); 
+  // } else if(filterValue === "mdlplcs") { 
+    // for(var i = 0; i < fullDataset.items.length; ++i) { 
+      // if(fullDataset.items[i].type == "MODEL") { 
+        // data.items.push(fullDataset.items[i]); 
+      // } 
+    // } 
+  // } else { 
+    // for(var i = 0; i < fullDataset.items.length; ++i) { 
+      // if(fullDataset.items[i].status == filterValue) { 
+        // data.items.push(fullDataset.items[i]); 
+      // } 
+    // } 
+  // } 
+<% if(isBPA) { %> 
+  if(filterValue === "mdlplcs") { 
+    for(var i = 0; i < fullDataset.items.length; ++i) {     
+      if(fullDataset.items[i].type == "MODEL" && (fullDataset.items[i].status == "Published" || fullDataset.items[i].status == "Pending Retire" )) { 
+        data.items.push(fullDataset.items[i]); 
+      } 
+      // only include model policies
+      /**
+      else if(fullDataset.items[i].type != "MODEL") { 
+        data.items.push(fullDataset.items[i]); 
+          } 
+          */
     }
   } else if(filterValue === "all") {
     for(var i = 0; i < fullDataset.items.length; ++i) {
@@ -543,35 +657,53 @@ var filterData = function(fullDataset) {
     }
   }
   
-  return data;
+  return data; 
+}; 
+/* SDD */
+var _policyDateFormat={formatLength:'short', selector:'date', locale:'en-us'};
+var _policyDateCompare=function(a, b){
+	var ret = 0;
+	var dateA = dojo.date.locale.parse(a,_policyDateFormat);
+	var dateB=dojo.date.locale.parse(b,_policyDateFormat);
+	if(dateA>dateB){ret=1;}
+	else if(dateA<dateB){ret=-1;}
+	return ret;
 };
+/* /SDD */
+var store = null; 
+var activeDataSet = null; 
+var grid = null; 
 
-var store = null;
-var activeDataSet = null;
-var grid = null;
 
 
+var gridVisibility = { 
+  "all":[<%= isBPA %>,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
+  "Draft":[<%= isBPA %>,true,true,false,false,true,true,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
+  "Review":[<%= isBPA %>,true,true,true,false,false,false,false,false,false,true,false,true,false,true,true,true,false,<%= isMPA %>], 
+  "Approve":[<%= isBPA %>,true,true,true,false,false,false,false,false,true,false,true,true,true,true,true,true,false,<%= isMPA %>], 
+  "Published":[<%= isBPA %>,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
+  "Pending Retire":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,<%= isMPA %>], 
+  "Retired":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,<%= isMPA %>], 
+  "mdlplcs":[<%= isBPA %>,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>] 
+}; 
 
-var gridVisibility = {
-  "all":[<%= isBPA %>,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,true],
-  "Draft":[<%= isBPA %>,true,false,false,false,true,true,false,false,false,false,false,false,false,true,true,true,false,true],
-  "Review":[<%= isBPA %>,true,true,true,false,false,false,false,false,false,true,false,true,false,true,true,true,false,true],
-  "Approve":[<%= isBPA %>,true,true,true,false,false,false,false,false,true,false,true,true,true,true,true,true,false,true],
-  "Published":[<%= isBPA %>,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,true],
-  "Retired":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,true],
-  "mdlplcs":[<%= isBPA %>,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,true]
-};
-
-var renderTable = function() {
-  var data = filterData(fullDataset);
-    /*set up data store*/
-    store = new dojo.data.ItemFileWriteStore({data: data});
-  activeDataSet = data;
-    /*set up layout*/
-    var layout = [
+var renderTable = function() { 
+  var data = filterData(fullDataset); 
+    /*set up data store*/ 
+    store = new dojo.data.ItemFileWriteStore({data: data}); 
+    	/* SDD */
+	// Define the comparator function for dates.
+    store.comparatorMap = {};
+    store.comparatorMap["liveDateFormatted"] = _policyDateCompare;
+    store.comparatorMap["lastModFormatted"] = _policyDateCompare;
+	/* /SDD */
+  activeDataSet = data; 
+    /*set up layout*/ 
+    var layout = [ 
       {name: 'Source', noresize: true, field: 'source', width: "100px", formatter: function(value, index) { 
-    return "<img alt='" + grid.getItem(index).type + "' height='20px' src='" + value + "'><div class='gid-actions "+ grid.getItem(index).type +"'><input id='accept-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='accept' onClick=\"getElementById('copy-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='accept-"+grid.getItem(index).itemId+"'>Adopt</label><input id='copy-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='copy' onClick=\"getElementById('accept-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='copy-"+grid.getItem(index).itemId+"'>Copy</label></div>";
-    }},
+    //return "<img alt='" + grid.getItem(index).type + "' height='20px' src='" + value + "'><div class='gid-actions "+ grid.getItem(index).type +"'><input id='accept-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='accept' 0nClick=\"getElementById('copy-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='accept-"+grid.getItem(index).itemId+"'>Adopt</label><input id='copy-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='copy' 0nClick=\"getElementById('accept-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='copy-"+grid.getItem(index).itemId+"'>Copy</label></div>"; 
+    return "<span height='20px'>"+grid.getItem(index).type+"</span><div class='gid-actions "+ grid.getItem(index).type +"'><input id='accept-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='accept' 0nClick=\"getElementById('copy-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='accept-"+grid.getItem(index).itemId+"'>Adopt</label><input id='copy-"+grid.getItem(index).itemId+"' name='accept-copy-"+grid.getItem(index).itemId+"' type='checkbox' value='copy' 0nClick=\"getElementById('accept-"+grid.getItem(index).itemId+"').checked=false;\" /><label for='copy-"+grid.getItem(index).itemId+"'>Copy</label></div>"; 
+    }}, 
       {name: 'Policy', noresize: true, field: 'title', width: "200px", formatter: function(value, index) { 
     return "<a href='"+ grid.getItem(index).editURL + "' target='_blank' >" + value + "</a>"; 
     }},
@@ -581,7 +713,7 @@ var renderTable = function() {
       {name: 'Last Review Date', noresize: true, field: 'lastModFormatted', width: "70px"},
       {name: 'Scheduled Review Date', noresize: true, field: 'reviewDate', width: "70px"},
       {name: 'Retired Date', noresize: true, field: 'retiredDate', width: "70px"},
-      {name: 'Rationale For Retirement', noresize: true, field: 'retiredDate', width: "120px"},
+      {name: 'Rationale For Retirement', noresize: true, field: 'retireRationale', width: "120px"},
       {name: 'Submitter', noresize: true, field: 'reviewers', width: "120px"},
       {name: 'Reviewers', noresize: true, field: 'reviewers', width: "120px"},
       {name: 'Approvers', noresize: true, field: 'approvers', width: "120px"},
@@ -590,11 +722,11 @@ var renderTable = function() {
       {name: 'Owner', noresize: true, field: 'author', width: "120px"},
       {name: 'Policy Contacts', noresize: true, field: 'contacts', width: "120px"},
     {name: 'Standards', noresize: true, field: 'itemId', width: "200px", formatter: function(value, index) { 
-    return grid.getItem(index).standards;
-    }},
-      {name: 'Policy Replacement', noresize: true, field: 'replacement', width: "120px"},
-      {name: 'Views', noresize: true, field: 'viewCount', width: "120px"},
-    ];
+    return grid.getItem(index).standards; 
+    }}, 
+      {name: 'Policy Replacement', noresize: true, field: 'replacement', width: "120px"}, 
+      {name: 'Adopt/Copy', noresize: true, field: 'viewCount', width: "120px"}, 
+    ]; 
 
     /*create a new grid:*/
     grid = new dojox.grid.EnhancedGrid({
@@ -695,33 +827,36 @@ var refreshTitleFilter = function() {
   refreshData();
 };
 
-var gridProcess = function() {
-  var targetPath = "<%= wcmContextPath %>";
-  var accept = [];
-  var copy = [];
-  var inputs = document.getElementsByTagName("INPUT");
+var gridProcess = function() { 
+  var targetPath = "<%= wcmContextPath %>"; 
+  var accept = []; 
+  var copy = []; 
+  //var inputs = document.getElementsByTagName("INPUT"); 
+  var inputs = jQuery("INPUT"); 
+  console.log(inputs); 
   
-  for(var i = 0; i < inputs.length; ++i) {
-    var name = inputs[i].getAttribute("name");
-    if(name && name.startsWith("accept-copy-") && inputs[i].checked) {
-      var itemId = parseInt(name.substring(name.lastIndexOf("-")+1, name.length));
-      var item = getItemById(itemId);
-      if(item) {
-        if(inputs[i].value == "accept") {
-          accept.push(item.contentId);
-        } else {
-          copy.push(item.contentId);
-        }
-      }
-    }
-  }
+  for(var i = 0; i < inputs.length; ++i) { 
+    var name = inputs[i].getAttribute("name"); 
+    //if(name && name.startsWith("accept-copy-") && inputs[i].checked) { 
+    if(name && name.indexOf("accept-copy-")==0 && inputs[i].checked) { 
+      var itemId = parseInt(name.substring(name.lastIndexOf("-")+1, name.length)); 
+      var item = getItemById(itemId); 
+      if(item) { 
+        if(inputs[i].value == "accept") { 
+          accept.push(item.contentId); 
+        } else { 
+          copy.push(item.contentId); 
+        } 
+      } 
+    } 
+  } 
   
   if(accept.length > 0 || copy.length > 0) {
 	try {
 		//  jquery ui might not be loaded so enclose in try catch
 		jQuery( "#processing-dlg" ).dialog("open");
 	} catch(ex) {}
-    jQuery.get("/wps/wcm/myconnect/prudential/prupolicydesign/jspassets/processpoliciesjsp", {"pp-copy":copy.join(), "pp-link":accept.join(), "targetPath":targetPath}, function(){
+    jQuery.get("/wps/wcm/myconnect/prupolicydesign/jspassets/processpoliciesjsp", {"pp-copy":copy.join(), "pp-link":accept.join(), "targetPath":targetPath}, function(){
 		jQuery("#processing-dlg .progress-label").html("Processing completed, reloading page.");
 		location.reload();
 	});
@@ -759,17 +894,19 @@ jQuery(function(){
 <div style="float:left; margin-left:<%= (isBPA? "130px": "20px") %>">
   <input type="text" id="title-filter" style="width:160px; padding:2px"/> <button id="title-filter-bttn" type="button" style="padding:0">Filter</button>
 </div>
-<select name="status-filter-value" id="status-filter-value" style="float:right">
-  <option value="all">All</option>
-  <option value="Draft">Draft</option>
-  <option value="Review">Review</option>
-  <option value="Approve">Approve</option>
-  <option value="Published">Published</option>
-  <option value="Retired">Retired</option>
-  <% if(isBPA) { %>
-  <option value="mdlplcs">Available Model Policies</option>
-  <% } %>
-</select>
+<select name="status-filter-value" id="status-filter-value" style="float:right"> 
+  <option value="all">All</option> 
+  <option value="Draft">Draft</option> 
+  <option value="Review">Review</option> 
+  <option value="Approve">Approve</option> 
+  <option value="Published">Published</option> 
+  <option value="Pending Retire">Pending Retire</option> 
+  <option value="Retired">Retired</option> 
+  <% if(isBPA) { %> 
+  <option value="mdlplcs">Available Model Policies</option> 
+  <% } %> 
+</select> 
+
 
 
 <div id='grid-accept-all-place-holder' style="height:20px; margin:30px 0 0 30px;">

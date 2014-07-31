@@ -15,6 +15,7 @@ import com.ibm.workplace.wcm.api.custom.Directives;
 import com.ibm.workplace.wcm.api.custom.RollbackDirectiveParams;
 import com.ibm.workplace.wcm.api.exceptions.*;
 import com.prudential.utils.Utils;
+import com.prudential.vp.RetrieveReminderTaskAction;
 import com.prudential.wcm.WCMUtils;
 
 import java.util.*;
@@ -46,25 +47,15 @@ public class RemoveEmailReminderDates implements CustomWorkflowAction {
        CustomWorkflowActionResult result = null;
        String message = "RemoveEmailReminderDates executing";
        WebContentCustomWorkflowService webContentCustomWorkflowService = null;
-      
-       Workspace ws = Utils.getSystemWorkspace();
-       DocumentLibrary currentLib = ws.getCurrentDocumentLibrary();
+             
        try {
           
-          ws.login();
-          String uuid = doc.getId().getId();
-          
-          // find the library date component by that name
-          ws.setCurrentDocumentLibrary(ws.getDocumentLibrary("PruPolicyDesign"));
-          DocumentIdIterator ldcIt = ws.findByName(DocumentTypes.LibraryDateComponent, uuid);
-          while(ldcIt.hasNext()) {
-             DocumentId tempId = (DocumentId)ldcIt.next();             
-             try {
-                ws.delete(tempId);
-             } catch (Exception e) {
+          if(doc instanceof Content) {
+             Content theContent = (Content)doc;
+             if(theContent.hasComponent(RetrieveReminderTaskAction.p_lastRunComponent)) {
+                theContent.removeComponent(RetrieveReminderTaskAction.p_lastRunComponent) ;
                 if (isDebug) {
-                  s_log.log(Level.FINEST, "Exception occured deleting "+e.getMessage());
-                  e.printStackTrace();
+                  s_log.log(Level.FINEST, "Removed last run component");
                }
              }
           }
@@ -77,13 +68,7 @@ public class RemoveEmailReminderDates implements CustomWorkflowAction {
           if (isDebug) {
              e.printStackTrace();
           }
-       }
-       finally {
-          if(ws != null) {
-             ws.setCurrentDocumentLibrary(currentLib);
-             ws.logout();
-          }
-       }
+       }    
        return result;
     } 
     

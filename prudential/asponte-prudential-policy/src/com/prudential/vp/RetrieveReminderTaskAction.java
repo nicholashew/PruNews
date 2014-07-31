@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.ibm.workplace.wcm.api.Content;
+import com.ibm.workplace.wcm.api.DateComponent;
 import com.ibm.workplace.wcm.api.Document;
 import com.ibm.workplace.wcm.api.DocumentId;
 import com.ibm.workplace.wcm.api.DocumentIdIterator;
@@ -39,9 +40,8 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
    /** Logger for the class */
    private static Logger s_log = Logger.getLogger(RetrieveReminderTaskAction.class.getName());
 
-   private static String p_lastRunComponent = "ReminderLastRun";
-
-   private static String p_emailedFolder = "EmailReminders";
+   public static String p_lastRunComponent = "ReminderLastRun";
+   
 
    @Override
    public void run() {
@@ -63,7 +63,6 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
          oldLib = ws.getCurrentDocumentLibrary();
          DocumentLibrary designLib = ws.getDocumentLibrary("PruPolicyDesign");
          ws.setCurrentDocumentLibrary(designLib);
-         folderId = Utils.getFolderId(ws, "PruPolicyContent", p_emailedFolder);
 
          DocumentLibrary[] libs = {designLib};
          // use WCM API queries to find content in specific workflow stages
@@ -92,56 +91,27 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
             while (contentIterator.hasNext()) {
                DocumentId tempContentId = (DocumentId) contentIterator.next();
                Content theContent = (Content) ws.getById(tempContentId);
-               String uuid = tempContentId.getId();
-               // check to see if this content already has a component to see if we need to send reminder email
-               // if it doesn't exist yet, means we need to send the email and create the component                            
-               LibraryDateComponent ldc = null;
-               DocumentIdIterator ldcIterator = ws.findByName(DocumentTypes.DateComponent, uuid);
-               if (ldcIterator.hasNext()) {
-                  ldc = (LibraryDateComponent) ws.getById((DocumentId) ldcIterator.next());
+               DateComponent dc = null;
+               boolean contentHadComponent = false;
+               if(theContent.hasComponent(p_lastRunComponent)) {
+                  dc = (DateComponent)theContent.getComponent(p_lastRunComponent);
+                  contentHadComponent = true;
                }
+               
                else {
                   try {
-                     ldc = ws.createDateComponent();
-                     ldc.setName(uuid);
-                     //ldc.setDate(new Date());
-                     ws.save(ldc);
-                     ws.move(ldc.getId(), folderId);
+                     dc = theContent.createComponent(p_lastRunComponent, DocumentTypes.DateComponent);
                   }
                   catch (DocumentCreationException e) {
                      // TODO Auto-generated catch block
                      if (s_log.isLoggable(Level.FINEST)) {
                         s_log.log(Level.FINEST, "", e);
                      }
-                  }
-                  catch (AuthorizationException e) {
-                     // TODO Auto-generated catch block
-                     if (s_log.isLoggable(Level.FINEST)) {
-                        s_log.log(Level.FINEST, "", e);
-                     }
-                  }
-                  catch (DocumentSaveException e) {
-                     // TODO Auto-generated catch block
-                     if (s_log.isLoggable(Level.FINEST)) {
-                        s_log.log(Level.FINEST, "", e);
-                     }
-                  }
-                  catch (DuplicateChildException e) {
-                     // TODO Auto-generated catch block
-                     if (s_log.isLoggable(Level.FINEST)) {
-                        s_log.log(Level.FINEST, "", e);
-                     }
-                  }
-                  catch (DocumentRetrievalException e) {
-                     // TODO Auto-generated catch block
-                     if (s_log.isLoggable(Level.FINEST)) {
-                        s_log.log(Level.FINEST, "", e);
-                     }
-                  }
+                  }                 
                }
 
                // now we have the ldc, get the date from it.  This will be the last time it was run
-               Date theDate = ldc.getDate();
+               Date theDate = dc.getDate();
                Date now = new Date();
                boolean shouldSend = false;
                // if its null, send and update the date. 
@@ -188,8 +158,14 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
                      Date updatedDate = new Date();
                      updatedDate = Utils.addDays(updatedDate, delay);
                      // now get the content to get the field
-                     ldc.setDate(updatedDate);
-                     ws.save(ldc);
+                     dc.setDate(updatedDate);
+                     if(contentHadComponent) {
+                        theContent.setComponent(p_lastRunComponent, dc);
+                     }
+                     else {
+                        theContent.addComponent(p_lastRunComponent, dc);
+                     }
+                     ws.save(theContent);
                      // now send the reminder email;
                      /* create and schedule the EmailReminderTask */
                      String defaultMessage = "";

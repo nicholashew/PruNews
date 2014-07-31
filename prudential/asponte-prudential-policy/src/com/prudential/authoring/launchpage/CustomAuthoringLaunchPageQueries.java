@@ -265,14 +265,21 @@ public class CustomAuthoringLaunchPageQueries {
       }
 
       // iterate, add the result to the item wrapper
-      while (theResults.hasNext()) {
-         // get the current result
-         Document currentResult = (Document)theResults.next();
-         if (currentResult != null) {
-            CustomAuthoringItemWrapper tempWrapper = wrapSingleResult(currentResult,request,response,attributeNames,retrieveCats);
-            if (tempWrapper != null) {
-               resultList.add(tempWrapper);
+      if (theResults != null) {
+         while (theResults.hasNext()) {
+            // get the current result
+            Document currentResult = (Document) theResults.next();
+            if (currentResult != null) {
+               CustomAuthoringItemWrapper tempWrapper = wrapSingleResult(currentResult, request, response, attributeNames, retrieveCats);
+               if (tempWrapper != null) {
+                  resultList.add(tempWrapper);
+               }
             }
+         }
+      }
+      else {
+         if (isDebug) {
+            s_log.log(Level.FINEST, "theResults was null");
          }
       }
       if (isDebug) {
@@ -309,7 +316,7 @@ public class CustomAuthoringLaunchPageQueries {
          try {
             currentResult = (Document) Utils.getSystemWorkspace().getById(currentId);
             if (currentResult != null) {
-               CustomAuthoringItemWrapper tempWrapper = wrapSingleResult(currentResult,request,response,attributeNames,retrieveCats);
+               CustomAuthoringItemWrapper tempWrapper = wrapSingleResult(currentResult, request, response, attributeNames, retrieveCats);
                if (tempWrapper != null) {
                   resultList.add(tempWrapper);
                }
@@ -363,12 +370,12 @@ public class CustomAuthoringLaunchPageQueries {
          try {
             currentResult = (Document) Utils.getSystemWorkspace().getById(currentId);
             if (currentResult != null) {
-               CustomAuthoringItemWrapper tempWrapper = wrapSingleResult(currentResult,request,response,attributeNames,retrieveCats);
+               CustomAuthoringItemWrapper tempWrapper = wrapSingleResult(currentResult, request, response, attributeNames, retrieveCats);
                if (tempWrapper != null) {
                   resultList.add(tempWrapper);
                }
             }
-            
+
          }
          catch (DocumentRetrievalException e1) {
             // TODO Auto-generated catch block
@@ -447,11 +454,11 @@ public class CustomAuthoringLaunchPageQueries {
    public static String createURIGateway(Object theRequest, Object p_response, Map<String, String> p_parameters) {
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       if (isDebug) {
-         s_log.entering("CustomAuthoringLaunchPageQueries", "createURIGateway "+theRequest);
+         s_log.entering("CustomAuthoringLaunchPageQueries", "createURIGateway " + theRequest);
       }
-      
+
       if (p_response instanceof org.apache.jetspeed.portlet.PortletResponse) {
-         return createPortalURI((org.apache.jetspeed.portlet.PortletResponse) p_response, p_parameters);         
+         return createPortalURI((org.apache.jetspeed.portlet.PortletResponse) p_response, p_parameters);
       }
       else {
          return createPortalURIJSR((RenderRequest) theRequest, (RenderResponse) p_response, p_parameters);
@@ -743,14 +750,14 @@ public class CustomAuthoringLaunchPageQueries {
       return provider;
    }
 
-   static CustomAuthoringItemWrapper wrapSingleResult(Document currentResult, Object request, Object response,
-      String[] attributeNames, boolean retrieveCats) {
-            
+   static CustomAuthoringItemWrapper wrapSingleResult(Document currentResult, Object request, Object response, String[] attributeNames,
+      boolean retrieveCats) {
+
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       if (isDebug) {
          s_log.entering("CustomAuthoringLaunchPageQueries", "wrapSingleResult");
       }
-      
+
       CustomAuthoringItemWrapper tempWrapper = null;
 
       Item currentItem = (Item) currentResult;
@@ -805,7 +812,7 @@ public class CustomAuthoringLaunchPageQueries {
          try {
             effectiveDate = ((WorkflowedDocument) currentDocument).getEffectiveDate();
             DocumentId currentStageId = ((WorkflowedDocument) currentDocument).getWorkflowStageId();
-            if(currentStageId != null) {
+            if (currentStageId != null) {
                workflowStageName = currentStageId.getName();
             }
          }
@@ -817,8 +824,7 @@ public class CustomAuthoringLaunchPageQueries {
          }
          catch (AuthorizationException e) {
             // TODO Auto-generated catch block
-            if (s_log.isLoggable(Level.FINEST))
-            {
+            if (s_log.isLoggable(Level.FINEST)) {
                s_log.log(Level.FINEST, "", e);
             }
          }
@@ -847,55 +853,48 @@ public class CustomAuthoringLaunchPageQueries {
       }
 
       Date createdDate = currentDocument.getCreationDate();
-      
-      tempWrapper = new CustomAuthoringItemWrapper(iconDisplayName, iconPath, currentItem.getTitle(),
-         currentItem.getIdentity().getID(), status, itemActions, resultLib, author, createdDate, lastModDate, effectiveDate,
-         additionalAttributeMap, atName, workflowStageName);
-      
-      if(expiredDate != null) {
+
+      tempWrapper = new CustomAuthoringItemWrapper(iconDisplayName, iconPath, currentItem.getTitle(), currentItem.getIdentity().getID(),
+         status, itemActions, resultLib, author, createdDate, lastModDate, effectiveDate, additionalAttributeMap, atName, workflowStageName);
+
+      if (expiredDate != null) {
          tempWrapper.setExpireDate(expiredDate);
       }
       String itemPath = "";
       Workspace ws = Utils.getWorkspace();
       try {
          itemPath = ws.getPathById(currentDocument.getId(), false, false);
-         if(itemPath != null) {
+         if (itemPath != null) {
             tempWrapper.setPath(itemPath);
          }
       }
       catch (DocumentRetrievalException e) {
          // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST))
-         {
+         if (s_log.isLoggable(Level.FINEST)) {
             s_log.log(Level.FINEST, "", e);
          }
       }
       catch (IllegalDocumentTypeException e) {
          // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST))
-         {
+         if (s_log.isLoggable(Level.FINEST)) {
             s_log.log(Level.FINEST, "", e);
          }
       }
 
-      
-      
-     
-      if(retrieveCats) {
+      if (retrieveCats) {
          /** a map of categories where the key will be the uuid, the value the category name */
          ArrayList<DocumentId> categoryList = getCategoryList(currentDocument);
-         
+
          tempWrapper.setCategories(categoryList);
       }
-      
+
       if (isDebug) {
-         s_log.exiting("CustomAuthoringLaunchPageQueries", "wrapSingleResult returning "+tempWrapper);
+         s_log.exiting("CustomAuthoringLaunchPageQueries", "wrapSingleResult returning " + tempWrapper);
       }
-      
-      
+
       return tempWrapper;
    }
-   
+
    /**
     * 
     * getCategoryMap retrieve the category map for an object
@@ -904,16 +903,16 @@ public class CustomAuthoringLaunchPageQueries {
     */
    private static ArrayList<DocumentId> getCategoryList(Document theDocument) {
       ArrayList<DocumentId> categoryList = new ArrayList<DocumentId>();
-      
-      if(theDocument instanceof ContentComponentContainer) {
-      
+
+      if (theDocument instanceof ContentComponentContainer) {
+
          // get the cats, get the names for the cats, 
-         DocumentId[] catArray = ((ContentComponentContainer)theDocument).getCombinedCategoryIds();
+         DocumentId[] catArray = ((ContentComponentContainer) theDocument).getCombinedCategoryIds();
          categoryList = new ArrayList<DocumentId>(Arrays.asList(catArray));
       }
-      
+
       return categoryList;
-      
+
    }
 
 }

@@ -151,9 +151,14 @@ public DocumentId getSiteAreaByPath(Workspace ws, String path) {
 <%@ taglib uri="/WEB-INF/tld/std-portlet.tld" prefix="portlet" %> 
 <portlet:defineObjects/> 
 <wcm:initworkspace user="<%= (java.security.Principal)request.getUserPrincipal() %>" /> 
-<!-- 
-CMK RenderHitCountPlugin: <wcm:plugin name="RenderHitCountPlugin" uuid="e813613c-fd6c-4fd7-a101-c7080d2e72dd"></wcm:plugin><br> 
---> 
+
+<script>
+	if(!window.jQuery) { 
+		document.write(unescape('%3Cscript src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"%3E%3C/script%3E'));
+		document.write(unescape('%3Clink rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css"%3E%3C/link%3E'));
+		document.write(unescape('%3Cscript src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"%3E%3C/script%3E'));
+	}
+</script>
 
 <% 
   Workspace ws = Utils.getWorkspace(); 
@@ -247,8 +252,8 @@ font-size:11px;
 } 
 </style> 
 <% 
-  //System.out.println("CMK:::DashboardRenderLaunchPage.jsp"); 
-  String[] additionalAttributes = {""}; 
+  
+  String[] additionalAttributes = {"PolicyOwner"}; 
   // now build the items from the results 
   // get the documentiditerator from the authoring template and site area 
   String[] authTempIds = {"4143aff0-6901-4207-852b-9b2c3d098679"}; 
@@ -279,18 +284,19 @@ var fullDataset = {
         // get the action URLs 
         CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview"); 
         String editURL = previewAction.getActionURL(); 
-
+		
         String curUuid = theWrapper.getItemId(); 
         DocumentId curDocId = ws.createDocumentId(curUuid); 
-        Content curContent = (Content) ws.getById(curDocId); 
-        LinkComponent modelPolicyLinkCmpt = (LinkComponent) curContent.getComponent("ModelPolicyLink"); 
+        Content theContent = (Content) ws.getById(curDocId); 
+        editURL="<a href='"+Utils.getPreviewURL(theContent)+"'>"+theContent.getName()+"</a>";
+        LinkComponent modelPolicyLinkCmpt = (LinkComponent) theContent.getComponent("ModelPolicyLink"); 
         DocumentId modelPolicyDocId = modelPolicyLinkCmpt.getDocumentReference(); 
         if(modelPolicyDocId != null){ 
           String curModelPolicyPath = ws.getPathById(modelPolicyDocId, true, false); 
           String pathToContent = "wcm%3apath%3a%2F" + curModelPolicyPath; 
-          editURL = "?1dmy&page=com.prudential.page.PP.PolicyDetail&urile=" + pathToContent; 
+          //editURL = "?1dmy&page=com.prudential.page.PP.PolicyDetail&urile=" + pathToContent; 
         } 
-
+		
         // ensure live date isn't null 
         String liveDateFormatted = ""; 
         if(theWrapper.getLiveDate() != null) { 
@@ -315,20 +321,20 @@ var fullDataset = {
     } 
     
     String stage = theWrapper.getWfStage().toLowerCase(); 
-    Document doc = getDocumentById(ws, theWrapper.getItemId()); 
+    //Document doc = getDocumentById(ws, theWrapper.getItemId()); 
     String retireRationale = ""; 
     if(stage.contains("draft")) { 
       stage = "Draft"; 
     } else if(stage.contains("review")) { 
       stage = "Review"; 
       // if we're in review, get the review date 
-      Content theContent = (Content)doc; 
+      //Content theContent = (Content)doc; 
       Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("approval")) { 
       stage = "Approve"; 
       // if we're in review, get the review date 
-      Content theContent = (Content)doc; 
+      //Content theContent = (Content)doc; 
       Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("publish")) { 
@@ -337,7 +343,7 @@ var fullDataset = {
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
       stage = "Retired";     
-      Content theContent = (Content)doc; 
+      //Content theContent = (Content)doc; 
       HistoryLogIterator hli = theContent.getHistoryLog(); 
       ArrayList comments = new ArrayList();
       while(hli.hasNext()) { 
@@ -354,7 +360,7 @@ var fullDataset = {
       }
     } else if(stage.contains("expire")) { 
       stage = "Retired"; 
-      Content theContent = (Content)doc; 
+      //Content theContent = (Content)doc; 
       HistoryLogIterator hli = theContent.getHistoryLog(); 
       ArrayList comments = new ArrayList();
       while(hli.hasNext()) { 
@@ -372,7 +378,7 @@ var fullDataset = {
     } 
     
     
-    String modelPolicyId = getModelPolicyLinkValue(doc); 
+    String modelPolicyId = getModelPolicyLinkValue(theContent); 
     Document parent = getDocumentById(ws, modelPolicyId); 
     String contentPath = theWrapper.getPath().toLowerCase(); 
     String policyType = "LINK"; 
@@ -380,6 +386,10 @@ var fullDataset = {
       modelPolicyId = ""; 
     } 
   
+    /* SDD 10863*/
+    String _policyOwner=theWrapper.getAdditionalAttribute("PolicyOwner");
+	if(_policyOwner==null){_policyOwner="";}
+	else{_policyOwner=_policyOwner.replace("\"","\\\"").replaceAll("[\\r\\n]+"," ").split("[|]")[0].trim();}
     %>{ 
     itemId:"<%=id%>", 
     contentId:"<%=theWrapper.getItemId()%>", 
@@ -388,8 +398,8 @@ var fullDataset = {
     source:"Link", 
     type:"<%=policyType%>", 
     authTemp:"<%=theWrapper.getAuthTemplateName()%>", 
-    //editURL:"<%=editURL%>", 
-    editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
+    editURL:"<%=editURL%>", 
+    //editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
     title:"<%=theWrapper.getTitle()%>", 
     modelPolicyId:"<%= modelPolicyId %>", 
     status:"<%=stage%>", 
@@ -398,7 +408,7 @@ var fullDataset = {
     reviewDate:"<%=reviewDate%>", 
     retiredDate:"<%=expireDateFormatted%>", 
     retireRationale:"<%=retireRationale%>", 
-    author:"<%=theWrapper.getAuthor()%>", 
+    author:"<%=_policyOwner%>", 
     stage:"<%=stage %>", 
     path:"<%=theWrapper.getPath() %>", 
     standards:"<%= getStandards(parent) %>", 
@@ -414,7 +424,7 @@ var fullDataset = {
     CustomAuthoringItemWrapper theWrapper = wrapperResults.get(i); 
         // get the action URLs 
         CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview"); 
-        String editURL = previewAction.getActionURL(); 
+        //String editURL = previewAction.getActionURL(); 
         // ensure live date isn't null 
         String liveDateFormatted = ""; 
         if(theWrapper.getLiveDate() != null) { 
@@ -437,19 +447,19 @@ var fullDataset = {
     
     String stage = theWrapper.getWfStage().toLowerCase(); 
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
+    String editURL="<a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a>";
+    Content theContent = (Content)doc; 
     String retireRationale = ""; 
     if(stage.contains("draft")) { 
       stage = "Draft"; 
     } else if(stage.contains("review")) {       
       stage = "Review"; 
       // if we're in review, get the review date 
-      Content theContent = (Content)doc; 
       Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("approval")) { 
       stage = "Approve"; 
       // if we're in review, get the review date 
-      Content theContent = (Content)doc; 
       Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("publish")) { 
@@ -457,8 +467,7 @@ var fullDataset = {
     } else if(stage.contains("approveretire")) { 
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
-      stage = "Retired"; 
-      Content theContent = (Content)doc; 
+      stage = "Retired";           
       HistoryLogIterator hli = theContent.getHistoryLog(); 
       ArrayList comments = new ArrayList();
       while(hli.hasNext()) { 
@@ -475,7 +484,6 @@ var fullDataset = {
       }
     } else if(stage.contains("expire")) { 
       stage = "Retired"; 
-      Content theContent = (Content)doc; 
       HistoryLogIterator hli = theContent.getHistoryLog(); 
       ArrayList comments = new ArrayList();
       while(hli.hasNext()) { 
@@ -521,6 +529,10 @@ var fullDataset = {
       modelPolicyId = ""; 
     } 
   
+    /* SDD 10863*/
+    String _policyOwner=theWrapper.getAdditionalAttribute("PolicyOwner");
+	if(_policyOwner==null){_policyOwner="";}
+	else{_policyOwner=_policyOwner.replace("\"","\\\"").replaceAll("[\\r\\n]+"," ").split("[|]")[0].trim();}
     %>{ 
     itemId: <%=id%>, 
     viewCount:"<wcm:plugin name="RenderReferenceCount" displayCount="true" uuid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
@@ -537,7 +549,7 @@ var fullDataset = {
     reviewDate:"<%=reviewDate%>", 
     retiredDate:"<%=expireDateFormatted%>", 
     retireRationale:"<%=retireRationale%>", 
-    author:"<%=theWrapper.getAuthor()%>", 
+    author:"<%=_policyOwner%>", 
     stage:"<%=stage %>", 
     path:"<%=theWrapper.getPath() %>", 
     standards:"<%= getStandards(doc) %>", 
@@ -561,6 +573,9 @@ fullDataset.items.sort(function(a, b) {
 dojo.require("dojox.grid.EnhancedGrid"); 
 dojo.require("dojox.grid.enhanced.plugins.Pagination"); 
 dojo.require("dojo.data.ItemFileWriteStore"); 
+/* SDD */
+dojo.require("dojo.date.locale");
+/* /SDD */
 
 var gridVisibility = { 
   "all":[true,true,true,true,true,true,false,true], 
@@ -610,12 +625,16 @@ var filterData = function(fullDataset) {
   // } 
 <% if(isBPA) { %> 
   if(filterValue === "mdlplcs") { 
-    for(var i = 0; i < fullDataset.items.length; ++i) { 
-      if(fullDataset.items[i].type == "MODEL" && fullDataset.items[i].status == "Published") { 
+    for(var i = 0; i < fullDataset.items.length; ++i) {     
+      if(fullDataset.items[i].type == "MODEL" && (fullDataset.items[i].status == "Published" || fullDataset.items[i].status == "Pending Retire" )) { 
         data.items.push(fullDataset.items[i]); 
-      } else if(fullDataset.items[i].type != "MODEL") { 
+      } 
+      // only include model policies
+      /**
+      else if(fullDataset.items[i].type != "MODEL") { 
         data.items.push(fullDataset.items[i]); 
           } 
+          */
     } 
   } else if(filterValue === "all") { 
     for(var i = 0; i < fullDataset.items.length; ++i) { 
@@ -654,7 +673,17 @@ var filterData = function(fullDataset) {
   
   return data; 
 }; 
-
+/* SDD */
+var _policyDateFormat={formatLength:'short', selector:'date', locale:'en-us'};
+var _policyDateCompare=function(a, b){
+	var ret = 0;
+	var dateA = dojo.date.locale.parse(a,_policyDateFormat);
+	var dateB=dojo.date.locale.parse(b,_policyDateFormat);
+	if(dateA>dateB){ret=1;}
+	else if(dateA<dateB){ret=-1;}
+	return ret;
+};
+/* /SDD */
 var store = null; 
 var activeDataSet = null; 
 var grid = null; 
@@ -676,6 +705,12 @@ var renderTable = function() {
   var data = filterData(fullDataset); 
     /*set up data store*/ 
     store = new dojo.data.ItemFileWriteStore({data: data}); 
+    	/* SDD */
+	// Define the comparator function for dates.
+    store.comparatorMap = {};
+    store.comparatorMap["liveDateFormatted"] = _policyDateCompare;
+    store.comparatorMap["lastModFormatted"] = _policyDateCompare;
+	/* /SDD */
   activeDataSet = data; 
     /*set up layout*/ 
     var layout = [ 
