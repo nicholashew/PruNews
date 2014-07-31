@@ -114,11 +114,26 @@ public class Utils {
             
             DocumentIdIterator results = ws.findComponentByName(name);
             if(results.hasNext()) {
-               returnComponent = (LibraryComponent)results.next();
+               DocumentId theResult = (DocumentId)results.next();
+               returnComponent = (LibraryComponent)ws.getById(theResult);
             }
          }
          
       
+      }
+      catch (DocumentRetrievalException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST))
+         {
+            s_log.log(Level.FINEST, "", e);
+         }
+      }
+      catch (AuthorizationException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST))
+         {
+            s_log.log(Level.FINEST, "", e);
+         }
       } finally {
          if(ws != null) {
             if(originalLib != null) {
