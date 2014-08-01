@@ -3,7 +3,7 @@
  /* cmknight
  /********************************************************************/
 
-package com.prudential.authoring.launchpage;
+package com.prudential.authoring.buttons;
 
 import java.io.File;
 import java.io.FileOutputStream;

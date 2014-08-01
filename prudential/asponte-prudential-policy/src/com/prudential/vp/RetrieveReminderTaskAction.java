@@ -90,10 +90,16 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
             }
             while (contentIterator.hasNext()) {
                DocumentId tempContentId = (DocumentId) contentIterator.next();
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "tempContentId="+tempContentId);
+               }
                Content theContent = (Content) ws.getById(tempContentId);
                DateComponent dc = null;
                boolean contentHadComponent = false;
                if(theContent.hasComponent(p_lastRunComponent)) {
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "content had component "+p_lastRunComponent);
+                  }
                   dc = (DateComponent)theContent.getComponent(p_lastRunComponent);
                   contentHadComponent = true;
                }
@@ -101,6 +107,10 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
                else {
                   try {
                      dc = theContent.createComponent(p_lastRunComponent, DocumentTypes.DateComponent);
+                     dc.setDate(new Date());
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "content did Not have component, created");
+                     }
                   }
                   catch (DocumentCreationException e) {
                      // TODO Auto-generated catch block
@@ -153,6 +163,10 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
                               s_log.log(Level.FINEST, "Exception " + e.getMessage());
                               e.printStackTrace();
                            }
+                        }
+                     } else {
+                        if (isDebug) {
+                           s_log.log(Level.FINEST, "Content did not have component "+componentName);
                         }
                      }
                      Date updatedDate = new Date();
@@ -236,5 +250,9 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
             ws.logout();
          }
       }
+      if (isDebug) {
+         s_log.exiting("RetrieveReminderTaskAction", "run");
+      }
+      
    }
 }

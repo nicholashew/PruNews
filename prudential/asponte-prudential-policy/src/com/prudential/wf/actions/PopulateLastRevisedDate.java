@@ -45,7 +45,8 @@ public class PopulateLastRevisedDate extends BaseCustomWorkflowAction {
       if(theDoc instanceof Content) {
          // get the pub date, add the # of days 
          Content theContent =(Content)theDoc;
-         if(theContent.hasComponent(s_dayField)) {            
+         // only do it if not moving backwards
+         if(theContent.hasComponent(s_dayField) && !theContent.isWorkflowMovingBackward()) {            
             try {               
                DateComponent theDate = (DateComponent)theContent.getComponent(s_dayField);
                try {

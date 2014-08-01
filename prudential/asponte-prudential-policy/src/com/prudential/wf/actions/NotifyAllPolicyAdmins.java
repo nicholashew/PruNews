@@ -24,6 +24,8 @@ import com.ibm.workplace.wcm.api.DocumentIdIterator;
 import com.ibm.workplace.wcm.api.DocumentLibrary;
 import com.ibm.workplace.wcm.api.HTMLComponent;
 import com.ibm.workplace.wcm.api.LibraryComponent;
+import com.ibm.workplace.wcm.api.LibraryHTMLComponent;
+import com.ibm.workplace.wcm.api.LibraryShortTextComponent;
 import com.ibm.workplace.wcm.api.OptionSelectionComponent;
 import com.ibm.workplace.wcm.api.ShortTextComponent;
 import com.ibm.workplace.wcm.api.SiteArea;
@@ -262,10 +264,10 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
       }
       LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), cmpntName, "PruPolicyDesign");
       if (bodyComponent != null) {
-         HTMLComponent stc = (HTMLComponent) bodyComponent;
+         LibraryHTMLComponent stc = (LibraryHTMLComponent) bodyComponent;
          componentText = stc.getHTML();
-         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
-         componentText.replaceAll("[DOCUMENTURL]", Utils.getPreviewURL(doc));
+         componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
 
       if (!componentText.isEmpty()) {
@@ -348,9 +350,9 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
       }
       LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), cmpntName, "PruPolicyDesign");
       if (bodyComponent != null) {
-         ShortTextComponent stc = (ShortTextComponent) bodyComponent;
+         LibraryShortTextComponent stc = (LibraryShortTextComponent) bodyComponent;
          componentText = stc.getText();
-         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
+         componentText.replaceAll("DOCUMENTNAME", doc.getName());
       }
       if (!componentText.isEmpty()) {
          sb.append(componentText);

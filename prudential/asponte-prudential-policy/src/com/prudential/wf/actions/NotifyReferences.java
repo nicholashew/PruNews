@@ -261,10 +261,10 @@ public class NotifyReferences implements CustomWorkflowAction {
       // try to get the component
       LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailTextCmpnt, "PruPolicyDesign");
       if(bodyComponent != null) {
-         HTMLComponent stc = (HTMLComponent)bodyComponent;
+         LibraryHTMLComponent stc = (LibraryHTMLComponent)bodyComponent;
          componentText = stc.getHTML();
-         componentText.replaceAll("[DOCUMENTNAME]", doc.getName());
-         componentText.replaceAll("[DOCUMENTURL]", Utils.getPreviewURL(doc));
+         componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
       
       if(componentText.isEmpty()) {
@@ -304,9 +304,9 @@ public class NotifyReferences implements CustomWorkflowAction {
       StringBuilder sb = new StringBuilder();
       LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailSubjectCmpnt, "PruPolicyDesign");
       if(subjectComponent != null) {
-         ShortTextComponent stc = (ShortTextComponent)subjectComponent;
+         LibraryShortTextComponent stc = (LibraryShortTextComponent)subjectComponent;
          subject = stc.getText();
-         subject.replaceAll("[DOCUMENTNAME]", doc.getName());
+         subject.replaceAll("DOCUMENTNAME", doc.getName());
       }
       
       // retrieve from WCM      
