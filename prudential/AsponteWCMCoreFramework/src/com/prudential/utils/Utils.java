@@ -6,6 +6,8 @@
 package com.prudential.utils;
 
 //import java.security.Principal;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -22,6 +24,7 @@ import javax.naming.InitialContext;
 import javax.naming.Name;
 
 import com.ibm.portal.um.*;
+import com.ibm.portal.um.exceptions.PumaAttributeException;
 import com.ibm.portal.um.exceptions.PumaMissingAccessRightsException;
 import com.ibm.portal.um.exceptions.PumaModelException;
 import com.ibm.portal.um.exceptions.PumaSystemException;
@@ -95,7 +98,7 @@ public class Utils {
 
    /** The primary email attribute key */
    public static final String PRIMARY_EMAIL_KEY = "ibm-primaryEmail";
-   
+
    public static String p_prevStageCmpnt = "PreviousStage";
 
    public static LibraryComponent getLibraryComponentByName(Workspace ws, String name, String libraryName) {
@@ -106,54 +109,52 @@ public class Utils {
          s_log.entering("Utils", "getLibraryComponentByName called for " + name + " in library " + libraryName);
       }
       try {
-         if(ws != null) {
-         
+         if (ws != null) {
+
             ws.login();
             originalLib = ws.getCurrentDocumentLibrary();
             ws.setCurrentDocumentLibrary(ws.getDocumentLibrary(libraryName));
-            
+
             DocumentIdIterator results = ws.findComponentByName(name);
-            if(results.hasNext()) {
-               DocumentId theResult = (DocumentId)results.next();
-               returnComponent = (LibraryComponent)ws.getById(theResult);
+            if (results.hasNext()) {
+               DocumentId theResult = (DocumentId) results.next();
+               returnComponent = (LibraryComponent) ws.getById(theResult);
             }
          }
-         
-      
+
       }
       catch (DocumentRetrievalException e) {
          // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST))
-         {
+         if (s_log.isLoggable(Level.FINEST)) {
             s_log.log(Level.FINEST, "", e);
          }
       }
       catch (AuthorizationException e) {
          // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST))
-         {
+         if (s_log.isLoggable(Level.FINEST)) {
             s_log.log(Level.FINEST, "", e);
          }
-      } finally {
-         if(ws != null) {
-            if(originalLib != null) {
+      }
+      finally {
+         if (ws != null) {
+            if (originalLib != null) {
                ws.setCurrentDocumentLibrary(originalLib);
             }
             ws.logout();
          }
       }
-      
+
       if (isDebug) {
          String componentName = "null";
-         if(returnComponent != null) {
+         if (returnComponent != null) {
             componentName = returnComponent.getName();
          }
-         s_log.exiting("Utils", "getLibraryComponentByName returning "+componentName);
+         s_log.exiting("Utils", "getLibraryComponentByName returning " + componentName);
       }
-      
-      
+
       return returnComponent;
    }
+
    /**
     * 
     * getDistributionListId helper method to get the site area
@@ -453,7 +454,8 @@ public class Utils {
    }
 
    public static DocumentId createContent(Workspace ws, DocumentId authTemplateId, DocumentId newsParentId, String contentName,
-      String libraryName) throws DocumentCreationException, AuthorizationException, IllegalDocumentTypeException, DocumentSaveException, DuplicateChildException, Exception {
+      String libraryName) throws DocumentCreationException, AuthorizationException, IllegalDocumentTypeException, DocumentSaveException,
+      DuplicateChildException, Exception {
 
       return createContent(ws, authTemplateId, newsParentId, contentName, libraryName, null);
    }
@@ -775,12 +777,22 @@ public class Utils {
       }
       try {
          if (getPumaHome() != null) {
-            List<String> attributeNames = new ArrayList<String>(1);
-            attributeNames.add(PRIMARY_EMAIL_KEY);
+            PrivilegedExceptionAction<String> getEmailAddress = new PrivilegedExceptionAction<String>() {
 
-            // Get the attribute value
-            Map attributes = getPumaHome().getProfile().getAttributes(p_user, attributeNames);
-            emailAddress = (String) attributes.get(PRIMARY_EMAIL_KEY);
+               public String run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+                  String returnAttributeString = null;
+                  List<String> attributeNames = new ArrayList<String>(1);
+                  attributeNames.add(PRIMARY_EMAIL_KEY);
+
+                  // Get the attribute value
+                  Map attributes = getPumaHome().getProfile().getAttributes(p_user, attributeNames);
+                  returnAttributeString = (String) attributes.get(PRIMARY_EMAIL_KEY);
+                  return returnAttributeString;
+               }
+
+            };
+
+            emailAddress = getPumaHome().getEnvironment().runUnrestricted(getEmailAddress);
          }
       }
       catch (Exception e) {
@@ -796,7 +808,7 @@ public class Utils {
       return emailAddress;
    }
 
-   public static String getAttributeFromUser(final Principal p_user, String attributeToRetrieve) {
+   public static String getAttributeFromUser(final Principal p_user, final String attributeToRetrieve) {
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       String returnAttribute = "";
       if (isDebug) {
@@ -804,12 +816,24 @@ public class Utils {
       }
       try {
          if (getPumaHome() != null) {
-            List<String> attributeNames = new ArrayList<String>(1);
-            attributeNames.add(attributeToRetrieve);
 
-            // Get the attribute value
-            Map attributes = getPumaHome().getProfile().getAttributes(p_user, attributeNames);
-            returnAttribute = (String) attributes.get(attributeToRetrieve);
+            PrivilegedExceptionAction<String> getReturnAttribute = new PrivilegedExceptionAction<String>() {
+
+               public String run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+                  String returnAttributeString = null;
+                  List<String> attributeNames = new ArrayList<String>(1);
+                  attributeNames.add(attributeToRetrieve);
+
+                  // Get the attribute value
+                  Map attributes = getPumaHome().getProfile().getAttributes(p_user, attributeNames);
+                  returnAttributeString = (String) attributes.get(returnAttributeString);
+
+                  return returnAttributeString;
+               }
+
+            };
+
+            returnAttribute = getPumaHome().getEnvironment().runUnrestricted(getReturnAttribute);
          }
       }
       catch (Exception e) {
@@ -865,54 +889,49 @@ public class Utils {
             if (isDebug) {
                s_log.log(Level.FINEST, "retrieving by default attribute");
             }
-            users = getPumaHome().getLocator().findUsersByDefaultAttribute(p_dn);
-            if (!users.isEmpty()) {
-               user = users.get(0);
-               retrieved = true;
-            }
+            PrivilegedExceptionAction<User> getUser = new PrivilegedExceptionAction<User>() {
+
+               public User run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+                  boolean isDebug = s_log.isLoggable(Level.FINEST);
+                  User returnUser = null;
+                  List<User> users = Collections.emptyList();
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "trying findUsersByDefaultAttribute "+p_dn);
+                  }
+                  users = getPumaHome().getLocator().findUsersByDefaultAttribute(p_dn);
+                  if (!users.isEmpty()) {
+                     returnUser = users.get(0);                     
+                  }
+                  if(returnUser == null) {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "trying findUsersByAttribute cn "+p_dn);
+                     }
+                     users = getPumaHome().getLocator().findUsersByAttribute("cn", p_dn);
+                     if (!users.isEmpty()) {
+                        returnUser = users.get(0);                     
+                     }
+                  }
+                  if(returnUser == null) {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "trying findUsersByAttribute uid "+p_dn);
+                     }
+                     users = getPumaHome().getLocator().findUsersByAttribute("uid", p_dn);
+                     if (!users.isEmpty()) {
+                        returnUser = users.get(0);                     
+                     }
+                  }
+                  return returnUser;
+               }
+
+            };
+            user = getPumaHome().getEnvironment().runUnrestricted(getUser);
          }
          catch (Exception e) {
             if (isDebug) {
                s_log.log(Level.FINEST, "Exception getting user " + p_dn + " because " + e.getMessage());
                // e.printStackTrace();
             }
-         }
-         // if havent retrieved, try passing cn
-         if (!retrieved) {
-            try {
-               if (isDebug) {
-                  s_log.log(Level.FINEST, "retrieving by cn");
-               }
-               users = getPumaHome().getLocator().findUsersByAttribute("cn", p_dn);
-               if (!users.isEmpty()) {
-                  user = users.get(0);
-                  retrieved = true;
-               }
-            }
-            catch (Exception e) {
-               if (isDebug) {
-                  s_log.log(Level.FINEST, "Exception getting user " + p_dn + " because " + e.getMessage());
-               }
-            }
-         }
-         // if havent retrieved, try passing cn
-         if (!retrieved) {
-            try {
-               if (isDebug) {
-                  s_log.log(Level.FINEST, "retrieving by uid");
-               }
-               users = getPumaHome().getLocator().findUsersByAttribute("uid", p_dn);
-               if (!users.isEmpty()) {
-                  user = users.get(0);
-                  retrieved = true;
-               }
-            }
-            catch (Exception e) {
-               if (isDebug) {
-                  s_log.log(Level.FINEST, "Exception getting user " + p_dn + " because " + e.getMessage());
-               }
-            }
-         }
+         }         
       }
       catch (Exception e) {
          if (isDebug) {
@@ -944,8 +963,17 @@ public class Utils {
       }
       User user = null;
       try {
-         getPumaHome().getLocator().findUserByIdentifier(p_dn);
-         user = getPumaHome().getLocator().findUserByIdentifier(p_dn);
+         PrivilegedExceptionAction<User> getUser = new PrivilegedExceptionAction<User>() {
+
+            public User run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+               User returnUser = null;
+               returnUser = getPumaHome().getLocator().findUserByIdentifier(p_dn);
+               return returnUser;
+            }
+
+         };
+         
+         user = getPumaHome().getEnvironment().runUnrestricted(getUser);
       }
       catch (Exception e) {
          if (isDebug) {
@@ -980,7 +1008,17 @@ public class Utils {
       }
       List<Principal> members = null;
       try {
-         members = getPumaHome().getLocator().findMembersByGroup(p_group, p_findNestedMembers);
+         PrivilegedExceptionAction<List> getMembers = new PrivilegedExceptionAction<List>() {
+
+            public List run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+               List returnMembers = null;
+               returnMembers = getPumaHome().getLocator().findMembersByGroup(p_group, p_findNestedMembers);
+               return returnMembers;
+            }
+
+         };
+         
+         members = getPumaHome().getEnvironment().runUnrestricted(getMembers);
       }
       catch (Exception e) {
          if (isDebug) {
@@ -1005,7 +1043,16 @@ public class Utils {
       }
       try {
          if (getPumaHome() != null) {
-            theGroup = getPumaHome().getLocator().findGroupByIdentifier(p_dn);
+            PrivilegedExceptionAction<Group> getGroup = new PrivilegedExceptionAction<Group>() {
+
+               public Group run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+                  Group returnGroup = null;
+                  getPumaHome().getLocator().findGroupByIdentifier(p_dn);
+                  return returnGroup;
+               }
+
+            };
+            theGroup = getPumaHome().getEnvironment().runUnrestricted(getGroup);
          }
       }
       catch (Exception e) {
@@ -1030,59 +1077,45 @@ public class Utils {
    public static Group getGroupById(final String p_id) {
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       Group theGroup = null;
-      boolean retrieved = false;
       if (isDebug) {
          s_log.entering("Utils", "getGroupById called for " + p_id);
       }
-      List<Group> groups = Collections.emptyList();
+
       try {
          if (getPumaHome() != null) {
-            groups = getPumaHome().getLocator().findGroupsByDefaultAttribute(p_id);
-            if (!groups.isEmpty()) {
-               theGroup = groups.get(0);
-               retrieved = true;
-            }
+            PrivilegedExceptionAction<Group> getGroup = new PrivilegedExceptionAction<Group>() {
+
+               public Group run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+                  Group returnGroup = null;
+                  List<Group> groups = Collections.emptyList();
+                  groups = getPumaHome().getLocator().findGroupsByDefaultAttribute(p_id);
+                  if (!groups.isEmpty()) {
+                     returnGroup = groups.get(0);
+                  }
+
+                  if (returnGroup == null) {
+                     groups = getPumaHome().getLocator().findGroupsByAttribute("cn", p_id);
+                     if (!groups.isEmpty()) {
+                        returnGroup = groups.get(0);
+                     }
+                  }
+                  if (returnGroup == null) {
+                     groups = getPumaHome().getLocator().findGroupsByAttribute("uid", p_id);
+                     if (!groups.isEmpty()) {
+                        returnGroup = groups.get(0);
+                     }
+                  }
+                  return returnGroup;
+               }
+
+            };
+            theGroup = getPumaHome().getEnvironment().runUnrestricted(getGroup);
          }
       }
       catch (Exception e) {
          if (isDebug) {
             s_log.log(Level.FINEST, "getGroupById exception " + e.getMessage());
             e.printStackTrace();
-         }
-      }
-      if (!retrieved) {
-         try {
-            if (isDebug) {
-               s_log.log(Level.FINEST, "retrieving by cn");
-            }
-            groups = getPumaHome().getLocator().findGroupsByAttribute("cn", p_id);
-            if (!groups.isEmpty()) {
-               theGroup = groups.get(0);
-               retrieved = true;
-            }
-         }
-         catch (Exception e) {
-            if (isDebug) {
-               s_log.log(Level.FINEST, "Exception getting group " + p_id + " because " + e.getMessage());
-            }
-         }
-      }
-      // if havent retrieved, try passing cn
-      if (!retrieved) {
-         try {
-            if (isDebug) {
-               s_log.log(Level.FINEST, "retrieving by uid");
-            }
-            groups = getPumaHome().getLocator().findGroupsByAttribute("uid", p_id);
-            if (!groups.isEmpty()) {
-               theGroup = groups.get(0);
-               retrieved = true;
-            }
-         }
-         catch (Exception e) {
-            if (isDebug) {
-               s_log.log(Level.FINEST, "Exception getting user " + p_id + " because " + e.getMessage());
-            }
          }
       }
 
@@ -1130,7 +1163,7 @@ public class Utils {
 
       String theDn = getDnForJavaPrincipal(p_principal);
       if (isDebug) {
-         s_log.log(Level.FINEST, "theDn = "+theDn);
+         s_log.log(Level.FINEST, "theDn = " + theDn);
       }
       // check if it's a group
       //p_principal.
@@ -1138,7 +1171,7 @@ public class Utils {
       User theUser = Utils.getUserByDN(theDn);
       if (theUser != null) {
          if (isDebug) {
-            s_log.log(Level.FINEST, "theUser = "+theUser);
+            s_log.log(Level.FINEST, "theUser = " + theUser);
          }
          returnList.addAll(getEmailsUser(theUser));
       }
@@ -1149,12 +1182,12 @@ public class Utils {
          }
          // try to get a group
          Group theGroup = Utils.getGroupByDistinguishedName(theDn);
-         if(theGroup != null) {
+         if (theGroup != null) {
             if (isDebug) {
-               s_log.log(Level.FINEST, "theGroup = "+theGroup);
+               s_log.log(Level.FINEST, "theGroup = " + theGroup);
             }
-            returnList.addAll(getEmailsGroup(theGroup));   
-         }  
+            returnList.addAll(getEmailsGroup(theGroup));
+         }
          else {
             if (isDebug) {
                s_log.log(Level.FINEST, "theGroup was null");
@@ -1239,7 +1272,7 @@ public class Utils {
     * @param p_principal
     * @return
     */
-   public static String getDnForPrincipal(Principal p_principal) {
+   public static String getDnForPrincipal(final Principal p_principal) {
       String returnString = "";
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       if (isDebug) {
@@ -1247,21 +1280,19 @@ public class Utils {
       }
 
       try {
-         returnString = getPumaHome().getProfile().getIdentifier(p_principal);
+         PrivilegedExceptionAction<String> getDn = new PrivilegedExceptionAction<String>() {
+
+            public String run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+               String returnAttributeString = null;
+               returnAttributeString = getPumaHome().getProfile().getIdentifier(p_principal);
+               return returnAttributeString;
+            }
+
+         };
+
+         returnString = getPumaHome().getEnvironment().runUnrestricted(getDn);
       }
-      catch (PumaSystemException e) {
-         // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST)) {
-            s_log.log(Level.FINEST, "", e);
-         }
-      }
-      catch (PumaMissingAccessRightsException e) {
-         // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST)) {
-            s_log.log(Level.FINEST, "", e);
-         }
-      }
-      catch (PumaModelException e) {
+      catch (PrivilegedActionException e) {
          // TODO Auto-generated catch block
          if (s_log.isLoggable(Level.FINEST)) {
             s_log.log(Level.FINEST, "", e);
@@ -1280,34 +1311,33 @@ public class Utils {
     * @param p_principal
     * @return
     */
-   public static String getDnForJavaPrincipal(java.security.Principal p_principal) {
+   public static String getDnForJavaPrincipal(final java.security.Principal p_principal) {
       String returnString = "";
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       if (isDebug) {
          s_log.entering("Utils", "getDnForJavaPrincipal " + p_principal.toString());
       }
-      Principal thePumaPrincipal = null;
 
       try {
-         thePumaPrincipal = getUserById(p_principal.getName());
-         if (thePumaPrincipal == null) {
-            thePumaPrincipal = getGroupById(p_principal.getName());
-         }
-         returnString = getPumaHome().getProfile().getIdentifier(thePumaPrincipal);
+         PrivilegedExceptionAction<String> getDn = new PrivilegedExceptionAction<String>() {
+
+            public String run() throws PumaAttributeException, PumaSystemException, PumaModelException, PumaMissingAccessRightsException {
+               String theReturnString = "";
+               Principal thePumaPrincipal = getUserById(p_principal.getName());
+               if (thePumaPrincipal == null) {
+                  thePumaPrincipal = getGroupById(p_principal.getName());
+               }
+               theReturnString = getPumaHome().getProfile().getIdentifier(thePumaPrincipal);
+               return theReturnString;
+            }
+
+         };
+
+         returnString = getPumaHome().getEnvironment().runUnrestricted(getDn);
+
       }
-      catch (PumaSystemException e) {
-         // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST)) {
-            s_log.log(Level.FINEST, "", e);
-         }
-      }
-      catch (PumaMissingAccessRightsException e) {
-         // TODO Auto-generated catch block
-         if (s_log.isLoggable(Level.FINEST)) {
-            s_log.log(Level.FINEST, "", e);
-         }
-      }
-      catch (PumaModelException e) {
+
+      catch (PrivilegedActionException e) {
          // TODO Auto-generated catch block
          if (s_log.isLoggable(Level.FINEST)) {
             s_log.log(Level.FINEST, "", e);
@@ -1363,7 +1393,7 @@ public class Utils {
       DocumentLibrary currentLib = ws.getCurrentDocumentLibrary();
       DocumentLibrary lib = ws.getDocumentLibrary(libraryName);
       ws.setCurrentDocumentLibrary(lib);
-      
+
       if (folders.hasNext()) {
          returnId = (DocumentId) folders.next();
       }
@@ -1380,39 +1410,34 @@ public class Utils {
          }
          catch (DocumentCreationException e) {
             // TODO Auto-generated catch block
-            if (s_log.isLoggable(Level.FINEST))
-            {
+            if (s_log.isLoggable(Level.FINEST)) {
                s_log.log(Level.FINEST, "", e);
             }
          }
          catch (AuthorizationException e) {
             // TODO Auto-generated catch block
-            if (s_log.isLoggable(Level.FINEST))
-            {
+            if (s_log.isLoggable(Level.FINEST)) {
                s_log.log(Level.FINEST, "", e);
             }
-         }        
+         }
          catch (DocumentRetrievalException e) {
             // TODO Auto-generated catch block
-            if (s_log.isLoggable(Level.FINEST))
-            {
+            if (s_log.isLoggable(Level.FINEST)) {
                s_log.log(Level.FINEST, "", e);
             }
          }
          catch (DocumentSaveException e) {
             // TODO Auto-generated catch block
-            if (s_log.isLoggable(Level.FINEST))
-            {
+            if (s_log.isLoggable(Level.FINEST)) {
                s_log.log(Level.FINEST, "", e);
             }
          }
          catch (DuplicateChildException e) {
             // TODO Auto-generated catch block
-            if (s_log.isLoggable(Level.FINEST))
-            {
+            if (s_log.isLoggable(Level.FINEST)) {
                s_log.log(Level.FINEST, "", e);
             }
-         }         
+         }
       }
 
       if (isDebug) {

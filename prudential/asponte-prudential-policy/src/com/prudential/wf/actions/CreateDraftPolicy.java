@@ -14,9 +14,11 @@ import com.ibm.workplace.wcm.api.custom.Directive;
 import com.ibm.workplace.wcm.api.custom.Directives;
 import com.ibm.workplace.wcm.api.custom.RollbackDirectiveParams;
 import com.ibm.workplace.wcm.api.exceptions.*;
+import com.prudential.utils.Utils;
 
 import java.util.*;
 import java.util.logging.*;
+
 import javax.naming.NamingException;
 
 /**
@@ -76,6 +78,22 @@ public class CreateDraftPolicy implements CustomWorkflowAction {
 
          try {
             Content draft = (Content) cont.createDraftDocument();
+            if(draft.hasComponent(Utils.p_prevStageCmpnt)) {
+               // remove the component and send back to the previous stage.
+               try {
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "The content has the "+Utils.p_prevStageCmpnt+", remove from draft");
+                  }               
+                  draft.removeComponent(Utils.p_prevStageCmpnt);                 
+               }
+               catch (ComponentNotFoundException e) {
+                  // TODO Auto-generated catch block
+                  if (s_log.isLoggable(Level.FINEST))
+                  {
+                     s_log.log(Level.FINEST, "", e);
+                  }
+               }            
+            }
             draft.setEffectiveDate(new Date());
             // check for gendateone
             Date genOne = cont.getGeneralDateOne();

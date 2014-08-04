@@ -27,8 +27,8 @@ public class CheckNotificationEmail extends HttpServlet {
 
    // daily
    // every 10 minutes for testing
-   //private static long interval = 86400000;
-   private static long interval = 600000;
+   private static long interval = 86400000;
+   //private static long interval = 600000;
 
    /**
     * @see HttpServlet#HttpServlet()

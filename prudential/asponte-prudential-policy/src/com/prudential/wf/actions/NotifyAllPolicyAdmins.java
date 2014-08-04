@@ -266,8 +266,8 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
       if (bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent) bodyComponent;
          componentText = stc.getHTML();
-         componentText.replaceAll("DOCUMENTNAME", doc.getName());
-         componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
+         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText = componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
 
       if (!componentText.isEmpty()) {
@@ -352,7 +352,7 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
       if (bodyComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent) bodyComponent;
          componentText = stc.getText();
-         componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getName());
       }
       if (!componentText.isEmpty()) {
          sb.append(componentText);

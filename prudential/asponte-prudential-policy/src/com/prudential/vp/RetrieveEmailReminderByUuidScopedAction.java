@@ -182,7 +182,7 @@ public class RetrieveEmailReminderByUuidScopedAction implements VirtualPortalSco
      // TODO Auto-generated method stub
      boolean isDebug = s_log.isLoggable(Level.FINEST);
      if (isDebug) {
-        s_log.entering("ScheduleReviewEmailAction", "getRecipients for doc "+doc.getName());
+        s_log.entering("RetrieveEmailReminderByUuidScopedAction", "getRecipients for doc "+doc.getName());
      }
      Set recipientSet = new HashSet();
      ArrayList recipientList = null;
@@ -258,7 +258,7 @@ public class RetrieveEmailReminderByUuidScopedAction implements VirtualPortalSco
      }
      
      if (isDebug) {
-        s_log.exiting("ScheduleReviewEmailAction", "getRecipients");
+        s_log.exiting("RetrieveEmailReminderByUuidScopedAction", "getRecipients");
      }
      
      recipientList = new ArrayList(Arrays.asList(recipientSet.toArray()));

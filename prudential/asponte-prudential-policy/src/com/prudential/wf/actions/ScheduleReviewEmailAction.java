@@ -61,8 +61,8 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       if(bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent)bodyComponent;
          componentText = stc.getHTML();
-         componentText.replaceAll("DOCUMENTNAME", doc.getName());
-         componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
+         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText = componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
       
       if(componentText.isEmpty()) {
@@ -112,7 +112,7 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       if(subjectComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent)subjectComponent;
          subject = stc.getText();
-         subject.replaceAll("DOCUMENTNAME", doc.getName());
+         subject = subject.replaceAll("DOCUMENTNAME", doc.getName());
       }
       
       return subject;
