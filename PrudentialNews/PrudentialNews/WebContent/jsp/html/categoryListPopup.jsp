@@ -48,7 +48,8 @@ function updateCategory() {
     
 	var categories = [];
 	$("#SelectedCats").val("");
-	$("#tokenfield").tokenfield('destroy');	
+	$("#tokenfield").tokenfield('destroy');
+	$("#tokenfield").val('');	
 	$("#tokenfield").tokenfield();	
 	$(":checkbox:checked").each(function() {
 		var obj = {id:"", label:""};
@@ -64,28 +65,37 @@ function updateCategory() {
 	
 }
 
-function updateCategory_old() {
-	var categories = [];
-	$("#category-modal-container .category-list li:has( input[type=checkbox]:checked )").each(function() {
-		var obj = {id:"", label:""};
-		obj.id = $(this).find("input[type=checkbox]").val();
-		obj.label = $(this).find("label").text();
-		categories.push(obj);
-	});
-	$("#SelectedCats").val(JSON.stringify(categories));
-}
 function updateCategoryListSelection(catIds) {
-	//$("#category-modal-container ul.category-list > li > input[type='checkbox']").prop("checked", false);
 	for(var i = 0; i < catIds.length; ++i) {
-		//$("#category-modal-container ul.category-list > li > input#"+catIds[i]).prop("checked", true);
 		$("#"+catIds[i]+"").prop("checked", true);
 	}
 }
 
+
 $(function(){
 	var theData = '<%=catListPopupvalue%>';
 	var jsonData = $.parseJSON(theData);
-	$("#tokenfield").tokenfield();	
+	$("#tokenfield")
+		.on('tokenfield:removedtoken', function (e) {
+	        var checkId = e.attrs.value;
+	        console.log ("got a change in " + checkId);
+	        $("#" + checkId + "").prop('checked', false); 
+	        var catsJson = jQuery.parseJSON(unescape($("#SelectedCats").val()));
+			console.log ("JSON Is " + JSON.stringify(catsJson));
+		   	var indexToDelete = null;
+		   	$.each(catsJson, function(i, obj) {
+				console.log ("Got : " + obj.id);
+				if (obj.id == checkId) {
+				   indexToDelete = i;
+				}
+			});
+			catsJson.splice(indexToDelete, 1);
+			console.log ("Now JSON Is " + JSON.stringify(catsJson));
+    		$("#SelectedCats").val(JSON.stringify(catsJson));
+	        
+   	        //$("#SelectedCats").val(JSON.stringify(categories));
+	   })	
+	.tokenfield();
 	//var $select = $('#select-test');
 	var categories = [];
 	$(jsonData).each(function (index, o) {  

@@ -206,4 +206,8 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
       return recipientList;
 
    }
+   
+   boolean shouldSend(Document doc) {
+      return true;
+   }
 }

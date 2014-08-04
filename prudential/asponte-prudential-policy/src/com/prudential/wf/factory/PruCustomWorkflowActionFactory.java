@@ -27,6 +27,7 @@ import com.prudential.wf.actions.RemoveMyActionsMessage;
 import com.prudential.wf.actions.ReviewApproveEmailAction;
 import com.prudential.wf.actions.NotifyReferences;
 import com.prudential.wf.actions.ReviewDelayPopulatePreviousStage;
+import com.prudential.wf.actions.ReviewExpiringEmailAction;
 import com.prudential.wf.actions.ScheduleReviewEmailAction;
 import com.prudential.wf.actions.CreateDraftPolicy;
 
@@ -62,6 +63,7 @@ public class PruCustomWorkflowActionFactory implements
 		actions.put("ApproveDelayPopulatePreviousStage", new ApproveDelayPopulatePreviousStage(customWorkflowService));
 		actions.put("PopulateLastRevisedDate", new PopulateLastRevisedDate(customWorkflowService));
 		actions.put("PreviousStageIfNecessary", new PreviousStageIfNecessary(customWorkflowService));
+		actions.put("ReviewExpiringEmailAction", new ReviewExpiringEmailAction(customWorkflowService));
 		//ReviewDelayPopulatePreviousStage
 		//ApproveDelayPopulatePreviousStage
 	}

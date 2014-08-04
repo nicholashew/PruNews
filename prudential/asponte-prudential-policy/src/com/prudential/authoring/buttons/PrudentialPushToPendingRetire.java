@@ -175,7 +175,9 @@ public class PrudentialPushToPendingRetire implements AuthoringAction {
                   s_log.log(Level.FINEST, "isPending = " + isPending);
                }
                if (isPending) {
-                  isValid = true;
+                  if(!theContent.hasDraft()) {
+                     isValid = true;
+                  }                  
                }
             }
 

@@ -58,7 +58,7 @@ public class PopulateFutureReviewDate extends BaseCustomWorkflowAction {
                   tempDate = tempCal.getTime();
                   theContent.setGeneralDateOne(tempDate);
                   if (isDebug) {
-                     s_log.log(Level.FINEST, "Effective Date set to "+tempDate);
+                     s_log.log(Level.FINEST, "General Date One set to "+tempDate);
                   }
                }
                catch (Exception e) {

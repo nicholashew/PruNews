@@ -7,6 +7,7 @@ package com.prudential.wf.actions;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,6 +29,8 @@ import com.ibm.workplace.wcm.api.exceptions.AuthorizationException;
 import com.ibm.workplace.wcm.api.exceptions.ComponentNotFoundException;
 import com.ibm.workplace.wcm.api.exceptions.DocumentIdCreationException;
 import com.ibm.workplace.wcm.api.exceptions.PropertyRetrievalException;
+import com.prudential.tasks.EmailReminderTask;
+import com.prudential.tasks.PreviousStageTask;
 import com.prudential.utils.Utils;
 import com.prudential.wcm.WCMUtils;
 import com.prudential.wcm.wf.*;
@@ -68,7 +71,18 @@ public class PreviousStageIfNecessary extends BaseCustomWorkflowAction {
                }               
                theContent.removeComponent(Utils.p_prevStageCmpnt);
                actionMessage = this.getClass().getName() + " Previous Stage Necessary";
-               directive = Directives.PREVIOUS_WORKFLOW_STAGE;
+               //directive = Directives.PREVIOUS_WORKFLOW_STAGE;
+               // now, schedule the task to 
+            // get the component from the parent site area
+               PreviousStageTask thisTask = new PreviousStageTask();
+               thisTask.setUuid(theContent.getId().getId());               
+               Timer timer = new Timer("PREVSTAGETIME");
+               Calendar calendar = Calendar.getInstance();
+               calendar.add(Calendar.SECOND, 10);
+
+               Date theDate = calendar.getTime();
+               // run immediately
+               timer.schedule(thisTask, theDate);
             }
             catch (ComponentNotFoundException e) {
                // TODO Auto-generated catch block

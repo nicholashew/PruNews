@@ -20,6 +20,8 @@ import com.ibm.workplace.wcm.api.custom.CustomWorkflowAction;
 import com.ibm.workplace.wcm.api.custom.CustomWorkflowActionResult;
 import com.ibm.workplace.wcm.api.custom.Directive;
 import com.ibm.workplace.wcm.api.custom.Directives;
+import com.ibm.workplace.wcm.api.exceptions.PropertyRetrievalException;
+
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -114,7 +116,21 @@ public class EmailNewsletters implements CustomWorkflowAction {
    @Override
    public Date getExecuteDate(Document p_arg0) {
       // TODO Auto-generated method stub
-      return new Date();
+      //return new Date();
+      Content theContent = (Content)p_arg0;      
+      Date executeDate = new Date();
+      try {
+         executeDate = theContent.getEffectiveDate();
+      }
+      catch (PropertyRetrievalException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST))
+         {
+            s_log.log(Level.FINEST, "", e);
+         }
+      }
+      return executeDate;
+      
    }
 
    /**

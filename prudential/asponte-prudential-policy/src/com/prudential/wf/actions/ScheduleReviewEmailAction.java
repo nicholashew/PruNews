@@ -197,4 +197,8 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       return recipientList;
 
    }
+   
+   boolean shouldSend(Document doc) {
+      return true;
+   }
 }

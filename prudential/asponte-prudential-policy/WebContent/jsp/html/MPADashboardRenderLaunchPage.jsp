@@ -318,8 +318,7 @@ var fullDataset = {
     
     String stage = theWrapper.getWfStage().toLowerCase();
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
-    String editURL="<a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a>";
-    Content theContent = (Content)doc; 
+    editURL="<a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a>";    
     String retireRationale = ""; 
     if(stage.contains("draft")) { 
       stage = "Draft"; 
@@ -435,7 +434,9 @@ var fullDataset = {
     
     String stage = theWrapper.getWfStage().toLowerCase();
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
-    Content theContent = (Content) ws.getById(theWrapper.getItemId());
+    DocumentId curDocId = ws.createDocumentId(theWrapper.getItemId()); 
+    Content theContent = (Content) ws.getById(curDocId);
+    
     String retireRationale = "";
     if(stage.contains("draft")) { 
       stage = "Draft"; 

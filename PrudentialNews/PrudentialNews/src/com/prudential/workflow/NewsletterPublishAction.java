@@ -19,6 +19,7 @@ import com.ibm.workplace.wcm.api.exceptions.DocumentCreationException;
 import com.ibm.workplace.wcm.api.exceptions.DocumentSaveException;
 import com.ibm.workplace.wcm.api.exceptions.DuplicateChildException;
 import com.ibm.workplace.wcm.api.exceptions.IllegalDocumentTypeException;
+import com.ibm.workplace.wcm.api.exceptions.PropertyRetrievalException;
 import com.ibm.workplace.wcm.api.exceptions.VirtualPortalNotFoundException;
 import com.ibm.workplace.wcm.api.exceptions.WCMException;
 import com.ibm.workplace.wcm.api.query.Query;
@@ -147,7 +148,21 @@ public class NewsletterPublishAction implements CustomWorkflowAction {
    @Override
    public Date getExecuteDate(Document p_arg0) {
       // TODO Auto-generated method stub
-      return new Date();
+      //return new Date();
+      Content theContent = (Content)p_arg0;      
+      Date executeDate = new Date();
+      try {
+         executeDate = theContent.getEffectiveDate();
+      }
+      catch (PropertyRetrievalException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST))
+         {
+            s_log.log(Level.FINEST, "", e);
+         }
+      }
+      return executeDate;
+      
    }
 
 }

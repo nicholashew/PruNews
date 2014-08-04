@@ -162,30 +162,20 @@ public abstract class BaseEmailAction extends BaseCustomWorkflowAction {
       CustomWorkflowActionResult result = null;
       String message = "BaseEmailAction executing";
       WebContentCustomWorkflowService webContentCustomWorkflowService = null;
-      
-      /**
-      ScheduleReviewEmailRenderer emailRenderer = new ScheduleReviewEmailRenderer();
-      emailRenderer.setWcmContentLink("http://wcmwidgets.com:122222/wps/myportal/WCM-Authoring?wcmAuthoringAction=read&amp;docid=");
-
-      WCMEmailTask runnableTask = new WCMEmailTask();
-
-      runnableTask.setEmailBodyType("text/html");
-      runnableTask.setFromEmailAddress(getFromEmailAddress());
-      runnableTask.setRenderer(emailRenderer);
-      runnableTask.setEmailProperties(super.emailProperties);
-      runnableTask.setRecipientList(getRecipients(doc));
-      */
+            
       try {
          webContentCustomWorkflowService = WCMUtils.getWebContentCustomWorkflowService();
          result = webContentCustomWorkflowService.createResult(directive, message);
+         if(shouldSend(doc)) {
+            
+         }
          email(getRecipients(doc), doc);         
       }
       catch (Exception e) {
          if (isDebug) {
             e.printStackTrace();
          }
-      }
-      //return super.execute(doc, runnableTask, 0, -1, 1);     
+      }   
       return result;
    } 
    
@@ -278,6 +268,8 @@ public abstract class BaseEmailAction extends BaseCustomWorkflowAction {
     */
    abstract String getEmailSubject(Document doc);
    
+   abstract boolean shouldSend(Document doc);
+   
    /**
     * 
     * email description
@@ -309,7 +301,7 @@ public abstract class BaseEmailAction extends BaseCustomWorkflowAction {
 
          WCMUtils.sendMessage(props, emailUser, emailPassword, fromEmailAddress, p_emailAddresses, subject, emailBody, emailBodyType);
          // now create the library date component if necessary
-         updateDate(theDoc);
+         //updateDate(theDoc);
       }
       catch (Exception e) {
          if (isDebug) {
