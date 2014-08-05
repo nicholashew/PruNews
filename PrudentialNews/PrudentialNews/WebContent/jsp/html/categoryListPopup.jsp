@@ -134,7 +134,7 @@ $(function(){
 		 }
         	},
 		open: function( event, ui ) {
-			$("#category-list-ajax").html("<div class='loading'><br><br><img src='http://www.jlg.com/images/layout/loadingGif.gif'></div>");
+			$("#category-list-ajax").html("<div class='loading'><br><br><img src='/webradar/public/images/spinner.gif'></div>");
 			//var catIds = getCategoryIds();			
 			if(categoryListHtml == null) {
 			$.ajax({
@@ -171,7 +171,7 @@ function myoptionsubmit()
 <input type="hidden" id="SelectedCats" style="width:500px; height:500px;"></textarea>
 <input type="text" id="tokenfield" />
 
-<input type='button' name='basic' id="openCatModal" value='Demo' class='basic-modal'/>
+<input type='button' name='basic' id="openCatModal" value='Select Categories' class='basic-modal'/>
 
 <div id="categoryModal">	
 	<div class='content' id="category-list-ajax"></div>	

@@ -49,172 +49,177 @@ public class NotifyReferences implements CustomWorkflowAction {
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       Directive directive = Directives.CONTINUE;
       RollbackDirectiveParams params = (RollbackDirectiveParams) Directives.ROLLBACK_DOCUMENT.createDirectiveParams();
-
+      boolean shouldSend = true;
       if (isDebug) {
          s_log.log(Level.FINEST, "Processing Document: " + doc.getTitle() + " (" + doc.getName() + ")");
       }
 
-      try {
-         if (wksp == null) {
-            if (isDebug) {
-               s_log.log(Level.FINEST, "Retrieving System Workspace");
+      // only send if necessary
+
+      shouldSend = shouldSend(doc);
+      if (shouldSend) {
+         try {
+            if (wksp == null) {
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "Retrieving System Workspace");
+               }
+               wksp = WCM_API.getRepository().getSystemWorkspace();
             }
-            wksp = WCM_API.getRepository().getSystemWorkspace();
-         }
-         if (wksp != null) {
-            Set targetListSet = new HashSet();
-            ArrayList targetList = new ArrayList();
-            boolean dnUsed = wksp.isDistinguishedNamesUsed();
-            wksp.useDistinguishedNames(true);
-            // Get the references to the current docuemnt
-            Reference[] refs = wksp.getReferences(doc.getId());
-            for (Reference ref : refs) {
-               // Get the document referring to the current document
-               DocumentId refId = ref.getRefererDocumentId();
+            if (wksp != null) {
+               Set targetListSet = new HashSet();
+               ArrayList targetList = new ArrayList();
+               boolean dnUsed = wksp.isDistinguishedNamesUsed();
+               wksp.useDistinguishedNames(true);
+               // Get the references to the current docuemnt
+               Reference[] refs = wksp.getReferences(doc.getId());
+               for (Reference ref : refs) {
+                  // Get the document referring to the current document
+                  DocumentId refId = ref.getRefererDocumentId();
 
-               try {
-                  Document refDoc = wksp.getById(refId);
-                  if (isDebug) {
-                     s_log.log(Level.FINEST, "Processing " + refId);
-                  }
-                  // Only look for Content items
-                  if (refDoc instanceof Content) {
-                     Content refCont = (Content) refDoc;
-
-                     // Only look for Content items - which are Published
-                     // don't exclude drafts.
-                     //if (refCont.isPublished()) {
-                     DocumentId refATid = refCont.getAuthoringTemplateID();
-                     String refATname = refATid.getName();
-
-                     // Check if the Referenced Content item is a Policy document
-                     if (policyTemplateList.contains(refATname)) {
-
-                        /**********************************************
-                         ** Perform necessary email notifications to **
-                         ** Authors / Owners of referring documents  **
-                         **********************************************/
-                        String[] authors = refDoc.getAuthors();
-                        String[] owners = refDoc.getOwners();
-                        targetListSet.addAll(Arrays.asList(authors));
-                        targetListSet.addAll(Arrays.asList(owners));
-                        if (authors != null) {
-                           for (int x = 0; x < authors.length; x++) {
-                              String dn = authors[x];
-                              if (isDebug) {
-                                 s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
-                              }
-                              User theUser = Utils.getUserByDN(dn);
-                              if (theUser != null) {
-                                 targetListSet.addAll(Utils.getEmailsUser(theUser));
-                              }
-                              else {
-                                 if (isDebug) {
-                                    s_log.log(Level.FINEST, "theUser was null, try group");
-                                 }
-                                 Group theGroup = Utils.getGroupByDistinguishedName(dn);
-                                 if (theGroup != null) {
-                                    targetListSet.addAll(Utils.getEmailsGroup(theGroup));
-                                 }
-                                 else {
-                                    if (isDebug) {
-                                       s_log.log(Level.FINEST, "theGroup was null");
-                                    }
-
-                                 }
-                              }
-
-                           }
-                        }
-                        if (owners != null) {
-                           for (int x = 0; x < owners.length; x++) {
-                              String dn = owners[x];
-                              if (isDebug) {
-                                 s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
-                              }
-                              User theUser = Utils.getUserByDN(dn);
-                              if (theUser != null) {
-                                 targetListSet.addAll(Utils.getEmailsUser(theUser));
-                              }
-                              else {
-                                 if (isDebug) {
-                                    s_log.log(Level.FINEST, "theUser was null, try group");
-                                 }
-                                 Group theGroup = Utils.getGroupByDistinguishedName(dn);
-                                 if (theGroup != null) {
-                                    targetListSet.addAll(Utils.getEmailsGroup(theGroup));
-                                 }
-                                 else {
-                                    if (isDebug) {
-                                       s_log.log(Level.FINEST, "theGroup was null");
-                                    }
-
-                                 }
-                              }
-
-                           }
-                        }
-                        // Email the "targetList"...
-
+                  try {
+                     Document refDoc = wksp.getById(refId);
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "Processing " + refId);
                      }
-                     //}
+                     // Only look for Content items
+                     if (refDoc instanceof Content) {
+                        Content refCont = (Content) refDoc;
+
+                        // Only look for Content items - which are Published
+                        // don't exclude drafts.
+                        //if (refCont.isPublished()) {
+                        DocumentId refATid = refCont.getAuthoringTemplateID();
+                        String refATname = refATid.getName();
+
+                        // Check if the Referenced Content item is a Policy document
+                        if (policyTemplateList.contains(refATname)) {
+
+                           /**********************************************
+                            ** Perform necessary email notifications to **
+                            ** Authors / Owners of referring documents  **
+                            **********************************************/
+                           String[] authors = refDoc.getAuthors();
+                           String[] owners = refDoc.getOwners();
+                           targetListSet.addAll(Arrays.asList(authors));
+                           targetListSet.addAll(Arrays.asList(owners));
+                           if (authors != null) {
+                              for (int x = 0; x < authors.length; x++) {
+                                 String dn = authors[x];
+                                 if (isDebug) {
+                                    s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
+                                 }
+                                 User theUser = Utils.getUserByDN(dn);
+                                 if (theUser != null) {
+                                    targetListSet.addAll(Utils.getEmailsUser(theUser));
+                                 }
+                                 else {
+                                    if (isDebug) {
+                                       s_log.log(Level.FINEST, "theUser was null, try group");
+                                    }
+                                    Group theGroup = Utils.getGroupByDistinguishedName(dn);
+                                    if (theGroup != null) {
+                                       targetListSet.addAll(Utils.getEmailsGroup(theGroup));
+                                    }
+                                    else {
+                                       if (isDebug) {
+                                          s_log.log(Level.FINEST, "theGroup was null");
+                                       }
+
+                                    }
+                                 }
+
+                              }
+                           }
+                           if (owners != null) {
+                              for (int x = 0; x < owners.length; x++) {
+                                 String dn = owners[x];
+                                 if (isDebug) {
+                                    s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
+                                 }
+                                 User theUser = Utils.getUserByDN(dn);
+                                 if (theUser != null) {
+                                    targetListSet.addAll(Utils.getEmailsUser(theUser));
+                                 }
+                                 else {
+                                    if (isDebug) {
+                                       s_log.log(Level.FINEST, "theUser was null, try group");
+                                    }
+                                    Group theGroup = Utils.getGroupByDistinguishedName(dn);
+                                    if (theGroup != null) {
+                                       targetListSet.addAll(Utils.getEmailsGroup(theGroup));
+                                    }
+                                    else {
+                                       if (isDebug) {
+                                          s_log.log(Level.FINEST, "theGroup was null");
+                                       }
+
+                                    }
+                                 }
+
+                              }
+                           }
+                           // Email the "targetList"...
+
+                        }
+                        //}
+                     }
+                  }
+                  catch (Exception ex) {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, ex.toString() + ": Unable to retrieve referencing document (Referer)");
+                        ex.printStackTrace();
+                     }
                   }
                }
-               catch (Exception ex) {
-                  if (isDebug) {
-                     s_log.log(Level.FINEST, ex.toString() + ": Unable to retrieve referencing document (Referer)");
-                     ex.printStackTrace();
+               wksp.useDistinguishedNames(dnUsed);
+
+               Properties props = WCMUtils.getStandardMailProperties();
+
+               StringBuffer emailMessage = new StringBuffer();
+
+               emailMessage.append(getEmailBody(doc));
+
+               String fromEmailAddress = props.getProperty("prudential.mail.fromaddress");
+               String subject = getEmailSubject(doc);
+               String emailBody = emailMessage.toString();
+               String emailUser = props.getProperty("prudential.mail.username");
+               //String emailPassword = props.getProperty("prudential.mail.password");
+               String emailPassword = props.getProperty("prudential.mail.pass");
+               String emailBodyType = "text/html";
+
+               targetList = new ArrayList(Arrays.asList(targetListSet.toArray()));
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "targetListSet is ");
+                  Iterator targetListIterator = targetListSet.iterator();
+                  while (targetListIterator.hasNext()) {
+                     s_log.log(Level.FINEST, "targetListIterator contains " + targetListIterator.next().toString());
+                  }
+                  targetListIterator = targetList.iterator();
+                  while (targetListIterator.hasNext()) {
+                     s_log.log(Level.FINEST, "targetListIterator from targetList contains " + targetListIterator.next().toString());
                   }
                }
+
+               WCMUtils.sendMessage(props, emailUser, emailPassword, fromEmailAddress, targetList, subject, emailBody, emailBodyType);
+
+               // now create the library date component if necessary
+
             }
-            wksp.useDistinguishedNames(dnUsed);
+         }
 
-            Properties props = WCMUtils.getStandardMailProperties();
-
-            StringBuffer emailMessage = new StringBuffer();
-
-            emailMessage.append(getEmailBody(doc));
-
-            String fromEmailAddress = props.getProperty("prudential.mail.fromaddress");
-            String subject = getEmailSubject(doc);
-            String emailBody = emailMessage.toString();
-            String emailUser = props.getProperty("prudential.mail.username");
-            //String emailPassword = props.getProperty("prudential.mail.password");
-            String emailPassword = props.getProperty("prudential.mail.pass");
-            String emailBodyType = "text/html";
-
-            targetList = new ArrayList(Arrays.asList(targetListSet.toArray()));
+         catch (ServiceNotAvailableException ex) {
             if (isDebug) {
-               s_log.log(Level.FINEST, "targetListSet is ");
-               Iterator targetListIterator = targetListSet.iterator();
-               while (targetListIterator.hasNext()) {
-                  s_log.log(Level.FINEST, "targetListIterator contains " + targetListIterator.next().toString());
-               }
-               targetListIterator = targetList.iterator();
-               while (targetListIterator.hasNext()) {
-                  s_log.log(Level.FINEST, "targetListIterator from targetList contains " + targetListIterator.next().toString());
-               }
+               s_log.log(Level.FINEST, ex.toString() + ": Unable to retrieve System Workspace");
+               ex.printStackTrace();
             }
-
-            WCMUtils.sendMessage(props, emailUser, emailPassword, fromEmailAddress, targetList, subject, emailBody, emailBodyType);
-
-            // now create the library date component if necessary
-
+         }
+         catch (Exception ex) {
+            if (isDebug) {
+               s_log.log(Level.FINEST, ex.toString() + ": Unable to retrieve references from current document");
+               ex.printStackTrace();
+            }
          }
       }
-      catch (ServiceNotAvailableException ex) {
-         if (isDebug) {
-            s_log.log(Level.FINEST, ex.toString() + ": Unable to retrieve System Workspace");
-            ex.printStackTrace();
-         }
-      }
-      catch (Exception ex) {
-         if (isDebug) {
-            s_log.log(Level.FINEST, ex.toString() + ": Unable to retrieve references from current document");
-            ex.printStackTrace();
-         }
-      }
-
       WebContentCustomWorkflowService webContentCustomWorkflowService;
       try {
          // Construct and inital Context
@@ -228,7 +233,12 @@ public class NotifyReferences implements CustomWorkflowAction {
       }
       String message;
       if (directive == Directives.CONTINUE) {
-         message = "Referer Authors / Owners notified";
+         if(shouldSend) {
+            message = "Referer Authors / Owners notified";   
+         }
+         else {
+            message = "No need to send, not retiring yet";
+         }
          if (isDebug) {
             s_log.log(Level.FINEST, message);
          }
@@ -256,25 +266,26 @@ public class NotifyReferences implements CustomWorkflowAction {
 
       // retrieve from WCM      
       StringBuilder sb = new StringBuilder();
-      
+
       String componentText = "";
       // try to get the component
-      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailTextCmpnt, "PruPolicyDesign");
-      if(bodyComponent != null) {
-         LibraryHTMLComponent stc = (LibraryHTMLComponent)bodyComponent;
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailTextCmpnt,
+         "PruPolicyDesign");
+      if (bodyComponent != null) {
+         LibraryHTMLComponent stc = (LibraryHTMLComponent) bodyComponent;
          componentText = stc.getHTML();
          componentText = componentText.replaceAll("DOCUMENTNAME", doc.getName());
          componentText = componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
-      
-      if(componentText.isEmpty()) {
+
+      if (componentText.isEmpty()) {
          sb.append("The model policy " + doc.getName() + " has been marked for retire.");
          sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
       }
       else {
          sb.append(componentText);
       }
-      
+
       String body = sb.toString();
 
       if (isDebug) {
@@ -302,29 +313,64 @@ public class NotifyReferences implements CustomWorkflowAction {
       // try to get the component
       String subject = "";
       StringBuilder sb = new StringBuilder();
-      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailSubjectCmpnt, "PruPolicyDesign");
-      if(subjectComponent != null) {
-         LibraryShortTextComponent stc = (LibraryShortTextComponent)subjectComponent;
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailSubjectCmpnt,
+         "PruPolicyDesign");
+      if (subjectComponent != null) {
+         LibraryShortTextComponent stc = (LibraryShortTextComponent) subjectComponent;
          subject = stc.getText();
          subject = subject.replaceAll("DOCUMENTNAME", doc.getName());
       }
-      
+
       // retrieve from WCM      
-      if(subject.isEmpty()) {
-         sb.append("The model policy " + doc.getName() + " has been marked for retire.");   
+      if (subject.isEmpty()) {
+         sb.append("The model policy " + doc.getName() + " has been marked for retire.");
       }
       else {
          sb.append(subject);
       }
       String body = sb.toString();
 
-      
       if (isDebug) {
          s_log.exiting("NotifyReferences", "getEmailSubject returning " + body);
       }
 
       return body;
 
+   }
+
+   /**
+    * for 
+    * @see com.prudential.wf.actions.ReviewApproveEmailAction#shouldSend(com.ibm.workplace.wcm.api.Document)
+    */
+   boolean shouldSend(Document doc) {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+
+      if (isDebug) {
+         s_log.entering("NotifyReferences", "shouldSend " + doc.getName());
+      }
+
+      Content theContent = (Content) doc;
+      boolean shouldSend = false;
+      // get the gendateone.  If it's populated and after now, don't send
+      Date genDateOne;
+      try {
+         genDateOne = theContent.getGeneralDateOne();
+         if (genDateOne == null || genDateOne.after(new Date())) {
+            shouldSend = true;
+         }
+      }
+      catch (PropertyRetrievalException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST)) {
+            s_log.log(Level.FINEST, "", e);
+         }
+      }
+
+      if (isDebug) {
+         s_log.exiting("NotifyReferences", "shouldSend: " + shouldSend);
+      }
+
+      return shouldSend;
    }
 
 }

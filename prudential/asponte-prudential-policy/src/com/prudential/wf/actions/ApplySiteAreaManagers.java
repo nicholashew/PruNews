@@ -24,8 +24,13 @@ import com.ibm.workplace.wcm.api.exceptions.DocumentRetrievalException;
 import com.ibm.workplace.wcm.api.exceptions.OperationFailedException;
 import com.ibm.workplace.wcm.api.exceptions.ServiceNotAvailableException;
 import com.ibm.workplace.wcm.api.security.Access;
+import com.prudential.tasks.ApplyManagersAsOwnersTask;
+import com.prudential.tasks.PreviousStageTask;
+
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
 import java.util.logging.Level;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -59,59 +64,14 @@ public class ApplySiteAreaManagers implements CustomWorkflowAction {
                s_log.log(Level.FINEST, "Content: {0} ({1})", new Object[]{cont.getTitle(), cont.getName()});
             }
 			
-			try {
-				if (wksp == null) {
-					wksp = WCM_API.getRepository().getSystemWorkspace();
-					wksp.useDistinguishedNames(false);
-				}
-				// cmk just get the inherited manager access from the content itself
-				//String[] managersContent = cont.getInheritedManagerAccessMembers();
-				String[] managersContent = cont.getMembersForInheritedAccess(Access.MANAGER);
-				if(managersContent != null && managersContent.length > 0) {
-				   if (isDebug) {
-                     s_log.log(Level.FINEST, "found content managers, using to populate the authors");
-                  }
-				   cont.addOwners(managersContent);
-				}
-				else {
-				   DocumentId parId = ((Hierarchical)cont).getParentId();
-	                boolean foundManagers = false;
-	                while (parId != null && !foundManagers) {
-	                    Document parent = wksp.getById(parId);
-	                    String[] managers = parent.getMembersForAccess(Access.MANAGER);
-	                    if (managers != null) {
-	                        foundManagers = true;
-	                        cont.addOwners(managers);
-	                        if (isDebug) {
-	                           s_log.log(Level.FINEST, "Owners field set to: {0}", Arrays.toString(managers));
-	                        }
-	                    } else {
-	                        parId = ((Hierarchical)parent).getParentId();
-	                    }
-	                }
-				}
-				
-			} catch (OperationFailedException e) {
-			   if (isDebug) {
-                  s_log.log(Level.FINEST, "exception occurred "+e.getMessage());
-                  e.printStackTrace();
-               }				
-			} catch (ServiceNotAvailableException e) {
-			   if (isDebug) {
-                  s_log.log(Level.FINEST, "exception occurred "+e.getMessage());
-                  e.printStackTrace();
-               }
-			} catch (DocumentRetrievalException e) {
-			   if (isDebug) {
-                  s_log.log(Level.FINEST, "exception occurred "+e.getMessage());
-                  e.printStackTrace();
-               }
-			} catch (AuthorizationException e) {
-			   if (isDebug) {
-                  s_log.log(Level.FINEST, "exception occurred "+e.getMessage());
-                  e.printStackTrace();
-               }
-			}
+			ApplyManagersAsOwnersTask thisTask = new ApplyManagersAsOwnersTask();
+            thisTask.setUuid(cont.getId().getId());               
+            Timer timer = new Timer("PREVSTAGETIME");
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.SECOND, 3);
+            Date theDate = calendar.getTime();
+            // run immediately
+            timer.schedule(thisTask, theDate);
 		}
 		WebContentCustomWorkflowService webContentCustomWorkflowService;
 		try {
