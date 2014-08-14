@@ -112,7 +112,27 @@ function myoptionsubmit()
 $(function() {
 	var theData = '<%=fvalue%>';
 	var jsonData = $.parseJSON(theData);
-	$("#suggestedCatTokenfield").tokenfield();	
+	//$("#suggestedCatTokenfield").tokenfield();
+	$("#suggestedCatTokenfield")
+		.on('suggestedCatTokenfield:removedtoken', function (e) {
+	        var checkId = e.attrs.value;
+	        console.log ("got a change in " + checkId);
+	        $("#" + checkId + "").prop('checked', false); 
+	        var catsJson = jQuery.parseJSON(unescape($("#SuggestedCats").val()));
+			console.log ("JSON Is " + JSON.stringify(catsJson));
+		   	var indexToDelete = null;
+		   	$.each(catsJson, function(i, obj) {
+				console.log ("Got : " + obj.id);
+				if (obj.id == checkId) {
+				   indexToDelete = i;
+				}
+			});
+			catsJson.splice(indexToDelete, 1);
+			console.log ("Now JSON Is " + JSON.stringify(catsJson));
+    		$("#SuggestedCats").val(JSON.stringify(catsJson));
+	           	      
+	   })	
+	.tokenfield();	
 	//var $select = $('#select-test');
 	var categories = [];
 	$(jsonData).each(function (index, o) {  
