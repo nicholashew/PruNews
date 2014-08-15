@@ -6,6 +6,7 @@
                  com.prudential.utils.*, 
                  com.prudential.wcm.*, 
                  java.text.*, 
+                 java.security.Principal,
                  java.util.logging.*, 
                  com.prudential.authoring.launchpage.*"%>
 
@@ -137,11 +138,11 @@
                   s_log.log(Level.FINEST, "before add authors");
                   String[] previousAuthors = doc.getAuthors();
                   String[] previousOwners = doc.getOwners();
-                  for(int a=0;a<previousAuthors.length;a++) {
-                  	s_log.log(Level.FINEST, "authors contains "+previousAuthors[a]);
+                  for (int a = 0; a < previousAuthors.length; a++) {
+                     s_log.log(Level.FINEST, "authors contains " + previousAuthors[a]);
                   }
-                  for(int b=0;b<previousOwners.length;b++) {
-                  	s_log.log(Level.FINEST, "owners contains "+previousOwners[b]);
+                  for (int b = 0; b < previousOwners.length; b++) {
+                     s_log.log(Level.FINEST, "owners contains " + previousOwners[b]);
                   }
                }
                doc.addAuthors(authors);
@@ -150,14 +151,14 @@
                   s_log.log(Level.FINEST, "after add authors");
                   String[] previousAuthors = doc.getAuthors();
                   String[] previousOwners = doc.getOwners();
-                  for(int a=0;a<previousAuthors.length;a++) {
-                  	s_log.log(Level.FINEST, "authors contains "+previousAuthors[a]);
+                  for (int a = 0; a < previousAuthors.length; a++) {
+                     s_log.log(Level.FINEST, "authors contains " + previousAuthors[a]);
                   }
-                  for(int b=0;b<previousOwners.length;b++) {
-                  	s_log.log(Level.FINEST, "owners contains "+previousOwners[b]);
+                  for (int b = 0; b < previousOwners.length; b++) {
+                     s_log.log(Level.FINEST, "owners contains " + previousOwners[b]);
                   }
-               }			
-			
+               }
+
                System.out.println("Saving: " + doc);
                String[] errors = ws.save(doc);
                if (errors != null && errors.length > 0) {
@@ -210,15 +211,17 @@
                doc.setEffectiveDate(new Date());
 
                doc.addHistoryLogEntry("Content Adopted by user " + userName);
+               // we need to set the PolicyApprover
+               // get from the parent site area 
                String[] errors = ws.save(doc);
                if (errors != null && errors.length > 0) {
                   if (isDebug) {
                      s_log.log(Level.FINEST, "Error Count: " + errors.length);
                      s_log.log(Level.FINEST, "Copy Policy ID: " + docId + ", to path ID: " + pathId);
-                  }
 
-                  for (String errMsg : errors) {
-                     s_log.log(Level.FINEST, "Error: " + errMsg);
+                     for (String errMsg : errors) {
+                        s_log.log(Level.FINEST, "Error: " + errMsg);
+                     }
                   }
                }
                else {
@@ -226,8 +229,62 @@
                      s_log.log(Level.FINEST, "Save returned no errors");
                   }
                }
+
                // after save, nextstage it 
-               doc.nextWorkflowStage();
+               // we need to set the PolicyApprover
+               // get from the parent site area 
+               Content theContent = (Content) ws.getById(doc.getId());
+               String componentName = "PolicyApprovers";
+               String componentNameSiteArea = "DefaultPolicyApprover";
+               SiteArea parentSite = (SiteArea) ws.getById(pathId);
+               if (parentSite.hasComponent(componentNameSiteArea)) {
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "Pull value for " + componentNameSiteArea + " from sitearea " + parentSite.getName());
+                  }
+                  UserSelectionComponent usc = (UserSelectionComponent) parentSite.getComponent(componentNameSiteArea);
+                  Principal[] values = usc.getSelections();
+                  if (theContent.hasComponent(componentName)) {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "content has component, use the principals to set the value");
+                        for (int x = 0; x < values.length; x++) {
+                           s_log.log(Level.FINEST, "values contains " + values[x]);
+                        }
+
+                     }
+                     UserSelectionComponent contentusc = (UserSelectionComponent) theContent.getComponent(componentName);
+                     contentusc.setSelections(values);
+                     theContent.setComponent(componentName, contentusc);
+                     // save the content
+                     String[] errors2 = ws.save(theContent);
+                     if (errors2 != null && errors2.length > 0) {
+                        if (isDebug) {
+                           s_log.log(Level.FINEST, "Error Count: " + errors2.length);
+                           for (String errMsg : errors2) {
+                              s_log.log(Level.FINEST, "Error: " + errMsg);
+                           }
+                        }
+                     }
+                     else {
+                        if (isDebug) {
+                           s_log.log(Level.FINEST, "Save returned no errors");
+                        }
+                     }
+                  }
+                  else {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "content does not have " + componentName);
+                     }
+                  }
+
+               }
+               else {
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "sitearea does not have " + componentNameSiteArea);
+                  }
+               }
+
+               // check to see if the parent site area has 
+               //doc.nextWorkflowStage(); 
             }
          }
          catch (Exception e) {

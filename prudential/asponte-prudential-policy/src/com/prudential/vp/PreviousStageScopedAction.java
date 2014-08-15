@@ -86,6 +86,10 @@ public class PreviousStageScopedAction implements VirtualPortalScopedAction {
 
                   Content theResult = (Content) ws.getById(contentId);
                   // move back
+                  // unlock
+                  if(ws.isLocked(contentId)) {
+                     ws.unlock(contentId);
+                  }
                   theResult.previousWorkflowStage(true);
                }
             }

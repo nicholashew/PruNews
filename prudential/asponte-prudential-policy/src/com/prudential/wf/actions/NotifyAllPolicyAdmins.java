@@ -249,10 +249,12 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
          }
          if (theContent.isDraft()) {
             if (!theContent.isDraftOfPublishedDocument()) {
-               cmpntName = WCMUtils.p_pendingAvailableEmailTextCmpnt;
+               //cmpntName = WCMUtils.p_pendingAvailableEmailTextCmpnt;
+               cmpntName = WCMUtils.p_pendingAvailableNewEmailTextCmpnt;
             }
             else {
-               cmpntName = WCMUtils.p_pendingAvailableNewEmailTextCmpnt;
+               //cmpntName = WCMUtils.p_pendingAvailableNewEmailTextCmpnt;
+               cmpntName = WCMUtils.p_pendingAvailableEmailTextCmpnt;
             }
          }
       }

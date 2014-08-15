@@ -105,7 +105,7 @@ public class GenDateOnePopulatePreviousStage extends AbstractPopulatePreviousSta
    String getDelayComponentName() {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      return null;
+      return s_delayCmpntName;
       
    }
 }

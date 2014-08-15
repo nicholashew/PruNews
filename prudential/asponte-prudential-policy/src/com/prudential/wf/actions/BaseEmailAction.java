@@ -167,9 +167,9 @@ public abstract class BaseEmailAction extends BaseCustomWorkflowAction {
          webContentCustomWorkflowService = WCMUtils.getWebContentCustomWorkflowService();
          result = webContentCustomWorkflowService.createResult(directive, message);
          if(shouldSend(doc)) {
-            
+            email(getRecipients(doc), doc);     
          }
-         email(getRecipients(doc), doc);         
+             
       }
       catch (Exception e) {
          if (isDebug) {

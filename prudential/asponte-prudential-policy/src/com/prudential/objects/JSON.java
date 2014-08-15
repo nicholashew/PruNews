@@ -119,6 +119,51 @@ public class JSON {
 
       return result; 
    } 
+   
+   public JSONObject createMyAction(Content cont, String[] approvers, String userType) { 
+      Date now = new Date(); 
+      long day = 1000 * 60 * 60 * 24; 
+      long week = 7 * day; 
+      long month = 31 * day; 
+
+      JSONObject result = new JSONObject(); 
+
+      header.put("businessKey", "PolsApprWFA-" + now.getTime()); 
+
+      LinkedList user = new LinkedList(); 
+      user.addAll(Arrays.asList(approvers)); 
+
+      String linkString = Utils.getPreviewURL(cont);
+      //String linkString = "https://" + authoringhostname + "/wps/myportal/wcmAuthoring?wcmAuthoringAction=read&docid=" + cont.getId().toString();
+      
+      LinkedHashMap userList = new LinkedHashMap(); 
+      userList.put("UserType", userType); 
+      userList.put("User", user); 
+      header.put("userList", userList); 
+      header.put("language", "en"); 
+      header.put("link", linkString); 
+
+      body.put("notificationType", "Note"); 
+      body.put("priority", 2); 
+      body.put("messageStatus", "Active"); 
+      body.put("progress", 0); 
+      body.put("startDate", now.getTime()); 
+      body.put("dueDate", (now.getTime() + week)); 
+      body.put("expirationDate", (now.getTime() + month)); 
+      body.put("title", "Approval Required"); 
+      body.put("shortDescription", "Approval required for " + cont.getTitle()); 
+      body.put("longDescription", "Approval required for the Policy: " + cont.getTitle()); 
+
+      status.put("serviceVersion", "1.0"); 
+      status.put("uiRemoveFlag", "false"); 
+
+      result.put("messageHeader", header); 
+      result.put("messageBody", body); 
+      result.put("messageStatus", status); 
+
+      return result; 
+   } 
+
 
    public JSONObject deleteMyAction(String id) { 
 

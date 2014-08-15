@@ -92,8 +92,40 @@ public class ApplyManagersAsOwnersScopedAction implements VirtualPortalScopedAct
                   if(managersContent != null && managersContent.length > 0) {
                      if (isDebug) {
                        s_log.log(Level.FINEST, "found content managers, using to populate the authors");
+                       for(int y=0;y<managersContent.length;y++) {
+                          s_log.log(Level.FINEST, "managers included "+managersContent[y]);
+                       }
+                       
                     }
                      theResult.addOwners(managersContent);
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "Owners field set to: {0}", Arrays.toString(managersContent));
+                     }
+                     try {
+                        if(ws.isLocked(theResult.getId())) {
+                           ws.unlock(theResult.getId());
+                        }
+                        String[] errors = ws.save(theResult);
+                        if(errors.length > 0) {
+                           if (isDebug) {
+                              s_log.log(Level.FINEST, "errors "+errors.length);
+                           }
+                           for(int x=0;x<errors.length;x++) {
+                              s_log.log(Level.FINEST, "errors contain "+errors[x]);
+                           }
+                        }
+                        else {
+                           if (isDebug) {
+                              s_log.log(Level.FINEST, "Content saved");
+                           }
+                        }
+                     }
+                     catch (Exception e) {
+                        if (isDebug) {
+                           s_log.log(Level.FINEST, "Exception "+e.getMessage());
+                           e.printStackTrace();
+                        }
+                     }
                   }
                   else {
                      DocumentId parId = ((Hierarchical)theResult).getParentId();
@@ -102,10 +134,38 @@ public class ApplyManagersAsOwnersScopedAction implements VirtualPortalScopedAct
                           Document parent = ws.getById(parId);
                           String[] managers = parent.getMembersForAccess(Access.MANAGER);
                           if (managers != null) {
+                             for(int y=0;y<managers.length;y++) {
+                                s_log.log(Level.FINEST, "managers included "+managers[y]);
+                             }
                               foundManagers = true;
                               theResult.addOwners(managers);
                               if (isDebug) {
                                  s_log.log(Level.FINEST, "Owners field set to: {0}", Arrays.toString(managers));
+                              }
+                              try {
+                                 if(ws.isLocked(theResult.getId())) {
+                                    ws.unlock(theResult.getId());
+                                 }
+                                 String[] errors = ws.save(theResult);
+                                 if(errors.length > 0) {
+                                    if (isDebug) {
+                                       s_log.log(Level.FINEST, "errors "+errors.length);
+                                    }
+                                    for(int x=0;x<errors.length;x++) {
+                                       s_log.log(Level.FINEST, "errors contain "+errors[x]);
+                                    }
+                                 }
+                                 else {
+                                    if (isDebug) {
+                                       s_log.log(Level.FINEST, "Content saved");
+                                    }
+                                 }
+                              }
+                              catch (Exception e) {
+                                 if (isDebug) {
+                                    s_log.log(Level.FINEST, "Exception "+e.getMessage());
+                                    e.printStackTrace();
+                                 }
                               }
                           } else {
                               parId = ((Hierarchical)parent).getParentId();

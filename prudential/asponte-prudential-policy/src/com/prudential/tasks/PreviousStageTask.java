@@ -57,7 +57,7 @@ public class PreviousStageTask extends TimerTask {
       boolean isDebug = s_log.isLoggable(Level.FINEST);
 
       if (isDebug) {
-         s_log.entering("EmailReminderTask", "run");
+         s_log.entering("PreviousStageTask", "run");
       }
 
       Repository repo = WCM_API.getRepository();
@@ -73,7 +73,7 @@ public class PreviousStageTask extends TimerTask {
          }
       }
       if (isDebug) {
-         s_log.exiting("EmailReminderTask", "run");
+         s_log.exiting("PreviousStageTask", "run");
       }
 
    }   
