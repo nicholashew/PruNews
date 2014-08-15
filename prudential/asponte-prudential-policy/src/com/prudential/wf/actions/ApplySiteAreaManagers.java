@@ -103,12 +103,20 @@ public class ApplySiteAreaManagers implements CustomWorkflowAction {
          else {
             DocumentId parId = ((Hierarchical) theResult).getParentId();
             boolean foundManagers = false;
+            if (isDebug) {
+               s_log.log(Level.FINEST, "Content security not inherited, check parent "+parId);
+            }
             try {
                while (parId != null && !foundManagers) {
                   Document parent;
-
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "checking "+parId);
+                  }
                   parent = ws.getById(parId);
                   String[] managers = parent.getMembersForAccess(Access.MANAGER);
+                  if(managers == null || managers.length < 1) {
+                     managers = parent.getMembersForInheritedAccess(Access.MANAGER);
+                  }
                   if (managers != null) {
                      for (int y = 0; y < managers.length; y++) {
                         s_log.log(Level.FINEST, "managers included " + managers[y]);

@@ -74,6 +74,8 @@ public class PreviousStageScopedAction implements VirtualPortalScopedAction {
                // try different workspace
                Workspace ws = Utils.getSystemWorkspace();
                if (ws != null && s_uuid != null) {
+                  ws.logout();
+                  ws.login();
                   DocumentId contentId = ws.createDocumentId(s_uuid);
                   if (contentId == null) {
                      throw new Exception("Could not create document id");
@@ -87,10 +89,10 @@ public class PreviousStageScopedAction implements VirtualPortalScopedAction {
                   Content theResult = (Content) ws.getById(contentId);
                   // move back
                   // unlock
-                  if(ws.isLocked(contentId)) {
-                     ws.unlock(contentId);
-                  }
-                  theResult.previousWorkflowStage(true);
+                  //if(ws.isLocked(contentId)) {
+                    // ws.unlock(contentId);
+                  //}                  
+                  theResult.previousWorkflowStage(true);                  
                }
             }
             catch (Exception e) {

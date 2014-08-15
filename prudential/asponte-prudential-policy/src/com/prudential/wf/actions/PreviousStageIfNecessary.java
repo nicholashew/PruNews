@@ -71,18 +71,21 @@ public class PreviousStageIfNecessary extends BaseCustomWorkflowAction {
                }               
                theContent.removeComponent(Utils.p_prevStageCmpnt);
                actionMessage = this.getClass().getName() + " Previous Stage Necessary";
-               //directive = Directives.PREVIOUS_WORKFLOW_STAGE;
+               // directive = Directives.PREVIOUS_WORKFLOW_STAGE;
                // now, schedule the task to 
-            // get the component from the parent site area
+               // get the component from the parent site area
+               
                PreviousStageTask thisTask = new PreviousStageTask();
                thisTask.setUuid(theContent.getId().getId());               
                Timer timer = new Timer("PREVSTAGETIME");
                Calendar calendar = Calendar.getInstance();
-               calendar.add(Calendar.SECOND, 10);
+               // delay longer
+               calendar.add(Calendar.SECOND, 45);
 
                Date theDate = calendar.getTime();
                // run immediately
                timer.schedule(thisTask, theDate);
+               
             }
             catch (ComponentNotFoundException e) {
                // TODO Auto-generated catch block
