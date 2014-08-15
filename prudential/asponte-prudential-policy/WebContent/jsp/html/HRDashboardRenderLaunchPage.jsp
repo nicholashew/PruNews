@@ -297,125 +297,7 @@ var fullDataset = {
           //editURL = "?1dmy&page=com.prudential.page.PP.PolicyDetail&urile=" + pathToContent; 
         } 
 		
-        // ensure live date isn't null 
-        String liveDateFormatted = ""; 
-        if(theWrapper.getLiveDate() != null) { 
-          liveDateFormatted = formatter.format(theWrapper.getLiveDate()); 
-        } // end-if 
-        String expireDateFormatted = ""; 
-        if(theWrapper.getExpireDate() != null) { 
-          expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
-        } // end-if 
-    
-        String lastModFormatted = ""; 
-    if(theWrapper.getLastModDate() != null) { 
-      lastModFormatted = formatter.format(theWrapper.getLastModDate()); 
-    } // end-if 
-    
-    String reviewDate = ""; 
-    if(theWrapper.getReviewDate() != null) { 
-      reviewDate = formatter.format(theWrapper.getReviewDate()); 
-    } // end-if 
-    else { 
-    
-    } 
-    
-    String stage = theWrapper.getWfStage().toLowerCase(); 
-    //Document doc = getDocumentById(ws, theWrapper.getItemId()); 
-    String retireRationale = ""; 
-    if(stage.contains("draft")) { 
-      stage = "Draft"; 
-    } else if(stage.contains("review")) { 
-      stage = "Review"; 
-      // if we're in review, get the review date 
-      //Content theContent = (Content)doc; 
-      Date enteredStage = theContent.getDateEnteredStage(); 
-      reviewDate = formatter.format(enteredStage); 
-    } else if(stage.contains("approval")) { 
-      stage = "Approve"; 
-      // if we're in review, get the review date 
-      //Content theContent = (Content)doc; 
-      Date enteredStage = theContent.getDateEnteredStage(); 
-      reviewDate = formatter.format(enteredStage); 
-    } else if(stage.contains("publish")) { 
-      stage = "Published"; 
-    } else if(stage.contains("approveretire")) { 
-      stage = "Pending Retire"; 
-    } else if(stage.contains("retire content")) { 
-      stage = "Retired";     
-      //Content theContent = (Content)doc; 
-      HistoryLogIterator hli = theContent.getHistoryLog(); 
-      ArrayList comments = new ArrayList();
-      while(hli.hasNext()) { 
-        HistoryLogEntry hle = hli.nextLogEntry(); 
-        int code = hle.getCode();
-        if(code >= 10000 && code <= 19999)
-		{
-			comments.add(hle);
-		}	             
-      } 
-      if(!comments.isEmpty()) {
-        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
-      	retireRationale = hle.getMessage(); 
-      }
-    } else if(stage.contains("expire")) { 
-      stage = "Retired"; 
-      //Content theContent = (Content)doc; 
-      HistoryLogIterator hli = theContent.getHistoryLog(); 
-      ArrayList comments = new ArrayList();
-      while(hli.hasNext()) { 
-        HistoryLogEntry hle = hli.nextLogEntry(); 
-        int code = hle.getCode();
-        if(code >= 10000 && code <= 19999)
-		{
-			comments.add(hle);
-		}	
-      } 
-      if(!comments.isEmpty()) {
-        HistoryLogEntry hle = (HistoryLogEntry)comments.get(comments.size()-1);
-      	retireRationale = hle.getMessage(); 
-      }
-    } 
-    
-    
-    String modelPolicyId = getModelPolicyLinkValue(theContent); 
-    Document parent = getDocumentById(ws, modelPolicyId); 
-    String contentPath = theWrapper.getPath().toLowerCase(); 
-    String policyType = "LINK"; 
-    if(modelPolicyId == null) { 
-      modelPolicyId = ""; 
-    } 
-  
-    /* SDD 10863*/
-    String _policyOwner=theWrapper.getAdditionalAttribute("PolicyOwner");
-	if(_policyOwner==null){_policyOwner="";}
-	else{_policyOwner=_policyOwner.replace("\"","\\\"").replaceAll("[\\r\\n]+"," ").split("[|]")[0].trim();}
-    %>{ 
-    itemId:"<%=id%>", 
-    contentId:"<%=theWrapper.getItemId()%>", 
-    viewCount:"<wcm:plugin name="RenderReferenceCount" displayCount="true" uuid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
-    //source:"/wps/wcm/myconnect/dd251369-8346-4d70-a834-21112c85f1a9/link.jpg?MOD=AJPERES&CACHEID=dd251369-8346-4d70-a834-21112c85f1a9&cache=none", 
-    source:"Link", 
-    type:"<%=policyType%>", 
-    authTemp:"<%=theWrapper.getAuthTemplateName()%>", 
-    editURL:"<%=editURL%>", 
-    //editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
-    title:"<%=theWrapper.getTitle()%>", 
-    modelPolicyId:"<%= modelPolicyId %>", 
-    status:"<%=stage%>", 
-    liveDateFormatted:"<%=liveDateFormatted%>", 
-    lastModFormatted:"<%=lastModFormatted%>", 
-    reviewDate:"<%=reviewDate%>", 
-    retiredDate:"<%=expireDateFormatted%>", 
-    retireRationale:"<%=retireRationale%>", 
-    author:"<%=_policyOwner%>", 
-    stage:"<%=stage %>", 
-    path:"<%=theWrapper.getPath() %>", 
-    standards:"<%= getStandards(parent) %>", 
-    reviewers:"", 
-    approvers:"", 
-    contacts:"" 
-
+        
         // ensure live date isn't null
         String liveDateFormatted = "";
         if(theWrapper.getLiveDate() != null) {
@@ -438,8 +320,7 @@ var fullDataset = {
     
     String stage = theWrapper.getWfStage().toLowerCase();
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
-    String editURL="<a href='"+Utils.getPreviewURL(doc)+"'>"+doc.getName()+"</a>";
-    Content theContent = (Content)doc; 
+
     String retireRationale = ""; 
     if(stage.contains("draft")) { 
       stage = "Draft"; 

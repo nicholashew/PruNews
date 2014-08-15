@@ -274,13 +274,13 @@ public class NotifyReferences implements CustomWorkflowAction {
       if (bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent) bodyComponent;
          componentText = stc.getHTML();
-         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getTitle());
          componentText = componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
 
       if (componentText.isEmpty()) {
-         sb.append("The model policy " + doc.getName() + " has been marked for retire.");
-         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
+         sb.append("The model policy " + doc.getTitle() + " has been marked for retire.");
+         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getTitle() + "</a><br>");
       }
       else {
          sb.append(componentText);
@@ -318,12 +318,12 @@ public class NotifyReferences implements CustomWorkflowAction {
       if (subjectComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent) subjectComponent;
          subject = stc.getText();
-         subject = subject.replaceAll("DOCUMENTNAME", doc.getName());
+         subject = subject.replaceAll("DOCUMENTNAME", doc.getTitle());
       }
 
       // retrieve from WCM      
       if (subject.isEmpty()) {
-         sb.append("The model policy " + doc.getName() + " has been marked for retire.");
+         sb.append("The model policy " + doc.getTitle() + " has been marked for retire.");
       }
       else {
          sb.append(subject);

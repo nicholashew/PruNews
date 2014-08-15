@@ -65,13 +65,13 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
       if(bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent)bodyComponent;
          componentText = stc.getHTML();
-         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getTitle());
          componentText = componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
       
       if(componentText.isEmpty()) {
-         sb.append("A document " + doc.getName() + " is awaiting your approval.");
-         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
+         sb.append("A document " + doc.getTitle() + " is awaiting your approval.");
+         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getTitle() + "</a><br>");
          // now check for the field         
       } else {
          sb.append(componentText);
@@ -113,14 +113,14 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
    String getEmailSubject(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      String subject = "Item "+doc.getName()+" is awaiting your approval";
+      String subject = "Item "+doc.getTitle()+" is awaiting your approval";
       
       // try to get the component
       LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailSubjectCmpnt, "PruPolicyDesign");
       if(subjectComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent)subjectComponent;
          subject = stc.getText();
-         subject = subject.replaceAll("DOCUMENTNAME", doc.getName());
+         subject = subject.replaceAll("DOCUMENTNAME", doc.getTitle());
       }
       
       return subject;

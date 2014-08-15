@@ -135,14 +135,23 @@ public class ApplyReviewersAction extends BaseCustomWorkflowAction {
       
       ContentComponent cmpnt = WCMUtils.getContentComponent(doc, p_componentName);
       if (cmpnt instanceof UserSelectionComponent) {
-         for (Principal p : ((UserSelectionComponent) cmpnt).getSelections()) {
-            if (isDebug) {
-               s_log.log(Level.FINEST, "adding principal "+p.getName());
-            }
-            com.ibm.portal.um.Principal thePrincipal = null;
-            thePrincipal = Utils.getPrincipalById(p.getName());
-            approvers.add(Utils.getDnForPrincipal(thePrincipal));
+         if (isDebug) {
+            s_log.log(Level.FINEST, "a user selection cmpnt was found");
          }
+         UserSelectionComponent theCmpnt = (UserSelectionComponent) cmpnt;
+         Principal[] users = theCmpnt.getSelections();
+         if(users != null) {
+            for (int x = 0;x<users.length;x++) {
+               Principal p = users[x];
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "adding principal "+p.getName());
+               }
+               com.ibm.portal.um.Principal thePrincipal = null;
+               thePrincipal = Utils.getPrincipalById(p.getName());
+               approvers.add(Utils.getDnForPrincipal(thePrincipal));
+            }
+         }         
+         
       }
       
       if (isDebug) {

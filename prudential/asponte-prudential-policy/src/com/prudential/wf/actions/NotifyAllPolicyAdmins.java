@@ -268,7 +268,7 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
       if (bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent) bodyComponent;
          componentText = stc.getHTML();
-         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getTitle());
          componentText = componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
 
@@ -276,18 +276,18 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
          sb.append(componentText);
       }
       else {
-         String message = "The model policy " + doc.getName() + " has been updated.";
+         String message = "The model policy " + doc.getTitle() + " has been updated.";
 
          try {
             if (theContent.isPublished()) {
-               message = "The model policy " + doc.getName() + " is ready to be adopted.";
+               message = "The model policy " + doc.getTitle() + " is ready to be adopted.";
             }
             if (theContent.isDraft()) {
                if (!theContent.isDraftOfPublishedDocument()) {
-                  message = "The new policy " + doc.getName() + " has been created and will become available to adopt.";
+                  message = "The new policy " + doc.getTitle() + " has been created and will become available to adopt.";
                }
                else {
-                  message = "The policy " + doc.getName() + " has been updated and will become available to adopt.";
+                  message = "The policy " + doc.getTitle() + " has been updated and will become available to adopt.";
                }
             }
          }
@@ -299,7 +299,7 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
          }
 
          sb.append(message);
-         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getName() + "</a><br>");
+         sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getTitle() + "</a><br>");
       }
 
       // now check for the field                     
@@ -354,26 +354,26 @@ public class NotifyAllPolicyAdmins extends BaseCustomWorkflowAction {
       if (bodyComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent) bodyComponent;
          componentText = stc.getText();
-         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getName());
+         componentText = componentText.replaceAll("DOCUMENTNAME", doc.getTitle());
       }
       if (!componentText.isEmpty()) {
          sb.append(componentText);
       }
       else {
-         String message = "The model policy " + doc.getName() + " has been updated.";
+         String message = "The model policy " + doc.getTitle() + " has been updated.";
          // retrieve from WCM            
          // if its published, state that its published
 
          try {
             if (theContent.isPublished()) {
-               message = "The model policy " + doc.getName() + " is ready to be adopted.";
+               message = "The model policy " + doc.getTitle() + " is ready to be adopted.";
             }
             if (theContent.isDraft()) {
                if (!theContent.isDraftOfPublishedDocument()) {
-                  message = "The new policy " + doc.getName() + " has been created and will become available to adopt.";
+                  message = "The new policy " + doc.getTitle() + " has been created and will become available to adopt.";
                }
                else {
-                  message = "The policy " + doc.getName() + " has been updated and will become available to adopt.";
+                  message = "The policy " + doc.getTitle() + " has been updated and will become available to adopt.";
                }
             }
          }
