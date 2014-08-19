@@ -31,8 +31,13 @@
     String catListPopupvalue = sb.toString();
 %>
 
-
 <script>
+if (window.jQuery) {  
+    console.log ("jQuery is loaded");
+} else {
+    console.log ("jQuery is still not loaded");
+}
+
 function getCategoryIds() {
 	var catIds = [];
 	try {
@@ -51,7 +56,7 @@ function updateCategory() {
 	$("#tokenfield").tokenfield('destroy');
 	$("#tokenfield").val('');	
 	$("#tokenfield").tokenfield();	
-	$(":checkbox:checked").each(function() {
+	$("#category-list-ajax :checkbox:checked").each(function() {
 		var obj = {id:"", label:""};
 		obj.id = $(this).val();
 		obj.label = $('label[for="'+obj.id+'"]').text();
@@ -71,7 +76,7 @@ function updateCategoryListSelection(catIds) {
 	}
 }
 
-
+console.log ("starting function.");
 $(function(){
 	var theData = '<%=catListPopupvalue%>';
 	var jsonData = $.parseJSON(theData);
