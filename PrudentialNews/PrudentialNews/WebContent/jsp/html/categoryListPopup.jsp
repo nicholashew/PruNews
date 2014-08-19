@@ -32,12 +32,6 @@
 %>
 
 <script>
-if (window.jQuery) {  
-    console.log ("jQuery is loaded");
-} else {
-    console.log ("jQuery is still not loaded");
-}
-
 function getCategoryIds() {
 	var catIds = [];
 	try {
