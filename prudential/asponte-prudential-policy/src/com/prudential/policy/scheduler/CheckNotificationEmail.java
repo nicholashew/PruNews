@@ -27,8 +27,8 @@ public class CheckNotificationEmail extends HttpServlet {
 
    // daily
    // every 10 minutes for testing
-   private static long interval = 86400000;
-   //private static long interval = 600000;
+   //private static long interval = 86400000;
+   private static long interval = 600000;
 
    /**
     * @see HttpServlet#HttpServlet()
@@ -40,11 +40,13 @@ public class CheckNotificationEmail extends HttpServlet {
 
    public void init(ServletConfig config) throws ServletException {
 
+      System.out.println("Initializing CheckNotificationEmail");
       /* create and schedule the updatedcontenttask */
       RetrieveReminderContentTask thisTask = new RetrieveReminderContentTask();
 
-      Timer timer = new Timer("EMAILREMINDERS");
-      timer.schedule(thisTask, new Date(), interval);
+      Timer timer = new Timer(true);
+      timer.scheduleAtFixedRate(thisTask,new Date(), interval);
+      //timer.schedule(thisTask, new Date(), interval);
       super.init(config);
    }
 

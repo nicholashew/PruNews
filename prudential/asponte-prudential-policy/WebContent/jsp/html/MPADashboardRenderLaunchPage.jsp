@@ -280,9 +280,8 @@ var fullDataset = {
   int id = 0;
   for (int i = 0; i < linkResults.size(); ++i, ++id) {
     CustomAuthoringItemWrapper theWrapper = linkResults.get(i);
-        // get the action URLs
-        CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview");
-        String editURL = previewAction.getActionURL();
+        // get the action URLs        
+        String editURL = "";
 
         String curUuid = theWrapper.getItemId();
         DocumentId curDocId = ws.createDocumentId(curUuid);
@@ -306,10 +305,12 @@ var fullDataset = {
           expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
         } // end-if 
     
-        String lastModFormatted = "";
-    if(theWrapper.getLastModDate() != null) {
-      lastModFormatted = formatter.format(theWrapper.getLastModDate());
-    } // end-if
+	/* SDD 10470 */
+        String lastModFormatted = ""; 
+    if(theContent.isWorkflowed()&&theContent.getGeneralDateTwo() != null) { 
+      lastModFormatted = formatter.format(theContent.getGeneralDateTwo()); 
+    } // end-if 
+    /* /SDD 10470 */
     
         String reviewDate = "";
     if(theWrapper.getReviewDate() != null) {
@@ -332,8 +333,10 @@ var fullDataset = {
       // if we're in review, get the review date 
       Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
+    } else if(stage.contains("movetopub")) { 
+      stage = "Pending Publish";     
     } else if(stage.contains("publish")) { 
-      stage = "Published"; 
+      stage = "Published";  
     } else if(stage.contains("approveretire")) { 
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
@@ -385,7 +388,7 @@ var fullDataset = {
     source:"/wps/wcm/myconnect/dd251369-8346-4d70-a834-21112c85f1a9/link.jpg?MOD=AJPERES&CACHEID=dd251369-8346-4d70-a834-21112c85f1a9&cache=none",
     type:"<%=policyType%>",
     authTemp:"<%=theWrapper.getAuthTemplateName()%>",
-    editURL:"<%=editURL%>",
+    editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>",
     title:"<%=theWrapper.getTitle()%>",
     modelPolicyId:"<%= modelPolicyId %>",
     status:"<%=stage%>",
@@ -409,8 +412,8 @@ var fullDataset = {
   for (int i = 0; i < wrapperResults.size(); ++i, ++id) {
     CustomAuthoringItemWrapper theWrapper = wrapperResults.get(i);
         // get the action URLs
-        CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview");
-        String editURL = previewAction.getActionURL();
+       
+        String editURL = "";
 	
         // ensure live date isn't null
         String liveDateFormatted = "";
@@ -421,11 +424,6 @@ var fullDataset = {
         if(theWrapper.getExpireDate() != null) { 
           expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
         } // end-if 
-    
-        String lastModFormatted = "";
-    if(theWrapper.getLastModDate() != null) {
-      lastModFormatted = formatter.format(theWrapper.getLastModDate());
-    } // end-if
     
         String reviewDate = "";
     if(theWrapper.getReviewDate() != null) {
@@ -450,6 +448,8 @@ var fullDataset = {
       // if we're in review, get the review date 
       Date enteredStage = theContent.getDateEnteredStage();
       reviewDate = formatter.format(enteredStage); 
+    } else if(stage.contains("movetopub")) { 
+      stage = "Pending Publish";     
     } else if(stage.contains("publish")) { 
       stage = "Published"; 
     } else if(stage.contains("approveretire")) { 
@@ -487,7 +487,14 @@ var fullDataset = {
       	retireRationale = hle.getMessage(); 
       }
     }  
-        
+      
+	/* SDD 10470 */
+        String lastModFormatted = ""; 
+    if(theContent.isWorkflowed()&&theContent.getGeneralDateTwo() != null) { 
+      lastModFormatted = formatter.format(theContent.getGeneralDateTwo()); 
+    } // end-if 
+    /* /SDD 10470 */
+	
     String modelPolicyId = getModelPolicyLinkValue(doc);
     Document parent = null;
     if(modelPolicyId != null) {
@@ -568,7 +575,8 @@ var gridVisibility = {
   "all":[true,true,true,true,true,true,false,true], 
   "Draft":[true,true,true,false,false,false,false,true], 
   "Review":[true,true,true,true,true,true,false,true], 
-  "Approve":[true,true,true,true,true,true,false,true], 
+  "Approve":[true,true,true,true,true,true,false,true],
+  "Pending Publish":[true,true,true,true,true,true,false,true], 
   "Published":[true,true,true,true,true,true,false,true], 
   "Pending Retire":[true,true,true,false,false,false,true,true], 
   "Retired":[true,true,true,false,false,false,true,true], 
@@ -682,6 +690,7 @@ var gridVisibility = {
   "Draft":[<%= isBPA %>,true,true,false,false,true,true,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
   "Review":[<%= isBPA %>,true,true,true,false,false,false,false,false,false,true,false,true,false,true,true,true,false,<%= isMPA %>], 
   "Approve":[<%= isBPA %>,true,true,true,false,false,false,false,false,true,false,true,true,true,true,true,true,false,<%= isMPA %>], 
+  "Pending Publish":[<%= isBPA %>,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>],
   "Published":[<%= isBPA %>,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
   "Pending Retire":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,<%= isMPA %>], 
   "Retired":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,<%= isMPA %>], 
@@ -899,7 +908,8 @@ jQuery(function(){
   <option value="all">All</option> 
   <option value="Draft">Draft</option> 
   <option value="Review">Review</option> 
-  <option value="Approve">Approve</option> 
+  <option value="Approve">Approve</option>
+  <option value="Pending Publish">Pending Publish</option> 
   <option value="Published">Published</option> 
   <option value="Pending Retire">Pending Retire</option> 
   <option value="Retired">Retired</option> 

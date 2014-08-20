@@ -262,8 +262,7 @@ var fullDataset = {
   for (int i = 0; i < wrapperResults.size(); ++i, ++id) { 
     CustomAuthoringItemWrapper theWrapper = wrapperResults.get(i); 
         // get the action URLs 
-        CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview"); 
-        String editURL = previewAction.getActionURL(); 
+        String editURL = ""; 
         String curUuid = theWrapper.getItemId(); 
         DocumentId curDocId = ws.createDocumentId(curUuid); 
         Content theContent = (Content) ws.getById(curDocId); 
@@ -273,10 +272,12 @@ var fullDataset = {
           liveDateFormatted = formatter.format(theWrapper.getLiveDate()); 
         } // end-if 
     
+	/* SDD 10470 */
         String lastModFormatted = ""; 
-    if(theWrapper.getLastModDate() != null) { 
-      lastModFormatted = formatter.format(theWrapper.getLastModDate()); 
+    if(theContent.isWorkflowed()&&theContent.getGeneralDateTwo() != null) { 
+      lastModFormatted = formatter.format(theContent.getGeneralDateTwo()); 
     } // end-if 
+    /* /SDD 10470 */ 
     String expireDateFormatted = ""; 
         if(theWrapper.getExpireDate() != null) { 
           expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
@@ -304,6 +305,8 @@ var fullDataset = {
       //Content theContent = (Content)doc; 
       Date enteredStage = theContent.getDateEnteredStage(); 
       reviewDate = formatter.format(enteredStage); 
+    } else if(stage.contains("movetopub")) { 
+      stage = "Pending Publish";     
     } else if(stage.contains("publish")) { 
       stage = "Published"; 
     } else if(stage.contains("approveretire")) { 
@@ -368,8 +371,8 @@ var fullDataset = {
     source:"<%=sourceIcon%>", 
     type:"<%=policyType%>", 
     authTemp:"<%=theWrapper.getAuthTemplateName()%>", 
-    editURL:"?page=com.prudential.page.PP.PolicyDetail&urile=wcm:path:<%=theWrapper.getPath() %>&previewopt=id&previewopt=<%=theWrapper.getItemId()%>", 
-//    editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
+    //editURL:"?page=com.prudential.page.PP.PolicyDetail&urile=wcm:path:<%=theWrapper.getPath() %>&previewopt=id&previewopt=<%=theWrapper.getItemId()%>", 
+	editURL:"<wcm:plugin name="RemoteAction" action="preview" docid="<%=theWrapper.getItemId()%>" ></wcm:plugin>", 
     title:"<%=theWrapper.getTitle()%>", 
     modelPolicyId:"<%= modelPolicyId %>", 
     status:"<%=stage%>", 
@@ -480,7 +483,8 @@ var gridVisibility = {
   "all":[false,true,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,false,false], 
   "Draft":[false,true,true,false,false,true,true,false,false,false,false,false,false,false,true,true,true,false,false], 
   "Review":[false,true,true,true,false,false,false,false,false,false,true,false,true,false,true,true,true,false,false], 
-  "Approve":[false,true,true,true,false,false,false,false,false,true,false,true,true,true,true,true,true,false,false], 
+  "Approve":[false,true,true,true,false,false,false,false,false,true,false,true,true,true,true,true,true,false,false],
+  "Pending Publish":[false,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,false], 
   "Published":[false,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,false], 
   "Pending Retire":[false,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,false], 
   "Retired":[false,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,false], 
@@ -697,7 +701,8 @@ jQuery(function(){
   <option value="all">All</option> 
   <option value="Draft">Draft</option> 
   <option value="Review">Review</option> 
-  <option value="Approve">Approve</option> 
+  <option value="Approve">Approve</option>
+  <option value="Publish Pending">Publish Pending</option> 
   <option value="Published">Published</option> 
   <option value="Pending Retire">Pending Retire</option> 
   <option value="Retired">Retired</option> 

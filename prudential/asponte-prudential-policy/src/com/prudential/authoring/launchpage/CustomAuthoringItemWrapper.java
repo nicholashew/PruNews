@@ -18,16 +18,16 @@ import com.ibm.workplace.wcm.api.*;
 public class CustomAuthoringItemWrapper {
 
    /** Logger for the class */
-   
+
    /** The actions available to launch for the item */
    private List<CustomAuthoringItemAction> m_actions;
-   
+
    /** a map of any passed additional attributes.  If query builder has passed fields to pull it will be in here */
    private Map<String, Object> m_additionalAttributes = new HashMap<String, Object>();
-   
+
    /** an arraylist of documentid values for the categories */
    private ArrayList<DocumentId> m_categories = new ArrayList<DocumentId>();
-   
+
    public ArrayList<DocumentId> getCategories() {
       return m_categories;
    }
@@ -52,13 +52,13 @@ public class CustomAuthoringItemWrapper {
 
    /** Action name for the Approve Item action */
    public static String APPROVE_ACTION_ID = "Approve";
-   
+
    /** Action name for the Approve Item action */
    public static String EDIT_ACTION_ID = "Edit";
 
    /** Action name for the Reject Item action */
    public static String REJECT_ACTION_ID = "Reject";
-   
+
    /** Action name for the Reject Item action */
    public static String DELETE_ACTION_ID = "Delete";
 
@@ -88,10 +88,10 @@ public class CustomAuthoringItemWrapper {
 
    /** The item's library */
    private String m_library;
-   
+
    /** item's workflow stage*/
    private String m_wfStage;
-   
+
    public String getWfStage() {
       return m_wfStage;
    }
@@ -101,7 +101,7 @@ public class CustomAuthoringItemWrapper {
    }
 
    private Date m_expireDate;
-   
+
    public Date getExpireDate() {
       return m_expireDate;
    }
@@ -111,7 +111,7 @@ public class CustomAuthoringItemWrapper {
    }
 
    private Date m_liveDate;
-   
+
    private String m_authTemplateName = "";
 
    public String getAuthTemplateName() {
@@ -147,12 +147,11 @@ public class CustomAuthoringItemWrapper {
    }
 
    private Date m_lastModDate;
-   
+
    private Date m_reviewDate;
-   
+
    private Date m_createdDate;
-   
-   
+
    public Date getCreatedDate() {
       return m_createdDate;
    }
@@ -243,46 +242,44 @@ public class CustomAuthoringItemWrapper {
    public void setAuthor(String p_author) {
       m_author = p_author;
    }
-   
+
    /**
     * Get all the actions for the item
     * @return the actions
     */
-   public List<CustomAuthoringItemAction> getActions()
-   {
+   public List<CustomAuthoringItemAction> getActions() {
       return m_actions;
    }
-   
+
    /**
     * Find an item action by id
     * @param p_actionId The action id
     * @return The action with the given id
     */
-   public CustomAuthoringItemAction getAction(String p_actionId)
-   {
+   public CustomAuthoringItemAction getAction(String p_actionId) {
       CustomAuthoringItemAction actionWithGivenId = null;
-      for (CustomAuthoringItemAction action : m_actions)
-      {
-         if (action.getId().equals(p_actionId))
-         {
-            actionWithGivenId = action;
-            break;
+      if (m_actions != null) {
+         for (CustomAuthoringItemAction action : m_actions) {
+            if (action.getId().equals(p_actionId)) {
+               actionWithGivenId = action;
+               break;
+            }
          }
       }
       return actionWithGivenId;
    }
-   
+
    /**
     * Get the open action for this item bean
     * @return the action
     */
-   public CustomAuthoringItemAction getOpenAction()
-   {
+   public CustomAuthoringItemAction getOpenAction() {
       return getAction(OPEN_ACTION_ID);
    }
 
-   public CustomAuthoringItemWrapper(String p_iconDisplayName, String p_iconPath, String p_title, String p_itemId, String p_status, List <CustomAuthoringItemAction>p_actions,
-      String p_library, String p_author, Date p_createdDate, Date p_modifiedDate, Date p_pubDate, Map<String,Object> additionalAttributeMap, String p_atName, String p_wfStageName) {
+   public CustomAuthoringItemWrapper(String p_iconDisplayName, String p_iconPath, String p_title, String p_itemId, String p_status,
+      List<CustomAuthoringItemAction> p_actions, String p_library, String p_author, Date p_createdDate, Date p_modifiedDate,
+      Date p_pubDate, Map<String, Object> additionalAttributeMap, String p_atName, String p_wfStageName) {
 
       m_iconDisplayName = p_iconDisplayName;
       m_iconPath = p_iconPath;
@@ -292,20 +289,20 @@ public class CustomAuthoringItemWrapper {
       m_actions = p_actions;
       m_library = p_library;
       m_author = p_author;
-      
+
       m_lastModDate = p_modifiedDate;
       m_createdDate = p_createdDate;
       m_liveDate = p_pubDate;
-      
+
       m_additionalAttributes = new HashMap<String, Object>(additionalAttributeMap);
-      
+
       m_authTemplateName = p_atName;
-      
+
       m_wfStage = p_wfStageName;
 
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       if (isDebug) {
-         s_log.log(Level.FINEST, " constructor "+this.toString()+" m_additionalAttributes = "+m_additionalAttributes);
+         s_log.log(Level.FINEST, " constructor " + this.toString() + " m_additionalAttributes = " + m_additionalAttributes);
       }
    }
 
@@ -313,26 +310,27 @@ public class CustomAuthoringItemWrapper {
    public String toString() {
       return "CustomAuthoringItemWrapper [ m_author=" + m_author + ", m_details=" + m_details + ", m_iconDisplayName=" + m_iconDisplayName
          + ", m_iconPath=" + m_iconPath + ", m_itemId=" + m_itemId + ", m_lastLogEntryDateString=" + m_lastLogEntryDateString
-         + ", m_library=" + m_library + ", m_path=" + m_path + ", m_status=" + m_status + ", m_title=" + m_title + ", m_authTemplateName="+m_authTemplateName+"]";
+         + ", m_library=" + m_library + ", m_path=" + m_path + ", m_status=" + m_status + ", m_title=" + m_title + ", m_authTemplateName="
+         + m_authTemplateName + "]";
    }
-   
+
    public String getAdditionalAttribute(String p_key) {
       String returnValue = "";
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      
+
       if (isDebug) {
-         s_log.entering("CustomAuthoringItemWrapper", "getAdditionalAttribute for attribute "+p_key+" map contains "+m_additionalAttributes+" for item "+m_itemId);         
+         s_log.entering("CustomAuthoringItemWrapper", "getAdditionalAttribute for attribute " + p_key + " map contains "
+            + m_additionalAttributes + " for item " + m_itemId);
       }
       // check from the map
-      if(m_additionalAttributes.get(p_key)!= null) {
-         returnValue = (String)m_additionalAttributes.get(p_key);
+      if (m_additionalAttributes.get(p_key) != null) {
+         returnValue = (String) m_additionalAttributes.get(p_key);
       }
-      
+
       if (isDebug) {
-         s_log.exiting("CustomAuthoringItemWrapper", "getAdditionalAttribute returning "+returnValue);
+         s_log.exiting("CustomAuthoringItemWrapper", "getAdditionalAttribute returning " + returnValue);
       }
-      
-      
+
       return returnValue;
    }
 

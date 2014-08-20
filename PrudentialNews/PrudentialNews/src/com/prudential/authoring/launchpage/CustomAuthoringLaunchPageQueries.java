@@ -751,7 +751,7 @@ public class CustomAuthoringLaunchPageQueries {
    }
 
    static CustomAuthoringItemWrapper wrapSingleResult(Document currentResult, Object request, Object response, String[] attributeNames,
-      boolean retrieveCats) {
+      boolean retrieveCats, boolean buildActions) {
 
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       if (isDebug) {
@@ -795,7 +795,11 @@ public class CustomAuthoringLaunchPageQueries {
 
       // create actions
       String type = currentItem.getIdentity().getTypeClass().getName();
-      List<CustomAuthoringItemAction> itemActions = buildActions(type, currentItem.getIdentity().getID(), request, response);
+      List<CustomAuthoringItemAction> itemActions = null;
+      if(buildActions) {
+         itemActions = buildActions(type, currentItem.getIdentity().getID(), request, response);
+      }
+      //
 
       Map<String, Object> additionalAttributeMap = buildAdditionalAttributes(attributeNames, currentDocument);
 
@@ -893,6 +897,12 @@ public class CustomAuthoringLaunchPageQueries {
       }
 
       return tempWrapper;
+   }
+   
+   static CustomAuthoringItemWrapper wrapSingleResult(Document currentResult, Object request, Object response, String[] attributeNames,
+      boolean retrieveCats) {
+
+      return wrapSingleResult(currentResult, request, response, attributeNames, retrieveCats, false);
    }
 
    /**

@@ -78,7 +78,8 @@
 	
 	Query theQuery = CustomAuthoringLaunchPageQueries.buildQuery(additionalSelectors,queryParms);
 	ResultIterator results = CustomAuthoringLaunchPageQueries.runQuery(ws,theQuery,queryParms);
-	String[] additionalAttributes = {"Issuing Orgainization"};
+	//String[] additionalAttributes = {"Issuing Orgainization"};
+	String[] additionalAttributes = {""};
 	// now build the items from the results
 	
 	List<CustomAuthoringItemWrapper> wrapperResults = CustomAuthoringLaunchPageQueries.wrapResults(results,renderRequest,renderResponse,additionalAttributes,true);
@@ -90,8 +91,8 @@ var dataNews = [
 <%for (int i = 0; i < wrapperResults.size(); ++i) {
 		CustomAuthoringItemWrapper theWrapper = wrapperResults.get(i);
         // get the action URLs
-        CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Edit");
-        String editURL = previewAction.getActionURL();
+        //CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Edit");
+        //String editURL = "";//previewAction.getActionURL();
         // ensure live date isn't null
         String liveDateFormatted = "";
         if(theWrapper.getLiveDate() != null) {
@@ -179,8 +180,8 @@ var dataNewsletter = [
 <%for (int j = 0; j < wrapperResultsNewsletter.size(); ++j) {
 		CustomAuthoringItemWrapper theWrapperNewsletter = wrapperResultsNewsletter.get(j);
         // get the action URLs
-        CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapperNewsletter.getAction("Edit");
-        String editURL = previewAction.getActionURL();
+        //CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapperNewsletter.getAction("Edit");
+        //String editURL = previewAction.getActionURL();
         // ensure live date isn't null
         String liveDateFormatted = "";
         if(theWrapperNewsletter.getLiveDate() != null) {

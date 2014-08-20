@@ -5,7 +5,8 @@
 /********************************************************************/
 
 --%>
-<%@ page import="org.apache.jetspeed.portlet.PortletURI,
+<%@ page
+	import="org.apache.jetspeed.portlet.PortletURI,
                  com.ibm.workplace.wcm.api.*,
                  com.ibm.workplace.wcm.api.query.*,
                  java.util.*,
@@ -147,10 +148,11 @@ public DocumentId getSiteAreaByPath(Workspace ws, String path) {
 }
 
 %>
-<%@ taglib uri="/WEB-INF/tld/wcm.tld" prefix="wcm" %>
-<%@ taglib uri="/WEB-INF/tld/std-portlet.tld" prefix="portlet" %>
-<portlet:defineObjects/>
-<wcm:initworkspace user="<%= (java.security.Principal)request.getUserPrincipal() %>" />
+<%@ taglib uri="/WEB-INF/tld/wcm.tld" prefix="wcm"%>
+<%@ taglib uri="/WEB-INF/tld/std-portlet.tld" prefix="portlet"%>
+<portlet:defineObjects />
+<wcm:initworkspace
+	user="<%= (java.security.Principal)request.getUserPrincipal() %>" />
 
 <script>
 	if(!window.jQuery) { 
@@ -194,63 +196,77 @@ public DocumentId getSiteAreaByPath(Workspace ws, String path) {
 %>
 
 <style>
-table{
-border-collapse:collapse;
-border:1px solid #000;
+table {
+	border-collapse: collapse;
+	border: 1px solid #000;
 }
-table td{
-border:1px solid #000;
-font-size:11px;
+
+table td {
+	border: 1px solid #000;
+	font-size: 11px;
 }
+
 .gid-actions {
-  font-size:9px;
-  display:none;
-  margin-top:2px;
+	font-size: 9px;
+	display: none;
+	margin-top: 2px;
 }
+
 .gid-actions.MODEL {
-  display:block;
+	display: block;
 }
 
 .gid-actions label {
-  vertical-align:top; 
-  padding:1px;
-  margin-left:2px;
+	vertical-align: top;
+	padding: 1px;
+	margin-left: 2px;
 }
 
 .gid-actions label:first-of-type {
-	border-right:1px solid black;padding-right:4px;margin-right:8px;
+	border-right: 1px solid black;
+	padding-right: 4px;
+	margin-right: 8px;
 }
 
 #grid-accept-all-place-holder label {
-  padding:1px;
-  margin-left:2px;
+	padding: 1px;
+	margin-left: 2px;
 }
 
 .dialog-no-title-bar .ui-dialog-titlebar {
-	display:none;
+	display: none;
 }
 </style>
 
-<style> 
-@import "/wps/portal_dojo/v1.7/dojo/resources/dojo.css"; 
-@import "/wps/portal_dojo/v1.7/dijit/themes/claro/claro.css"; 
-@import "/wps/portal_dojo/v1.7/dojox/grid/enhanced/resources/claro/EnhancedGrid.css"; 
-@import "/wps/portal_dojo/v1.7/dojox/grid/enhanced/resources/EnhancedGrid_rtl.css"; 
-</style> 
-<style> 
-#grid { 
-    width: 100%; 
-    height: 30em; 
-    margin:5px 0; 
-} 
-.hidded { 
-  display:none; 
-} 
-.dojoxGridArrowButtonChar { 
-    display: inline; 
-    float: right; 
-} 
-</style> 
+<style>
+@import "/wps/portal_dojo/v1.7/dojo/resources/dojo.css";
+
+@import "/wps/portal_dojo/v1.7/dijit/themes/claro/claro.css";
+
+@import
+	"/wps/portal_dojo/v1.7/dojox/grid/enhanced/resources/claro/EnhancedGrid.css"
+	;
+
+@import
+	"/wps/portal_dojo/v1.7/dojox/grid/enhanced/resources/EnhancedGrid_rtl.css"
+	;
+</style>
+<style>
+#grid {
+	width: 100%;
+	height: 30em;
+	margin: 5px 0;
+}
+
+.hidded {
+	display: none;
+}
+
+.dojoxGridArrowButtonChar {
+	display: inline;
+	float: right;
+}
+</style>
 <% 
   
   String[] additionalAttributes = {"PolicyOwner"}; 
@@ -270,9 +286,11 @@ font-size:11px;
   List<CustomAuthoringItemWrapper> linkResults = CustomAuthoringLaunchPageQueries.wrapResults(thelinkResults,renderRequest,renderResponse,additionalAttributes,false); 
   List<CustomAuthoringItemWrapper> wrapperResults = CustomAuthoringLaunchPageQueries.wrapResults(theWrapperResults,renderRequest,renderResponse,additionalAttributes,false); 
   SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); 
-%> 
-<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css"></link> 
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script> 
+%>
+<link rel="stylesheet"
+	href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css"></link>
+<script
+	src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 <script> 
 var fullDataset = { 
       identifier: 'itemId', 
@@ -281,9 +299,8 @@ var fullDataset = {
   int id = 0; 
   for (int i = 0; i < linkResults.size(); ++i, ++id) { 
     CustomAuthoringItemWrapper theWrapper = linkResults.get(i); 
-        // get the action URLs 
-        CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview"); 
-        String editURL = previewAction.getActionURL(); 
+        // get the action URLs         
+        String editURL = ""; 
 		
         String curUuid = theWrapper.getItemId(); 
         DocumentId curDocId = ws.createDocumentId(curUuid); 
@@ -308,10 +325,20 @@ var fullDataset = {
           expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
         } // end-if 
     
-        String lastModFormatted = "";
-    if(theWrapper.getLastModDate() != null) {
-      lastModFormatted = formatter.format(theWrapper.getLastModDate());
-    } // end-if
+	/* SDD 10470 */
+	boolean isDraft = false;
+    String lastModFormatted = ""; 
+    if(theContent.isWorkflowed()) {
+    	if(theContent.getGeneralDateTwo() != null) { 
+      		lastModFormatted = formatter.format(theContent.getGeneralDateTwo()); 
+    	} // end-if 
+    	if(!theContent.isPublished()) {
+    		isDraft = true;
+    	}
+    }
+    
+    /* /SDD 10470 */ 
+    
     
         String reviewDate = "";
     if(theWrapper.getReviewDate() != null) {
@@ -336,6 +363,9 @@ var fullDataset = {
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("publish")) { 
       stage = "Published"; 
+      if(isDraft) {
+      	stage = "Pending Publish";
+      }
     } else if(stage.contains("approveretire")) { 
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
@@ -411,8 +441,8 @@ var fullDataset = {
   for (int i = 0; i < wrapperResults.size(); ++i, ++id) {
     CustomAuthoringItemWrapper theWrapper = wrapperResults.get(i);
         // get the action URLs
-        CustomAuthoringItemAction previewAction = (CustomAuthoringItemAction)theWrapper.getAction("Preview");
-        String editURL = previewAction.getActionURL();
+       
+        String editURL = "";
         // ensure live date isn't null
         String liveDateFormatted = "";
         if(theWrapper.getLiveDate() != null) {
@@ -421,12 +451,7 @@ var fullDataset = {
         String expireDateFormatted = ""; 
         if(theWrapper.getExpireDate() != null) { 
           expireDateFormatted = formatter.format(theWrapper.getExpireDate()); 
-        } // end-if 
-    
-        String lastModFormatted = "";
-    if(theWrapper.getLastModDate() != null) {
-      lastModFormatted = formatter.format(theWrapper.getLastModDate());
-    } // end-if
+        } // end-if
     
         String reviewDate = "";
     if(theWrapper.getReviewDate() != null) {
@@ -437,6 +462,12 @@ var fullDataset = {
     Document doc = getDocumentById(ws, theWrapper.getItemId()); 
     String retireRationale = "";
     Content theContent = (Content)doc;
+    boolean isDraft = false;
+    if(theContent.isWorkflowed()) {
+    	if(!theContent.isPublished()) {
+    		isDraft = true;
+    	}
+    }
     if(stage.contains("draft")) { 
       stage = "Draft"; 
     } else if(stage.contains("review")) {       
@@ -451,6 +482,9 @@ var fullDataset = {
       reviewDate = formatter.format(enteredStage); 
     } else if(stage.contains("publish")) { 
       stage = "Published"; 
+      if(isDraft) {
+      	stage = "Pending Publish";
+      }
     } else if(stage.contains("approveretire")) { 
       stage = "Pending Retire"; 
     } else if(stage.contains("retire content")) { 
@@ -487,6 +521,13 @@ var fullDataset = {
       }
     } 
         
+	/* SDD 10470 */
+        String lastModFormatted = ""; 
+    if(theContent.isWorkflowed()&&theContent.getGeneralDateTwo() != null) { 
+      lastModFormatted = formatter.format(theContent.getGeneralDateTwo()); 
+    } // end-if 
+    /* /SDD 10470 */
+	
     String modelPolicyId = getModelPolicyLinkValue(doc);
     Document parent = null;
     if(modelPolicyId != null) {
@@ -567,7 +608,8 @@ var gridVisibility = {
   "all":[true,true,true,true,true,true,false,true], 
   "Draft":[true,true,true,false,false,false,false,true], 
   "Review":[true,true,true,true,true,true,false,true], 
-  "Approve":[true,true,true,true,true,true,false,true], 
+  "Approve":[true,true,true,true,true,true,false,true],
+  "Pending Publish":[true,true,true,true,true,true,false,true], 
   "Published":[true,true,true,true,true,true,false,true], 
   "Pending Retire":[true,true,true,false,false,false,true,true], 
   "Retired":[true,true,true,false,false,false,true,true], 
@@ -681,6 +723,7 @@ var gridVisibility = {
   "Draft":[<%= isBPA %>,true,true,false,false,true,true,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
   "Review":[<%= isBPA %>,true,true,true,false,false,false,false,false,false,true,false,true,false,true,true,true,false,<%= isMPA %>], 
   "Approve":[<%= isBPA %>,true,true,true,false,false,false,false,false,true,false,true,true,true,true,true,true,false,<%= isMPA %>], 
+  "Pending Publish":[<%= isBPA %>,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>],
   "Published":[<%= isBPA %>,true,true,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,<%= isMPA %>], 
   "Pending Retire":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,<%= isMPA %>], 
   "Retired":[<%= isBPA %>,true,true,false,true,false,false,true,true,false,false,false,false,false,true,true,false,true,<%= isMPA %>], 
@@ -892,35 +935,40 @@ jQuery(function(){
   </script>
 <br>
 <div style="float:left; margin-left:<%= (isBPA? "130px": "20px") %>">
-  <input type="text" id="title-filter" style="width:160px; padding:2px"/> <button id="title-filter-bttn" type="button" style="padding:0">Filter</button>
+	<input type="text" id="title-filter" style="width: 160px; padding: 2px" />
+	<button id="title-filter-bttn" type="button" style="padding: 0">Filter</button>
 </div>
-<select name="status-filter-value" id="status-filter-value" style="float:right"> 
-  <option value="all">All</option> 
-  <option value="Draft">Draft</option> 
-  <option value="Review">Review</option> 
-  <option value="Approve">Approve</option> 
-  <option value="Published">Published</option> 
-  <option value="Pending Retire">Pending Retire</option> 
-  <option value="Retired">Retired</option> 
-  <% if(isBPA) { %> 
-  <option value="mdlplcs">Available Model Policies</option> 
-  <% } %> 
-</select> 
+<select name="status-filter-value" id="status-filter-value"
+	style="float: right">
+	<option value="all">All</option>
+	<option value="Draft">Draft</option>
+	<option value="Review">Review</option>
+	<option value="Approve">Approve</option>
+	<option value="Pending Publish">Pending Publish</option>
+	<option value="Published">Published</option>
+	<option value="Pending Retire">Pending Retire</option>
+	<option value="Retired">Retired</option>
+	<% if(isBPA) { %>
+	<option value="mdlplcs">Available Model Policies</option>
+	<% } %>
+</select>
 
 
 
-<div id='grid-accept-all-place-holder' style="height:20px; margin:30px 0 0 30px;">
-<% if(isBPA) { %>
-<input id='grid-accept-all' type='checkbox' value='accept-all'/><label for='grid-accept-all'>Adopt All</label>
-<% } %>
+<div id='grid-accept-all-place-holder'
+	style="height: 20px; margin: 30px 0 0 30px;">
+	<% if(isBPA) { %>
+	<input id='grid-accept-all' type='checkbox' value='accept-all' /><label
+		for='grid-accept-all'>Adopt All</label>
+	<% } %>
 </div>
 
-<div id="gridDiv" style="padding:15px 0 0"></div>
+<div id="gridDiv" style="padding: 15px 0 0"></div>
 
-<div id='grid-process-place-holder' style="height:30px;">
-<% if(isBPA) { %>
-<button id="grid-process-accept-copy" type="button">Process</button>
-<% } %>
+<div id='grid-process-place-holder' style="height: 30px;">
+	<% if(isBPA) { %>
+	<button id="grid-process-accept-copy" type="button">Process</button>
+	<% } %>
 </div>
 
 
@@ -939,7 +987,7 @@ jQuery(function(){
 	});
 </script>
 
-<div id="processing-dlg" style="display:none">
+<div id="processing-dlg" style="display: none">
 	<div class="progress-label">Processing, please wait...</div>
 	<div class="progressbar"></div>
 </div>

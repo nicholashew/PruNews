@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.ibm.workplace.wcm.api.Category;
 import com.ibm.workplace.wcm.api.Document;
 import com.ibm.workplace.wcm.api.DocumentId;
 import com.ibm.workplace.wcm.api.DocumentIdIterator;
@@ -109,7 +110,9 @@ public class CategoryJSONWrapper {
                   path = ws.getPathById(tempId, false, false);
                   String title = tempId.getName();
                   String id = tempId.getID();
-                  ObjectWrapper ow = new ObjectWrapper(id, title, path);
+                  Category theCat = (Category)ws.getById(tempId);
+                  String description = theCat.getDescription();
+                  ObjectWrapper ow = new ObjectWrapper(id, title, path, true, description );
                   if (isDebug) {
                      s_log.log(Level.FINEST, "Adding object " + id + " to the arraylist");
                   }

@@ -102,18 +102,34 @@ public class WCMUtils {
    }
 
    public static ContentComponent getContentComponent(Document doc, String cmpntName) {
-      s_log.entering("WCMUtils", "getContentComponent");
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      if (isDebug) {
+         s_log.entering("WCMUtils", "getContentComponent "+cmpntName+" in content "+doc.getName());
+      }
+            
       ContentComponent cmpnt = null;
       if (doc instanceof ContentComponentContainer) {
          cmpnt = getContentComponent((ContentComponentContainer) doc, cmpntName);
       }
       else {
-         // TODO: log warning
+         if (isDebug) {
+            s_log.log(Level.FINEST, "doc instanceof ContentComponentContainer was false");
+         }
       }
+      if (isDebug) {
+         s_log.exiting("WCMUtils", "getContentComponent");
+      }
+      
+     
       return cmpnt;
    }
 
    public static ContentComponent getContentComponent(ContentComponentContainer c, String cmpntName) {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      if (isDebug) {
+         s_log.entering("WCMUtils", "getContentComponent for content "+c.getName()+" cmpnt "+cmpntName);
+      }
+      
       s_log.entering("WCMUtils", "getContentComponent");
       ContentComponent cmpnt = null;
       if (c.hasComponent(cmpntName)) {
@@ -122,8 +138,16 @@ public class WCMUtils {
          }
          catch (ComponentNotFoundException e) {
             // TODO: log exception
+            if (isDebug) {
+               s_log.log(Level.FINEST, "Exception");
+               e.printStackTrace();
+            }
          }
       }
+      if (isDebug) {
+         s_log.exiting("WCMUtils", "getContentComponent returning "+cmpnt);
+      }
+      
       return cmpnt;
    }
 
