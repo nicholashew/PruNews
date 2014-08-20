@@ -70,26 +70,25 @@ function updateCategoryListSelection(catIds) {
 	}
 }
 
-console.log ("starting function.");
 $(function(){
 	var theData = '<%=catListPopupvalue%>';
 	var jsonData = $.parseJSON(theData);
 	$("#tokenfield")
 		.on('tokenfield:removedtoken', function (e) {
 	        var checkId = e.attrs.value;
-	        console.log ("got a change in " + checkId);
+	        //console.log ("got a change in " + checkId);
 	        $("#" + checkId + "").prop('checked', false); 
 	        var catsJson = jQuery.parseJSON(unescape($("#SelectedCats").val()));
-			console.log ("JSON Is " + JSON.stringify(catsJson));
+			//console.log ("JSON Is " + JSON.stringify(catsJson));
 		   	var indexToDelete = null;
 		   	$.each(catsJson, function(i, obj) {
-				console.log ("Got : " + obj.id);
+				//console.log ("Got : " + obj.id);
 				if (obj.id == checkId) {
 				   indexToDelete = i;
 				}
 			});
 			catsJson.splice(indexToDelete, 1);
-			console.log ("Now JSON Is " + JSON.stringify(catsJson));
+			//console.log ("Now JSON Is " + JSON.stringify(catsJson));
     		$("#SelectedCats").val(JSON.stringify(catsJson));
 	        
    	        //$("#SelectedCats").val(JSON.stringify(categories));
