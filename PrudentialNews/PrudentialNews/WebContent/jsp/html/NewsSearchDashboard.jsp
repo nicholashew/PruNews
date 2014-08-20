@@ -23,6 +23,7 @@
 
 
 <wcm:libraryComponent name="Custom Authoring Assets/HTML - InitjQuery" library="PrudentialNewsDesign" />	
+<script src='<wcm:libraryComponent name="Custom Authoring Assets/jquery.cookie.js" library="PrudentialNewsDesign" />'></script>	
 <br/>
 <!--  new div -->
 <div style="position: relative; height: 350px;overflow: hidden; ">
