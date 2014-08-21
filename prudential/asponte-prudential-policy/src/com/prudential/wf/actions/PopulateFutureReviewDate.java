@@ -20,6 +20,7 @@ import com.ibm.workplace.wcm.api.custom.CustomWorkflowActionResult;
 import com.ibm.workplace.wcm.api.custom.Directive;
 import com.ibm.workplace.wcm.api.custom.Directives;
 import com.ibm.workplace.wcm.api.exceptions.ComponentNotFoundException;
+import com.prudential.utils.Utils;
 import com.prudential.wcm.WCMUtils;
 import com.prudential.wcm.wf.*;
 public class PopulateFutureReviewDate extends BaseCustomWorkflowAction {
@@ -56,7 +57,7 @@ public class PopulateFutureReviewDate extends BaseCustomWorkflowAction {
                   tempCal.setTime(tempDate);
                   tempCal.add(Calendar.DATE, offset);
                   tempDate = tempCal.getTime();
-                  theContent.setGeneralDateOne(tempDate);
+                  theContent = Utils.setGeneralDateOne(theContent, tempDate);                  
                   if (isDebug) {
                      s_log.log(Level.FINEST, "General Date One set to "+tempDate);
                   }

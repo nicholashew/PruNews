@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ibm.ws.webcontainer.servlet.ServletConfig;
+import com.prudential.tasks.RetrieveAnnualReviewContentTask;
 import com.prudential.tasks.RetrieveReminderContentTask;
 
 /**
@@ -24,6 +25,8 @@ public class CheckNotificationEmail extends HttpServlet {
 
    /** Logger for the class */
    private static Logger s_log = Logger.getLogger(CheckNotificationEmail.class.getName());
+
+   private static boolean isInit = false;
 
    // daily
    // every 10 minutes for testing
@@ -38,16 +41,20 @@ public class CheckNotificationEmail extends HttpServlet {
       // TODO Auto-generated constructor stub
    }
 
-   public void init(ServletConfig config) throws ServletException {
-
-      System.out.println("Initializing CheckNotificationEmail");
-      /* create and schedule the updatedcontenttask */
-      RetrieveReminderContentTask thisTask = new RetrieveReminderContentTask();
-
-      Timer timer = new Timer(true);
-      timer.scheduleAtFixedRate(thisTask,new Date(), interval);
+   public void init() throws ServletException {
+      if (!isInit) {
+         isInit = true;
+         System.out.println("Initializing CheckNotificationEmail");
+         /* create and schedule the updatedcontenttask */
+         RetrieveReminderContentTask thisTask = new RetrieveReminderContentTask();
+         RetrieveAnnualReviewContentTask annualReviewTask = new RetrieveAnnualReviewContentTask();
+         Timer timer = new Timer(true);
+         timer.scheduleAtFixedRate(thisTask, new Date(), interval);
+         timer.scheduleAtFixedRate(annualReviewTask, new Date(), interval);
+      }
       //timer.schedule(thisTask, new Date(), interval);
-      super.init(config);
+      super.init();
+
    }
 
    /**
@@ -71,16 +78,18 @@ public class CheckNotificationEmail extends HttpServlet {
       if (isDebug) {
          s_log.entering("CheckNotificationEmail", "handleRequest");
       }
-      
+
       // run the task once
       RetrieveReminderContentTask thisTask = new RetrieveReminderContentTask();
+      RetrieveAnnualReviewContentTask annualReviewTask = new RetrieveAnnualReviewContentTask();
 
       Timer timer = new Timer("EMAILREMINDERS");
       timer.schedule(thisTask, new Date());
+      timer.schedule(annualReviewTask, new Date());
       if (isDebug) {
          s_log.exiting("CheckNotificationEmail", "handleRequest");
       }
-      
+
    }
 
 }

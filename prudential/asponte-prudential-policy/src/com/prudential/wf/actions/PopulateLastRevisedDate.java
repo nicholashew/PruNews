@@ -21,6 +21,7 @@ import com.ibm.workplace.wcm.api.custom.CustomWorkflowActionResult;
 import com.ibm.workplace.wcm.api.custom.Directive;
 import com.ibm.workplace.wcm.api.custom.Directives;
 import com.ibm.workplace.wcm.api.exceptions.ComponentNotFoundException;
+import com.prudential.utils.Utils;
 import com.prudential.wcm.WCMUtils;
 import com.prudential.wcm.wf.*;
 public class PopulateLastRevisedDate extends BaseCustomWorkflowAction {
@@ -45,24 +46,11 @@ public class PopulateLastRevisedDate extends BaseCustomWorkflowAction {
       if(theDoc instanceof Content) {
          // get the pub date, add the # of days 
          Content theContent =(Content)theDoc;
+         
          // only do it if not moving backwards
          if(theContent.hasComponent(s_dayField) && !theContent.isWorkflowMovingBackward()) {            
             try {               
-               DateComponent theDate = (DateComponent)theContent.getComponent(s_dayField);
-               try {
-                  Date now = new Date();
-                  theDate.setDate(now);
-                  theContent.setComponent(s_dayField, theDate);
-                  if (isDebug) {
-                     s_log.log(Level.FINEST, "Last Revised Date set to "+now);
-                  }
-               }
-               catch (Exception e) {
-                  if (isDebug) {
-                     s_log.log(Level.FINEST, "exception setting the date field");
-                     e.printStackTrace();
-                  }               
-               }
+               theContent = Utils.setContentDateField(theContent, s_dayField, new Date());
             }
             catch (Exception e1) {
                // TODO Auto-generated catch block

@@ -33,6 +33,7 @@ import com.ibm.workplace.wcm.api.Category;
 import com.ibm.workplace.wcm.api.ChildPosition;
 import com.ibm.workplace.wcm.api.Content;
 import com.ibm.workplace.wcm.api.ContentLink;
+import com.ibm.workplace.wcm.api.DateComponent;
 import com.ibm.workplace.wcm.api.Document;
 import com.ibm.workplace.wcm.api.DocumentId;
 import com.ibm.workplace.wcm.api.DocumentIdIterator;
@@ -52,11 +53,13 @@ import com.ibm.workplace.wcm.api.WCM_API;
 import com.ibm.workplace.wcm.api.WebContentService;
 import com.ibm.workplace.wcm.api.Workspace;
 import com.ibm.workplace.wcm.api.exceptions.AuthorizationException;
+import com.ibm.workplace.wcm.api.exceptions.ComponentNotFoundException;
 import com.ibm.workplace.wcm.api.exceptions.DocumentCreationException;
 import com.ibm.workplace.wcm.api.exceptions.DocumentRetrievalException;
 import com.ibm.workplace.wcm.api.exceptions.DocumentSaveException;
 import com.ibm.workplace.wcm.api.exceptions.DuplicateChildException;
 import com.ibm.workplace.wcm.api.exceptions.IllegalDocumentTypeException;
+import com.ibm.workplace.wcm.api.exceptions.IllegalTypeChangeException;
 import com.ibm.workplace.wcm.api.exceptions.OperationFailedException;
 import com.ibm.workplace.wcm.api.exceptions.ServiceNotAvailableException;
 import com.ibm.workplace.wcm.api.query.Query;
@@ -1546,6 +1549,60 @@ public class Utils {
 
       return previewURL;
 
+   }
+   
+   public static Content setGeneralDateOne(Content theContent, Date theDate) {
+      
+      if(theContent.isWorkflowed()) {
+         try {
+            theContent.setGeneralDateOne(theDate);
+         }
+         catch (OperationFailedException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+               e.printStackTrace();
+            }
+         }
+      }
+      return theContent;
+   }
+   
+   public static Content setContentDateField(Content theContent, String componentName, Date theDate ) {
+      if(theContent.hasComponent(componentName)) {
+         try {
+            DateComponent dc = (DateComponent) theContent.getComponent(componentName);
+            dc.setDate(theDate);
+            theContent.setComponent(componentName, dc);
+         }
+         catch (ComponentNotFoundException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+               e.printStackTrace();
+            }
+         }
+         catch (OperationFailedException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+               e.printStackTrace();
+            }
+         }
+         catch (IllegalTypeChangeException e) {
+            // TODO Auto-generated catch block
+            if (s_log.isLoggable(Level.FINEST))
+            {
+               s_log.log(Level.FINEST, "", e);
+               e.printStackTrace();
+            }
+         }
+         
+      }
+      return theContent;
    }
 
 }

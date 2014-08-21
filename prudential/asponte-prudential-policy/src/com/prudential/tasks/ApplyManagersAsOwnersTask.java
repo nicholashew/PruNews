@@ -29,7 +29,6 @@ import com.ibm.workplace.wcm.api.VirtualPortalContext;
 import com.ibm.workplace.wcm.api.WCM_API;
 import com.ibm.workplace.wcm.api.Workspace;
 import com.ibm.workplace.wcm.api.exceptions.PropertyRetrievalException;
-import com.prudential.policy.vp.EmailReminderVPScopedAction;
 import com.prudential.utils.Utils;
 import com.prudential.vp.ApplyManagersAsOwnersScopedAction;
 import com.prudential.vp.PreviousStageScopedAction;
