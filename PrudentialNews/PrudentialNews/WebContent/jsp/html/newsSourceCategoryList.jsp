@@ -162,19 +162,22 @@ ul.newsSourcecategory-list > li > input[type='checkbox'] {
 <ul class="newsSourcecategory-list">
 <% 
 	String libName = "PrudentialNewsDesign";
-	String taxName = "NewsSource";
+	String taxName = "NewsSources";
 	// get a system workspace
 	Workspace ws = Utils.getSystemWorkspace();
 	ws.login();
 
 	ws.setCurrentDocumentLibrary(ws.getDocumentLibrary(libName));
-	DocumentIterator<DocumentId> taxoItor = ws.findByName(DocumentTypes.Category, taxName);
+	DocumentIdIterator taxoItor = ws.findByName(DocumentTypes.Taxonomy, taxName);
 	DocumentId docId = null;
 	String taxIdString = null;
 	if (taxoItor.hasNext()) {
 		docId = taxoItor.next();
 		taxIdString = docId.getId();
-	} 
+		System.out.println ("Got taxIdString: " + taxIdString);
+	} else {
+		System.out.println ("No taxonomy found");
+	}
 
     ArrayList<ObjectWrapper> categories = null;
     categories = CategoryJSONWrapper.getCategoryWrapperList(ws, libName, taxIdString);
@@ -183,8 +186,8 @@ ul.newsSourcecategory-list > li > input[type='checkbox'] {
 		ObjectWrapper category = (ObjectWrapper)itor.next();
 		String title = category.getLabel();
         String id = category.getId();
-        // String desc = category.getDescription();
-        String desc = "description sample";
+        String desc = category.getDescription();
+
 %>
 <li><label for="<%= id %>"><%= title %> (<%= desc %>)</label> <input type="radio" name="listOfNewsSources" value="<%= id %>" id="<%= id %>" /> </li>
 <%
