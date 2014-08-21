@@ -137,9 +137,7 @@ jQuery(function(){
 			//var catIds = getCategoryIds();			
 			if(categoryListHtml == null) {
 			jQuery.ajax({
-				url:"/wps/wcm/myconnect/prudential/PrudentialNewsDesign/JSPAssets/CategoryList",
-			
-//				url:"/wps/wcm/myconnect/prudential/PrudentialNewsDesign/JSPAssets/NewsSourceCategoryList",
+				url:"/wps/wcm/myconnect/prudential/PrudentialNewsDesign/JSPAssets/NewsSourceCategoryList",
 				traditional: true,
 				success: function(html){
 					showCategoryList(html);
