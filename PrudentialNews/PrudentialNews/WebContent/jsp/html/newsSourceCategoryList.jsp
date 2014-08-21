@@ -187,6 +187,7 @@ ul.newsSourcecategory-list > li > input[type='checkbox'] {
 		String title = category.getLabel();
         String id = category.getId();
         String desc = category.getDescription();
+        System.out.println ("Got id: " + id + " and description " + desc);
 
 %>
 <li><label for="<%= id %>"><%= title %> (<%= desc %>)</label> <input type="radio" name="listOfNewsSources" value="<%= id %>" id="<%= id %>" /> </li>
