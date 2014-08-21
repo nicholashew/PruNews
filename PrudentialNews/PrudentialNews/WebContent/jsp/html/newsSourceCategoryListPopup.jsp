@@ -19,7 +19,7 @@
 <% 
     CustomItemBean customItem = 
     (CustomItemBean) request.getAttribute("CustomItemBean"); 
-    customItem.setSubmitFunctionName("myoptionsubmit");
+    customItem.setSubmitFunctionName("newsoptionsubmit");
     StringBuilder sb = new StringBuilder();
     sb.append((String)customItem.getFieldValue());
     // check if the first char is [.  If not, add at beginning and ] at the end
@@ -32,46 +32,43 @@
 %>
 
 <script>
-function getCategoryIds() {
-	var catIds = [];
-	try {
-		var catsJson = jQuery.parseJSON(unescape(jQuery("#NewsSourceSelectedCat").val()));
-		jQuery.each(catsJson, function(i, obj) {
-			catIds.push(obj.id);
-		});
-	} catch(ex) {
-	}
-	return catIds;
-}
-function updateCategory() {
-    
-	var categories = [];
-	jQuery("#NewsSourceSelectedCat").val("");
-	jQuery("#newsSourceTokenfield").tokenfield('destroy');
-	jQuery("#newsSourceTokenfield").val('');	
-	jQuery("#newsSourceTokenfield").tokenfield();	
-	jQuery("#newsSourceCat-list-ajax :checkbox:checked").each(function() {
-		var obj = {id:"", label:""};
-		obj.id = jQuery(this).val();
-		obj.label = jQuery('label[for="'+obj.id+'"]').text();
-		//obj.label = jQuery(this).find("label").text();
-		categories.push(obj);
-		jQuery("#newsSourceTokenfield").tokenfield('createToken', { value: obj.id, label: obj.label });
-	});
-	jQuery("#NewsSourceSelectedCat").val(JSON.stringify(categories));
-	
-	// update with the tokenfield
-	
-}
-
-function updateCategoryListSelection(catIds) {
-	for(var i = 0; i < catIds.length; ++i) {
-		jQuery("#"+catIds[i]+"").prop("checked", true);
-	}
-}
-
-// console.log ("starting function.");
 jQuery(function(){
+	function getCategoryIds() {
+		var catIds = [];
+		try {
+			var catsJson = jQuery.parseJSON(unescape(jQuery("#NewsSourceSelectedCat").val()));
+			jQuery.each(catsJson, function(i, obj) {
+				catIds.push(obj.id);
+			});
+		} catch(ex) {
+		}
+		return catIds;
+	}
+	function updateCategory() {
+    
+		var categories = [];
+		jQuery("#NewsSourceSelectedCat").val("");
+		jQuery("#newsSourceTokenfield").tokenfield('destroy');
+		jQuery("#newsSourceTokenfield").val('');	
+		jQuery("#newsSourceTokenfield").tokenfield();	
+		jQuery("input[name=listOfNewsSources]:radio:checked").each(function() {
+			var obj = {id:"", label:""};
+			obj.id = jQuery(this).val();
+			obj.label = jQuery('label[for="'+obj.id+'"]').text();
+			//obj.label = jQuery(this).find("label").text();
+			categories.push(obj);
+			jQuery("#newsSourceTokenfield").tokenfield('createToken', { value: obj.id, label: obj.label });
+		});
+		jQuery("#NewsSourceSelectedCat").val(JSON.stringify(categories));
+	
+	}
+
+	function updateCategoryListSelection(catIds) {
+		for(var i = 0; i < catIds.length; ++i) {
+			jQuery("#"+catIds[i]+"").prop("checked", true);
+		}
+	}
+
 	var theData = '<%=catListPopupvalue%>';
 	var jsonData = jQuery.parseJSON(theData);
 	jQuery("#newsSourceTokenfield")
@@ -163,7 +160,7 @@ jQuery(function(){
 
 <script type="text/javascript">
 // really get the items from the input
-function myoptionsubmit()
+function newsoptionsubmit()
 {
 	jQuery("#<%=customItem.getFieldName()%>").val(jQuery("#NewsSourceSelectedCat").val());
 	//jQuery("#<%=customItem.getFieldName()%>").val(stringedCats);
