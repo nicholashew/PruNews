@@ -8,6 +8,7 @@ package com.prudential.vp;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -60,6 +61,8 @@ public class RetrieveAnnualReviewAction implements VirtualPortalScopedAction {
    private static Logger s_log = Logger.getLogger(RetrieveAnnualReviewAction.class.getName());
 
    public static String p_lastRunComponent = "ReminderLastRun";
+   private static String s_dayField = "LastRevisedDate";
+   private static String s_reviewDelay = "ReviewDateDelay";
 
    // try wrapping in priv exception action
    public void run() {
@@ -171,5 +174,74 @@ public class RetrieveAnnualReviewAction implements VirtualPortalScopedAction {
             s_log.log(Level.FINEST, "", e);
          }
       }
+   }
+   
+   public static Content createAnnualReviewDraft(Content theContent, Workspace ws) {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      
+      if(theContent.hasComponent(s_reviewDelay)) {
+         ShortTextComponent days;
+         try {
+            days = (ShortTextComponent)theContent.getComponentByReference(s_dayField);
+            String value = days.getText();
+            try {
+               int offset = Integer.parseInt(value);
+               Date tempDate = new Date();//theContent.getEffectiveDate();
+               Calendar tempCal = Calendar.getInstance();
+               tempCal.setTime(tempDate);
+               tempCal.add(Calendar.DATE, offset);
+               tempDate = tempCal.getTime();
+               theContent = Utils.setGeneralDateOne(theContent, tempDate);                  
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "General Date One set to "+tempDate);
+               }
+            }
+            catch (Exception e) {
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "exception setting the date field");
+                  e.printStackTrace();
+               }               
+            }
+         }
+         catch (Exception e1) {
+            // TODO Auto-generated catch block
+            if (isDebug) {
+               s_log.log(Level.FINEST, "exception setting the date field");
+               e1.printStackTrace();
+            }  
+         }
+         
+      }
+      
+      // now try to save
+      String[] errors = ws.save(theContent);
+      if(errors.length > 0) {
+         if (isDebug) {
+            for(int x=0;x<errors.length;x++) {
+               s_log.log(Level.FINEST, "Error saving "+errors[x]);  
+            }               
+         }
+         
+         throw new Exception("Content failed save");
+      }
+      Content draft = (Content) theContent.createDraftDocument();
+      draft.setEffectiveDate(new Date());
+      // check for gendateone
+      Date genOne = theContent.getGeneralDateOne();
+      if (genOne != null) {
+         draft.setGeneralDateTwo(genOne);
+      }
+      // now clear the genDateOne 
+      draft.setGeneralDateOne(null);
+      // Run both the Exit Actions and the Entry Actions of the next stage
+      if (isDebug) {
+         s_log.log(Level.FINEST, "draft documents stage is "+draft.getWorkflowStageId());
+      }
+      draft.nextWorkflowStage(true, true, "Moved automatically - via " + CreateAnnualReviewDraft.class.getName());
+      if (isDebug) {
+         s_log.log(Level.FINEST, "after next stage, draft documents stage is "+draft.getWorkflowStageId());
+      }
+      
+      return theContent;
    }
 }

@@ -80,7 +80,10 @@ public class CategoryJSONWrapper {
          s_log.entering("CategoryJSONWrapper", "getCategoryWrapperList");
       }
       TheCache theCache = TheCache.getInstance();
-      TheCacheEntry tce = theCache.get("catWrapper_" + libraryName);
+      if (taxIdString == null || taxIdString.equals("")) {
+         taxIdString = "537dafe3-657c-4117-9e4f-ebdab27b57cc";
+      }
+      TheCacheEntry tce = theCache.get("catWrapper_" + libraryName + taxIdString);
       ArrayList<ObjectWrapper> categories = null;
       if (tce != null) {
          categories = (ArrayList<ObjectWrapper>) tce.getCacheEntry();
@@ -92,9 +95,7 @@ public class CategoryJSONWrapper {
       DocumentLibrary currentDocLib = ws.getCurrentDocumentLibrary();
       ws.setCurrentDocumentLibrary(ws.getDocumentLibrary(libraryName));
       // get the Active taxonomy and it's children
-      if (taxIdString == null || taxIdString.equals("")) {
-         taxIdString = "537dafe3-657c-4117-9e4f-ebdab27b57cc";
-      }
+      
       try {
          DocumentId taxId = ws.createDocumentId(taxIdString);
          Taxonomy activeTax = (Taxonomy) ws.getById(taxId);
@@ -171,7 +172,7 @@ public class CategoryJSONWrapper {
       }
 
       if (categories != null && categories.size() > 0) {
-         theCache.put("catWrapper_" + libraryName, categories);
+         theCache.put("catWrapper_" + libraryName + taxIdString, categories);
       }
       return categories;
    }

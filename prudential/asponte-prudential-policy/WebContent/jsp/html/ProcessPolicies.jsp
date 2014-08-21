@@ -37,6 +37,107 @@
 
       return (String[]) values.toArray(new String[values.size()]);
    }
+   
+   public Content fixDraft(Content theContent, Workspace ws) {
+   	  Logger s_log = Logger.getLogger("com.prudential.JSP");
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      /**
+      need to clear:
+      PolicyOwner - text *
+      IssuingOrganization - text *
+      ModelPolicyChangeContact - UserSelection 
+      PrimaryEmailDisplayTitle - shorttext 
+      Contacts - User Selection
+      PrimaryEmailContact - ShortText
+      AlternateEmailContact - ShortText
+      
+      Also reset default approvers and reviewers
+      get the values from the parent site area
+      **/
+      TextComponent tempText = null;
+      UserSelectionComponent tempUser = null;
+      ShortTextComponent tempSTC = null;
+      java.security.Principal[] emptyUsers = {};
+      
+      try {
+      if(theContent.hasComponent("PolicyOwner")) {
+         tempText = (TextComponent) theContent.getComponent("PolicyOwner");
+         tempText.setText("-");
+         theContent.setComponent("PolicyOwner", tempText);
+      }
+      
+      if(theContent.hasComponent("IssuingOrganization")) {
+         tempText = (TextComponent) theContent.getComponent("IssuingOrganization");
+         tempText.setText("-");
+         theContent.setComponent("IssuingOrganization", tempText);
+      }
+      
+      if(theContent.hasComponent("PrimaryEmailDisplayTitle")) {
+         tempSTC = (ShortTextComponent) theContent.getComponent("PrimaryEmailDisplayTitle");
+         tempSTC.setText("-");
+         theContent.setComponent("PrimaryEmailDisplayTitle", tempSTC);
+      }
+      
+      if(theContent.hasComponent("PrimaryEmailContact")) {
+         tempSTC = (ShortTextComponent) theContent.getComponent("PrimaryEmailContact");
+         tempSTC.setText("-");
+         theContent.setComponent("PrimaryEmailContact", tempSTC);
+      }
+      
+      if(theContent.hasComponent("AlternateEmailContact")) {
+         tempSTC = (ShortTextComponent) theContent.getComponent("AlternateEmailContact");
+         tempSTC.setText("-");
+         theContent.setComponent("AlternateEmailContact", tempSTC);
+      }
+      
+      if(theContent.hasComponent("ModelPolicyChangeContact")) {
+         tempUser = (UserSelectionComponent) theContent.getComponent("ModelPolicyChangeContact");
+         tempUser.setSelections(emptyUsers);
+         theContent.setComponent("ModelPolicyChangeContact", tempUser);
+      }
+      
+      if(theContent.hasComponent("Contacts")) {
+         tempUser = (UserSelectionComponent) theContent.getComponent("Contacts");
+         tempUser.setSelections(emptyUsers);
+         theContent.setComponent("Contacts", tempUser);
+      }
+      
+      // get the defaults from the site area for DefaultPolicyReviewer -PolicyReviewers and DefaultPolicyApprover - PolicyApprovers
+      
+      DocumentId saId = theContent.getDirectParent();
+      SiteArea parent = (SiteArea)ws.getById(saId);
+      
+      if(parent.hasComponent("DefaultPolicyReviewer")) {
+         tempUser = (UserSelectionComponent) parent.getComponent("DefaultPolicyReviewer");
+         java.security.Principal[] parentUsers = tempUser.getSelections();
+         
+         if(theContent.hasComponent("PolicyReviewers")) {
+            tempUser = (UserSelectionComponent) theContent.getComponent("PolicyReviewers");
+            tempUser.setSelections(parentUsers);
+            theContent.setComponent("PolicyReviewers", tempUser);
+         }
+      }
+      
+      if(parent.hasComponent("DefaultPolicyApprover")) {
+         tempUser = (UserSelectionComponent) parent.getComponent("DefaultPolicyApprover");
+         java.security.Principal[] parentUsers = tempUser.getSelections();
+         
+         if(theContent.hasComponent("PolicyApprovers")) {
+            tempUser = (UserSelectionComponent) theContent.getComponent("PolicyApprovers");
+            tempUser.setSelections(parentUsers);
+            theContent.setComponent("PolicyApprovers", tempUser);
+         }
+      }
+      
+      } catch (Exception e) {
+         if (isDebug) {
+            s_log.log(Level.FINEST, "Exception "+e.getMessage());
+            e.printStackTrace();
+         }
+      }
+      
+      return theContent;
+   }
 
    public DocumentId getSiteAreaByPath(Workspace ws, String path) {
       Logger s_log = Logger.getLogger("com.prudential.JSP");
@@ -131,7 +232,10 @@
                doc.setTitle(doc.getTitle() + " (copied)");
                setModelPolicyLinkValue(doc, docId);
                // set content to draft by restarting workflow 
+               
                doc.restartWorkflow();
+               // clean the content
+               doc = fixDraft(doc,ws);
                doc.addHistoryLogEntry("Content copied by user " + userName);
                doc.setEffectiveDate(new Date());
                if (isDebug) {
@@ -160,6 +264,16 @@
                }
 
                System.out.println("Saving: " + doc);
+               /**
+               need to clear:
+               Policy Owner
+               issuing Organization
+               Model Policy Change Contact
+               Primary Email Display Title
+               Contacts
+               Primary Email Contact
+               Alternate Email Contact
+               **/
                String[] errors = ws.save(doc);
                if (errors != null && errors.length > 0) {
                   if (isDebug) {
