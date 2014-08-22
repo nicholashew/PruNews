@@ -133,7 +133,8 @@ public class ApplyManagersAsOwnersScopedAction implements VirtualPortalScopedAct
                       while (parId != null && !foundManagers) {
                           Document parent = ws.getById(parId);
                           String[] managers = parent.getMembersForAccess(Access.MANAGER);
-                          if (managers != null) {
+                          String[] inheritManagers = parent.getInheritedManagerAccessMembers();
+                          if (managers != null && managers.length > 0) {
                              for(int y=0;y<managers.length;y++) {
                                 s_log.log(Level.FINEST, "managers included "+managers[y]);
                              }
@@ -167,7 +168,43 @@ public class ApplyManagersAsOwnersScopedAction implements VirtualPortalScopedAct
                                     e.printStackTrace();
                                  }
                               }
-                          } else {
+                          }
+                          else if (inheritManagers != null && inheritManagers.length > 0) {
+                             for(int y=0;y<inheritManagers.length;y++) {
+                                s_log.log(Level.FINEST, "managers included "+managers[y]);
+                             }
+                              foundManagers = true;
+                              theResult.addOwners(inheritManagers);
+                              if (isDebug) {
+                                 s_log.log(Level.FINEST, "Owners field set to: {0}", Arrays.toString(inheritManagers));
+                              }
+                              try {
+                                 if(ws.isLocked(theResult.getId())) {
+                                    ws.unlock(theResult.getId());
+                                 }
+                                 String[] errors = ws.save(theResult);
+                                 if(errors.length > 0) {
+                                    if (isDebug) {
+                                       s_log.log(Level.FINEST, "errors "+errors.length);
+                                    }
+                                    for(int x=0;x<errors.length;x++) {
+                                       s_log.log(Level.FINEST, "errors contain "+errors[x]);
+                                    }
+                                 }
+                                 else {
+                                    if (isDebug) {
+                                       s_log.log(Level.FINEST, "Content saved");
+                                    }
+                                 }
+                              }
+                              catch (Exception e) {
+                                 if (isDebug) {
+                                    s_log.log(Level.FINEST, "Exception "+e.getMessage());
+                                    e.printStackTrace();
+                                 }
+                              }
+                          }
+                          else {
                               parId = ((Hierarchical)parent).getParentId();
                           }
                       }
