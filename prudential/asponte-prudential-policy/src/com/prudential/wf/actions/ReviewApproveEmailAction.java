@@ -29,17 +29,22 @@ import com.ibm.workplace.wcm.api.custom.CustomWorkflowActionResult;
 import com.ibm.workplace.wcm.api.exceptions.ComponentNotFoundException;
 import com.ibm.workplace.wcm.api.exceptions.PropertyRetrievalException;
 import com.prudential.renderer.ReviewApproveEmailRenderer;
+import com.prudential.shouldact.ShouldActPolicyEmails;
 import com.prudential.utils.Utils;
 import com.prudential.wcm.WCMUtils;
 
 public class ReviewApproveEmailAction extends BaseEmailAction {
 
    private static String m_usercmpntname = "PolicyApprovers";
+
    private static Logger s_log = Logger.getLogger(ReviewApproveEmailAction.class.getName());
+
    private static String m_emailcmpntname = "DefaultEmailContents";
+
    private static String s_delayCmpntName = "ApproveReadyReminderDelay";
+
    private static String p_messageComponentName = "ApproverMessage";
-   
+
    public ReviewApproveEmailAction() {
       super();
    }
@@ -52,31 +57,33 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
    String getEmailBody(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      
+
       if (isDebug) {
          s_log.entering("ReviewApproveEmailAction", "getEmailBody");
       }
-      
+
       // retrieve from WCM      
       StringBuilder sb = new StringBuilder();
       String componentText = "";
       // try to get the component
-      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailTextCmpnt, "PruPolicyDesign");
-      if(bodyComponent != null) {
-         LibraryHTMLComponent stc = (LibraryHTMLComponent)bodyComponent;
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailTextCmpnt,
+         "PruPolicyDesign");
+      if (bodyComponent != null) {
+         LibraryHTMLComponent stc = (LibraryHTMLComponent) bodyComponent;
          componentText = stc.getHTML();
          componentText = componentText.replaceAll("DOCUMENTNAME", doc.getTitle());
          componentText = componentText.replaceAll("DOCUMENTURL", Utils.getPreviewURL(doc));
       }
-      
-      if(componentText.isEmpty()) {
+
+      if (componentText.isEmpty()) {
          sb.append("A document " + doc.getTitle() + " is awaiting your approval.");
          sb.append("<br><a href='" + Utils.getPreviewURL(doc) + "'>" + doc.getTitle() + "</a><br>");
          // now check for the field         
-      } else {
+      }
+      else {
          sb.append(componentText);
       }
-      
+
       // include additional text
       if (doc instanceof Content) {
          // get the parent sa
@@ -98,13 +105,13 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
          }
 
       }
-      
+
       String body = sb.toString();
-      
+
       if (isDebug) {
-         s_log.exiting("ReviewApproveEmailAction", "getEmailBody returning "+body);
+         s_log.exiting("ReviewApproveEmailAction", "getEmailBody returning " + body);
       }
-      
+
       return body;
 
    }
@@ -113,29 +120,21 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
    String getEmailSubject(Document doc) {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
-      String subject = "Item "+doc.getTitle()+" is awaiting your approval";
-      
+      String subject = "Item " + doc.getTitle() + " is awaiting your approval";
+
       // try to get the component
-      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailSubjectCmpnt, "PruPolicyDesign");
-      if(subjectComponent != null) {
-         LibraryShortTextComponent stc = (LibraryShortTextComponent)subjectComponent;
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailSubjectCmpnt,
+         "PruPolicyDesign");
+      if (subjectComponent != null) {
+         LibraryShortTextComponent stc = (LibraryShortTextComponent) subjectComponent;
          subject = stc.getText();
          subject = subject.replaceAll("DOCUMENTNAME", doc.getTitle());
       }
-      
+
       return subject;
 
    }
 
-   @Override
-   String getDelayComponentName() {
-      // TODO Auto-generated method stub
-      boolean isDebug = s_log.isLoggable(Level.FINEST);
-      
-      return s_delayCmpntName;
-      
-   }     
-   
    /**
     * instead of sending to wcm approvers, send to the PolicyApprovers
     * @see com.prudential.wf.actions.BaseEmailAction#getRecipients(com.ibm.workplace.wcm.api.Document)
@@ -144,13 +143,13 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
       // TODO Auto-generated method stub
       boolean isDebug = s_log.isLoggable(Level.FINEST);
       if (isDebug) {
-         s_log.entering("ReviewApproveEmailAction", "getRecipients for doc "+doc.getName());
+         s_log.entering("ReviewApproveEmailAction", "getRecipients for doc " + doc.getName());
       }
       Set recipientSet = new HashSet();
       ArrayList recipientList = null;
       // get the approvers from the doc
-      if(doc instanceof Content) {
-         Content theContent = (Content)doc;
+      if (doc instanceof Content) {
+         Content theContent = (Content) doc;
          // set the workspace to use dn
          Workspace ws = doc.getSourceWorkspace();
          boolean dnUsed = ws.isDistinguishedNamesUsed();
@@ -161,53 +160,62 @@ public class ReviewApproveEmailAction extends BaseEmailAction {
             extractApprovers(doc, approverSet, m_usercmpntname);
             String[] approvers = approverSet.toArray(new String[approverSet.size()]);
             // need string[] of dn values
-            if(approvers != null) {
-               for(int x=0;x<approvers.length;x++) {
+            if (approvers != null) {
+               for (int x = 0; x < approvers.length; x++) {
                   String dn = approvers[x];
                   if (isDebug) {
-                     s_log.log(Level.FINEST, "dn = "+dn+", retrieve email");
+                     s_log.log(Level.FINEST, "dn = " + dn + ", retrieve email");
                   }
                   User theUser = Utils.getUserByDN(dn);
-                  if(theUser != null) {
+                  if (theUser != null) {
                      recipientSet.addAll(Utils.getEmailsUser(theUser));
-                  } 
+                  }
                   else {
                      if (isDebug) {
                         s_log.log(Level.FINEST, "theUser was null, try group");
                      }
                      Group theGroup = Utils.getGroupByDistinguishedName(dn);
-                     if(theGroup != null) {
+                     if (theGroup != null) {
                         recipientSet.addAll(Utils.getEmailsGroup(theGroup));
                      }
                      else {
                         if (isDebug) {
                            s_log.log(Level.FINEST, "theGroup was null");
                         }
-                        
+
                      }
                   }
-                  
+
                }
             }
          }
          finally {
-            if(ws != null) {
+            if (ws != null) {
                ws.useDistinguishedNames(dnUsed);
             }
          }
-         
+
       }
-      
+
       if (isDebug) {
          s_log.exiting("ReviewApproveEmailAction", "getRecipients");
       }
-      
+
       recipientList = new ArrayList(Arrays.asList(recipientSet.toArray()));
       return recipientList;
 
    }
-   
+
    boolean shouldSend(Document doc) {
-      return true;
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      boolean shouldSend = false;
+      
+      ShouldActPolicyEmails shouldAct = new ShouldActPolicyEmails();
+      shouldSend = shouldAct.shouldAct();
+      if (isDebug) {
+         s_log.exiting("ReviewApproveEmailAction", "shouldSend "+shouldSend);
+      }
+      
+      return shouldSend;
    }
 }

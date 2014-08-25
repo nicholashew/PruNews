@@ -66,8 +66,10 @@ public class WCMUtils {
    
    public static String p_reviewEmailSubjectCmpnt = "ReviewEmailSubject";
    public static String p_approveEmailSubjectCmpnt = "ApproveEmailSubject";
+   public static String p_approveRetireEmailSubjectCmpnt = "ApproveRetireEmailSubject";
    public static String p_reviewEmailTextCmpnt = "ReviewEmailText";
    public static String p_approveEmailTextCmpnt = "ApproveEmailText";
+   public static String p_approveRetireEmailTextCmpnt = "ApproveRetireEmailText";
    
    public static String p_retiringEmailSubjectCmpnt = "RetiringEmailSubject";
    public static String p_pendingAvailableEmailSubjectCmpnt = "PendingAvailableEmailSubject";

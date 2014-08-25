@@ -39,6 +39,7 @@ import com.ibm.workplace.wcm.api.exceptions.DuplicateChildException;
 import com.ibm.workplace.wcm.api.exceptions.IllegalDocumentTypeException;
 import com.ibm.workplace.wcm.api.exceptions.OperationFailedException;
 import com.ibm.workplace.wcm.api.exceptions.WCMException;
+import com.prudential.shouldact.ShouldActPolicyEmails;
 import com.prudential.tasks.EmailReminderTask;
 import com.prudential.utils.Utils;
 
@@ -341,7 +342,11 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
 
       // now run it
       try {
-         Utils.getPumaHome().getEnvironment().runUnrestricted(runAction);
+         // only if we should send
+         if(shouldSend()) {
+            Utils.getPumaHome().getEnvironment().runUnrestricted(runAction);
+         }
+         
       }
       catch (PrivilegedActionException e) {
          // TODO Auto-generated catch block
@@ -349,5 +354,18 @@ public class RetrieveReminderTaskAction implements VirtualPortalScopedAction {
             s_log.log(Level.FINEST, "", e);
          }
       }
+   }
+   
+   boolean shouldSend() {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      boolean shouldSend = false;
+      
+      ShouldActPolicyEmails shouldAct = new ShouldActPolicyEmails();
+      shouldSend = shouldAct.shouldAct();
+      if (isDebug) {
+         s_log.exiting("RetrieveReminderTaskAction", "shouldSend "+shouldSend);
+      }
+      
+      return shouldSend;
    }
 }

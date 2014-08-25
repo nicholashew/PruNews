@@ -29,6 +29,7 @@ import com.ibm.workplace.wcm.api.VirtualPortalContext;
 import com.ibm.workplace.wcm.api.WCM_API;
 import com.ibm.workplace.wcm.api.Workspace;
 import com.ibm.workplace.wcm.api.exceptions.PropertyRetrievalException;
+import com.prudential.shouldact.ShouldActPolicyEmails;
 import com.prudential.utils.Utils;
 import com.prudential.vp.RetrieveEmailReminderByUuidScopedAction;
 import com.prudential.wcm.WCMUtils;
@@ -277,6 +278,19 @@ public class EmailReminderTask extends TimerTask {
       
       return subject;
 
+   }
+   
+   private boolean shouldSend() {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      boolean shouldSend = false;
+      
+      ShouldActPolicyEmails shouldAct = new ShouldActPolicyEmails();
+      shouldSend = shouldAct.shouldAct();
+      if (isDebug) {
+         s_log.exiting("EmailReminderTask", "shouldSend "+shouldSend);
+      }
+      
+      return shouldSend;
    }
    
    

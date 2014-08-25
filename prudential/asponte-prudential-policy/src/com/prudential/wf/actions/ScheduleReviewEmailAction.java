@@ -28,6 +28,7 @@ import com.ibm.workplace.wcm.api.custom.Directive;
 import com.ibm.workplace.wcm.api.custom.Directives;
 import com.ibm.workplace.wcm.api.exceptions.PropertyRetrievalException;
 import com.prudential.renderer.ScheduleReviewEmailRenderer;
+import com.prudential.shouldact.ShouldActPolicyEmails;
 import com.prudential.utils.Utils;
 import com.prudential.wcm.WCMUtils;
 import com.prudential.wcm.tasks.WCMEmailTask;
@@ -118,15 +119,7 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
       return subject;
 
    }
-
-   @Override
-   String getDelayComponentName() {
-      // TODO Auto-generated method stub
-      boolean isDebug = s_log.isLoggable(Level.FINEST);
-      
-      return s_delayCmpntName;
-      
-   }  
+ 
    /**
     * instead of sending to wcm approvers, send to the PolicyApprovers
     * @see com.prudential.wf.actions.BaseEmailAction#getRecipients(com.ibm.workplace.wcm.api.Document)
@@ -199,6 +192,15 @@ public class ScheduleReviewEmailAction extends BaseEmailAction {
    }
    
    boolean shouldSend(Document doc) {
-      return true;
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      boolean shouldSend = false;
+      
+      ShouldActPolicyEmails shouldAct = new ShouldActPolicyEmails();
+      shouldSend = shouldAct.shouldAct();
+      if (isDebug) {
+         s_log.exiting("ScheduleReviewEmailAction", "shouldSend "+shouldSend);
+      }
+      
+      return shouldSend;
    }
 }
