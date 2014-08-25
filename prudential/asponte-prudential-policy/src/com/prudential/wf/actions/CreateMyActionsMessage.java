@@ -128,7 +128,10 @@ public class CreateMyActionsMessage implements CustomWorkflowAction {
                cont.setComponent("MyActions", tc); 
                cont.addHistoryLogEntry(myResponse.getResponse()); 
             } else { 
-               System.err.print("MyActions Response: [" + myResponse.getResponseCode() + "] " + myResponse.getResponse()); 
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "MyActions Response: [" + myResponse.getResponseCode() + "] " + myResponse.getResponse());
+               }
+               //System.err.print("MyActions Response: [" + myResponse.getResponseCode() + "] " + myResponse.getResponse()); 
             } 
          } 
          catch (Exception ex) { 

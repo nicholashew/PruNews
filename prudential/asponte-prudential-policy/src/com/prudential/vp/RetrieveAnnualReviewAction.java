@@ -182,7 +182,7 @@ public class RetrieveAnnualReviewAction implements VirtualPortalScopedAction {
       if (theContent.hasComponent(s_reviewDelay)) {
          ShortTextComponent days;
          try {
-            days = (ShortTextComponent) theContent.getComponentByReference(s_dayField);
+            days = (ShortTextComponent) theContent.getComponentByReference(s_reviewDelay);
             String value = days.getText();
             try {
                int offset = Integer.parseInt(value);
@@ -227,7 +227,7 @@ public class RetrieveAnnualReviewAction implements VirtualPortalScopedAction {
             }
             catch (Exception e) {
                if (isDebug) {
-                  s_log.log(Level.FINEST, "exception setting the date field");
+                  s_log.log(Level.FINEST, "exception e setting the date field "+e.getMessage());
                   e.printStackTrace();
                }
             }
@@ -235,7 +235,7 @@ public class RetrieveAnnualReviewAction implements VirtualPortalScopedAction {
          catch (Exception e1) {
             // TODO Auto-generated catch block
             if (isDebug) {
-               s_log.log(Level.FINEST, "exception setting the date field");
+               s_log.log(Level.FINEST, "exception e1 setting the date field "+e1.getMessage());
                e1.printStackTrace();
             }
          }
