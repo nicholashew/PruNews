@@ -24,5 +24,6 @@
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-server.jar"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-services.jar"/>
 	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-commons-utils.jar"/>
+	<classpathentry kind="lib" path="lib/PruPortalUtils.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

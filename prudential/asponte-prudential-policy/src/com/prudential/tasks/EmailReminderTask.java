@@ -142,7 +142,7 @@ public class EmailReminderTask extends TimerTask {
       StringBuilder sb = new StringBuilder();
       String componentText = "";
       // try to get the component
-      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reviewEmailTextCmpnt, "PruPolicyDesign");
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reminderEmailTextCmpnt, "PruPolicyDesign");
       if(bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent)bodyComponent;
          componentText = stc.getHTML();
@@ -198,7 +198,7 @@ public class EmailReminderTask extends TimerTask {
       StringBuilder sb = new StringBuilder();
       String componentText = "";
       // try to get the component
-      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailTextCmpnt, "PruPolicyDesign");
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reminderEmailTextCmpnt, "PruPolicyDesign");
       if(bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent)bodyComponent;
          componentText = stc.getHTML();
@@ -252,7 +252,7 @@ public class EmailReminderTask extends TimerTask {
       String subject = "Item "+doc.getTitle()+" is awaiting your review";
       
       // try to get the component
-      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reviewEmailSubjectCmpnt, "PruPolicyDesign");
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reminderEmailSubjectCmpnt, "PruPolicyDesign");
       if(subjectComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent)subjectComponent;
          subject = stc.getText();
@@ -269,7 +269,7 @@ public class EmailReminderTask extends TimerTask {
       String subject = "Item "+doc.getTitle()+" is awaiting your approval";
       
       // try to get the component
-      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailSubjectCmpnt, "PruPolicyDesign");
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_reminderEmailSubjectCmpnt, "PruPolicyDesign");
       if(subjectComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent)subjectComponent;
          subject = stc.getText();

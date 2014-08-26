@@ -11,11 +11,14 @@ import com.ibm.workplace.wcm.api.WebContentCustomWorkflowService;
 import com.ibm.workplace.wcm.api.custom.CustomWorkflowAction;
 import com.ibm.workplace.wcm.api.custom.CustomWorkflowActionFactory;
 import com.prudential.wcm.WCMUtils;
+import com.prudential.wf.actions.AlertContentRejectedEmailAction;
 import com.prudential.wf.actions.ApplyApproversAction;
 import com.prudential.wf.actions.ApplyReviewersAction;
 import com.prudential.wf.actions.ApplySiteAreaManagers;
 import com.prudential.wf.actions.ApproveDelayPopulatePreviousStage;
 import com.prudential.wf.actions.CreateMyActionsMessage;
+import com.prudential.wf.actions.EmailContentApprovers;
+import com.prudential.wf.actions.EmailContentAuthors;
 import com.prudential.wf.actions.GenDateOnePopulatePreviousStage;
 import com.prudential.wf.actions.NotifyAllPolicyAdmins;
 import com.prudential.wf.actions.PopulateFutureReviewDate;
@@ -64,6 +67,10 @@ public class PruCustomWorkflowActionFactory implements
 		actions.put("PopulateLastRevisedDate", new PopulateLastRevisedDate(customWorkflowService));
 		actions.put("PreviousStageIfNecessary", new PreviousStageIfNecessary(customWorkflowService));
 		actions.put("ReviewExpiringEmailAction", new ReviewExpiringEmailAction(customWorkflowService));
+		actions.put("EmailContentApprovers", new EmailContentApprovers());
+		actions.put("EmailContentAuthors", new EmailContentAuthors());
+		actions.put("AlertContentRejectedEmailAction", new AlertContentRejectedEmailAction());
+		
 		//ReviewDelayPopulatePreviousStage
 		//ApproveDelayPopulatePreviousStage
 	}

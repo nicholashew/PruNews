@@ -1551,6 +1551,100 @@ public class Utils {
 
    }
    
+   /**
+    * 
+    * getAuthoringURL helper method to generate URL to authoring portlet
+    * @param theDoc
+    * @return
+    */
+   public static String getAuthoringURL(Document theDoc) {
+      boolean isDebug = s_log.isLoggable(Level.FINEST);
+      String previewURL = "";
+      if (isDebug) {
+         s_log.entering("Utils", "getPreviewURL " + theDoc.getName());
+      }
+      StringBuilder sb = new StringBuilder();
+
+      String host = "";
+      String componentName = "EmailActionHost_";
+      String contextRoot = "/wps/myportal";
+      String path = "";
+      Workspace ws = getSystemWorkspace();
+      DocumentLibrary currentLib = ws.getCurrentDocumentLibrary();
+      try {
+         // get the system properties
+         ws.setCurrentDocumentLibrary(ws.getDocumentLibrary("PruPolicyDesign"));
+         Properties p = System.getProperties();
+         String key = "com.pru.AppServerEnv";
+         // will be DEV/QA/STAGE/PROD
+         String value = (String) p.get(key);
+         componentName = componentName + value;
+         if (isDebug) {
+            s_log.log(Level.FINEST, "componentName = " + componentName);
+         }
+         LibraryShortTextComponent stlc = null;
+         DocumentIdIterator hostValueIterator = ws.findByName(DocumentTypes.LibraryShortTextComponent, componentName);
+         if (hostValueIterator.hasNext()) {
+
+            DocumentId tempId = (DocumentId) hostValueIterator.next();
+            stlc = (LibraryShortTextComponent) ws.getById(tempId);
+            if (stlc != null) {
+               host = stlc.getText();
+               if (isDebug) {
+                  s_log.log(Level.FINEST, "host from component " + host);
+               }
+               else {
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "Component not found, leave blank");
+                  }
+               }
+            }
+
+         }
+         else {
+            if (isDebug) {
+               s_log.log(Level.FINEST, "Component not found, leave blank");
+            }
+         }
+
+         path = ws.getPathById(theDoc.getId(), true, true);
+      }
+      catch (DocumentRetrievalException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST)) {
+            s_log.log(Level.FINEST, "", e);
+         }
+      }
+      catch (IllegalDocumentTypeException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST)) {
+            s_log.log(Level.FINEST, "", e);
+         }
+      }
+      catch (AuthorizationException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST)) {
+            s_log.log(Level.FINEST, "", e);
+         }
+      }
+      finally {
+         if (currentLib != null) {
+            ws.setCurrentDocumentLibrary(currentLib);
+         }
+      }
+      sb.append(host);
+      sb.append(contextRoot);
+      sb.append("/wcmAuthoring?wcmAuthoringAction=read&docid="+theDoc.getId());
+      //sb.append("?page=com.prudential.page.PP.PolicyDetail&urile=wcm:path:" + path + "&previewopt=id&previewopt=" + theDoc.getId().getId());
+      previewURL = sb.toString();
+      if (isDebug) {
+         s_log.exiting("Utils", "getPreviewURL " + previewURL);
+      }
+
+      return previewURL;
+
+   }
+   
    public static Content setGeneralDateOne(Content theContent, Date theDate) {
       
       if(theContent.isWorkflowed()) {
