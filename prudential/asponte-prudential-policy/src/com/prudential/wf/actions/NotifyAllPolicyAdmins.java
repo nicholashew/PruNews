@@ -96,6 +96,9 @@ public class NotifyAllPolicyAdmins extends BaseEmailAction {
                cmpntName = WCMUtils.p_retiringEmailTextCmpnt;
             }
          }
+         if(theContent.isExpired()) {
+            cmpntName = WCMUtils.p_retiringEmailTextCmpnt;
+         }
          if (theContent.isDraft()) {
             if (!theContent.isDraftOfPublishedDocument()) {
                //cmpntName = WCMUtils.p_pendingAvailableEmailTextCmpnt;
@@ -195,6 +198,9 @@ public class NotifyAllPolicyAdmins extends BaseEmailAction {
             if(expiredStage.equals("5d2653c0-fc47-4f38-8ca3-acf9c4670b32")) {
                cmpntName = WCMUtils.p_retiringEmailSubjectCmpnt;
             }
+         }
+         if(theContent.isExpired()) {
+            cmpntName = WCMUtils.p_retiringEmailTextCmpnt;
          }
          if (theContent.isDraft()) {
             if (!theContent.isDraftOfPublishedDocument()) {
