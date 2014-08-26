@@ -192,6 +192,10 @@ public class RetrieveAnnualReviewAction implements VirtualPortalScopedAction {
                tempCal.add(Calendar.DATE, offset);
                tempDate = tempCal.getTime();
                theContent = Utils.setGeneralDateOne(theContent, tempDate);
+               // have to update the LastRevisedDate
+               if(theContent.hasComponent(s_dayField)) {
+                  theContent = Utils.setContentDateField(theContent, s_dayField, new Date());
+               }
                if (isDebug) {
                   s_log.log(Level.FINEST, "General Date One set to " + tempDate);
                }

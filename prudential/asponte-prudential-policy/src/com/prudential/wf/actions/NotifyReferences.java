@@ -61,7 +61,7 @@ public class NotifyReferences extends BaseEmailAction {
 
       String componentText = "";
       // try to get the component
-      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailTextCmpnt,
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_pendingRetireEmailTextCmpnt,
          "PruPolicyDesign");
       if (bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent) bodyComponent;
@@ -105,7 +105,7 @@ public class NotifyReferences extends BaseEmailAction {
       // try to get the component
       String subject = "";
       StringBuilder sb = new StringBuilder();
-      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_retiringEmailSubjectCmpnt,
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_pendingRetireEmailSubjectCmpnt,
          "PruPolicyDesign");
       if (subjectComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent) subjectComponent;

@@ -36,6 +36,7 @@ import com.ibm.workplace.wcm.api.custom.CustomWorkflowAction;
 import com.ibm.workplace.wcm.api.custom.CustomWorkflowActionResult;
 import com.ibm.workplace.wcm.api.custom.Directive;
 import com.ibm.workplace.wcm.api.custom.Directives;
+import com.ibm.workplace.wcm.api.exceptions.AuthorizationException;
 import com.ibm.workplace.wcm.api.exceptions.PropertyRetrievalException;
 import com.prudential.shouldact.ShouldActPolicyEmails;
 import com.prudential.utils.Utils;
@@ -90,6 +91,10 @@ public class NotifyAllPolicyAdmins extends BaseEmailAction {
       try {
          if (theContent.isPublished()) {
             cmpntName = WCMUtils.p_availableEmailTextCmpnt;
+            String expiredStage = theContent.getWorkflowStageId().getId();
+            if(expiredStage.equals("5d2653c0-fc47-4f38-8ca3-acf9c4670b32")) {
+               cmpntName = WCMUtils.p_retiringEmailTextCmpnt;
+            }
          }
          if (theContent.isDraft()) {
             if (!theContent.isDraftOfPublishedDocument()) {
@@ -106,6 +111,13 @@ public class NotifyAllPolicyAdmins extends BaseEmailAction {
          // TODO Auto-generated catch block
          if (s_log.isLoggable(Level.FINEST)) {
             s_log.log(Level.FINEST, "", e1);
+         }
+      }
+      catch (AuthorizationException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST))
+         {
+            s_log.log(Level.FINEST, "", e);
          }
       }
       LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), cmpntName, "PruPolicyDesign");
@@ -178,6 +190,11 @@ public class NotifyAllPolicyAdmins extends BaseEmailAction {
       try {
          if (theContent.isPublished()) {
             cmpntName = WCMUtils.p_availableEmailSubjectCmpnt;
+            // check if this is in the retired stage
+            String expiredStage = theContent.getWorkflowStageId().getId();
+            if(expiredStage.equals("5d2653c0-fc47-4f38-8ca3-acf9c4670b32")) {
+               cmpntName = WCMUtils.p_retiringEmailSubjectCmpnt;
+            }
          }
          if (theContent.isDraft()) {
             if (!theContent.isDraftOfPublishedDocument()) {
@@ -192,6 +209,13 @@ public class NotifyAllPolicyAdmins extends BaseEmailAction {
          // TODO Auto-generated catch block
          if (s_log.isLoggable(Level.FINEST)) {
             s_log.log(Level.FINEST, "", e1);
+         }
+      }
+      catch (AuthorizationException e) {
+         // TODO Auto-generated catch block
+         if (s_log.isLoggable(Level.FINEST))
+         {
+            s_log.log(Level.FINEST, "", e);
          }
       }
       LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), cmpntName, "PruPolicyDesign");

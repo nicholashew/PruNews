@@ -89,7 +89,7 @@ public class ReviewExpiringEmailAction extends ReviewApproveEmailAction {
       StringBuilder sb = new StringBuilder();
       String componentText = "";
       // try to get the component
-      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailTextCmpnt,
+      LibraryComponent bodyComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveRetireEmailTextCmpnt,
          "PruPolicyDesign");
       if (bodyComponent != null) {
          LibraryHTMLComponent stc = (LibraryHTMLComponent) bodyComponent;
@@ -146,7 +146,7 @@ public class ReviewExpiringEmailAction extends ReviewApproveEmailAction {
       String subject = "Item " + doc.getTitle() + " is awaiting your approval";
 
       // try to get the component
-      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveEmailSubjectCmpnt,
+      LibraryComponent subjectComponent = Utils.getLibraryComponentByName(Utils.getSystemWorkspace(), WCMUtils.p_approveRetireEmailSubjectCmpnt,
          "PruPolicyDesign");
       if (subjectComponent != null) {
          LibraryShortTextComponent stc = (LibraryShortTextComponent) subjectComponent;
