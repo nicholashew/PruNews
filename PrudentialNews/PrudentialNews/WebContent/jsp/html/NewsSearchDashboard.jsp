@@ -79,8 +79,8 @@
 
 
 	<div class="w2ui-buttons">
-		<button class="btn" name="clearFields" id="clearFields">Reset</button>
-		<button class="btn" name="search">Search</button>
+		<button class="btn disableEnable" name="clearFields" id="clearFields">Reset</button>
+		<button class="btn disableEnable" name="search">Search</button>
 	</div>
 </form>
 
