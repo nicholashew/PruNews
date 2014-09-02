@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="lib" path="lib/ilwwcm-api.jar"/>
-	<classpathentry kind="lib" path="lib/ilwwcm-api-impl.jar"/>
+	<classpathentry kind="lib" path="lib/PruPortalUtils.jar"/>
+	<classpathentry kind="lib" path="dependencies/com.ibm.ffdc.jar"/>
+	<classpathentry kind="lib" path="dependencies/FavoritesJPA.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilel-seedlist.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilwwcm-api-impl.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilwwcm-api.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilwwcm-commons-utils.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilwwcm-commons-XMLpersistency.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilwwcm-domain.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilwwcm-events.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilwwcm-server.jar"/>
+	<classpathentry kind="lib" path="dependencies/ilwwcm-services.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.ac.api.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.base.ext.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.base.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.content.repository.client.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.model.api.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.pe.rt.api.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.resolver.api.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.services.api.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.tagging.api.jar"/>
+	<classpathentry kind="lib" path="dependencies/wp.user.api.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="src" path=".apt_generated">
@@ -21,9 +41,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.etools.portal.runtime.provider.v80/wps.base.v80"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-server.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-services.jar"/>
-	<classpathentry kind="lib" path="C:/Users/cmknight/IBM/rationalsdp/workspace/prereqs/v8/ilwwcm-commons-utils.jar"/>
-	<classpathentry kind="lib" path="lib/PruPortalUtils.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
