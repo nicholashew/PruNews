@@ -95,6 +95,7 @@ public class ApplySiteAreaManagers implements CustomWorkflowAction {
 
             }
             theResult.addOwners(managersContent);
+            theResult.addAuthors(managersContent);
             if (isDebug) {
                s_log.log(Level.FINEST, "Owners field set to: {0}", Arrays.toString(managersContent));
             }
@@ -123,6 +124,7 @@ public class ApplySiteAreaManagers implements CustomWorkflowAction {
                      }
                      foundManagers = true;
                      theResult.addOwners(managers);
+                     theResult.addAuthors(managers);
                      if (isDebug) {
                         s_log.log(Level.FINEST, "Owners field set to: {0}", Arrays.toString(managers));
                      }

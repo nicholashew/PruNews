@@ -19,6 +19,7 @@ import com.prudential.wf.actions.ApproveDelayPopulatePreviousStage;
 import com.prudential.wf.actions.CreateMyActionsMessage;
 import com.prudential.wf.actions.EmailContentApprovers;
 import com.prudential.wf.actions.EmailContentAuthors;
+import com.prudential.wf.actions.ExpireAdoptedPolicies;
 import com.prudential.wf.actions.GenDateOnePopulatePreviousStage;
 import com.prudential.wf.actions.NotifyAllPolicyAdmins;
 import com.prudential.wf.actions.PopulateFutureReviewDate;
@@ -33,6 +34,7 @@ import com.prudential.wf.actions.ReviewDelayPopulatePreviousStage;
 import com.prudential.wf.actions.ReviewExpiringEmailAction;
 import com.prudential.wf.actions.ScheduleReviewEmailAction;
 import com.prudential.wf.actions.CreateDraftPolicy;
+import com.prudential.wf.actions.SetApproversReviewers;
 
 
 public class PruCustomWorkflowActionFactory implements
@@ -70,6 +72,8 @@ public class PruCustomWorkflowActionFactory implements
 		actions.put("EmailContentApprovers", new EmailContentApprovers());
 		actions.put("EmailContentAuthors", new EmailContentAuthors());
 		actions.put("AlertContentRejectedEmailAction", new AlertContentRejectedEmailAction());
+		actions.put("ExpireAdoptedPolicies", new ExpireAdoptedPolicies());
+		actions.put("SetApproversReviewers", new SetApproversReviewers(customWorkflowService));
 		
 		//ReviewDelayPopulatePreviousStage
 		//ApproveDelayPopulatePreviousStage

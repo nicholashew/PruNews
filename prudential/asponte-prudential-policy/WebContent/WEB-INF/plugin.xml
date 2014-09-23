@@ -8,6 +8,9 @@
 	</extension>      
 	<extension point="com.ibm.workplace.wcm.api.RenderingPlugin" id="ApproversReviewersPlugin">
     	<provider class="com.prudential.renderer.ApproversReviewersPlugin"/>
+	</extension>   
+	<extension point="com.ibm.workplace.wcm.api.RenderingPlugin" id="RetrieveElementInPath">
+    	<provider class="com.prudential.renderer.RetrieveElementInPath"/>
 	</extension>      
 	<extension point="com.ibm.workplace.wcm.api.AuthoringAction" id="PrudentialPopulateJSPAuthoringAction" >
     <provider class="com.prudential.authoring.buttons.PrudentialPopulateJSPAuthoringAction"/>
