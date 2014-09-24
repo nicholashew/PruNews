@@ -78,16 +78,15 @@ public class RejectApproveIfCreator extends BaseCustomWorkflowAction {
          }
          catch (DocumentIdCreationException e) {
             // TODO Auto-generated catch block
-            if (s_log.isLoggable(Level.FINEST))
-            {
+            if (s_log.isLoggable(Level.FINEST)) {
                s_log.log(Level.FINEST, "", e);
             }
          }
-                  
+
          if (wfid != null && modelPolicyWfId != null && wfid.equals(modelPolicyWfId)) {
-            // get the creatory
+            // get the creator
             // set to use full dn first
-            
+
             boolean isDN = ws.isDistinguishedNamesUsed();
             ws.useDistinguishedNames(true);
             String creator = theContent.getCreator();
@@ -106,6 +105,42 @@ public class RejectApproveIfCreator extends BaseCustomWorkflowAction {
                params.setCustomErrorMsg("Creator cannot approve");
                actionMessage = theDoc.getName() + " rejected because creator cannot approve";
             }
+            else if (theContent.hasComponent("PolicyCopier")) {
+               ShortTextComponent st;
+               try {
+                  st = (ShortTextComponent) theContent.getComponent("PolicyCopier");
+                  String compareString = st.getText();
+                  if (isDebug) {
+                     s_log.log(Level.FINEST, "Content had PolicyCopier, value: " + compareString);
+                  }
+                  if (lastModifier.equalsIgnoreCase(compareString)) {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "lastModifier matches PolicyCopier, reject");
+                        s_log.log(Level.FINEST, "lastModifier = " + lastModifier);
+                        s_log.log(Level.FINEST, "PolicyCopier = " + compareString);
+                     }
+                     directive = Directives.ROLLBACK_DOCUMENT;
+                     params = (RollbackDirectiveParams) Directives.ROLLBACK_DOCUMENT.createDirectiveParams();
+                     params.setCustomErrorMsg("Creator cannot approve");
+                     actionMessage = theDoc.getName() + " rejected because creator cannot approve";
+                  }
+                  else {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "last modifier was Not the PolicyCopier");                        
+                        s_log.log(Level.FINEST, "lastModifier = " + lastModifier);
+                        s_log.log(Level.FINEST, "PolicyCopier = " + compareString);
+                     }
+                  }
+                  
+               }
+               catch (ComponentNotFoundException e) {
+                  // TODO Auto-generated catch block
+                  if (s_log.isLoggable(Level.FINEST)) {
+                     s_log.log(Level.FINEST, "", e);
+                  }
+               }
+
+            }
             else {
                if (isDebug) {
                   s_log.log(Level.FINEST, "Creator doesn't match last mod, allow");
@@ -116,7 +151,7 @@ public class RejectApproveIfCreator extends BaseCustomWorkflowAction {
          }
          else {
             if (isDebug) {
-               s_log.log(Level.FINEST, "workflow not the necessary workflow, skip.  Workflow is "+wfid);
+               s_log.log(Level.FINEST, "workflow not the necessary workflow, skip.  Workflow is " + wfid);
             }
          }
 

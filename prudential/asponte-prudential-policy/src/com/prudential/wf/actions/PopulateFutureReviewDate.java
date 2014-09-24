@@ -62,19 +62,16 @@ public class PopulateFutureReviewDate extends BaseCustomWorkflowAction {
                   // only do this if the date to set is greater than the current general date one.
                   Date currentDate = theContent.getGeneralDateOne();
                   boolean shouldExecute = false;
-                  if (currentDate != null) {
-                     if (tempDate.after(currentDate)) {
-                        shouldExecute = true;
-                     }
-                     else {
-                        if (isDebug) {
-                           s_log.log(Level.FINEST, "Not setting general date one because it's already populated and is later than now "+currentDate);
-                        }
-                     }
-                  }
-                  else {
+                  if (currentDate == null || currentDate.before(new Date())) {
                      shouldExecute = true;
                   }
+                  else {
+                     if (isDebug) {
+                        s_log.log(Level.FINEST, "Not setting general date one because it's already populated and is later than now "
+                           + currentDate);
+                     }
+                  }
+
                   if (shouldExecute) {
                      theContent = Utils.setGeneralDateOne(theContent, tempDate);
                      if (isDebug) {
